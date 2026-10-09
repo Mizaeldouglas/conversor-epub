@@ -65,7 +65,8 @@ fieldset.opts legend{font:600 13px var(--f-body);text-transform:uppercase;letter
 .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 .btn.ghost:hover{border-color:var(--accent)}
-.btn:disabled{opacity:.45;cursor:default;filter:none}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:default;filter:none;pointer-events:none}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
 
 .queue-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .queue-head h2{margin:0;font:600 13px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
@@ -101,6 +102,7 @@ details.fixes summary:focus-visible{outline:2px solid var(--accent);outline-offs
 
 .notes{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:grid;gap:6px}
 .notes b{color:var(--ink);font-weight:600}
+.notes a{color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:6px;font-size:14px;max-width:calc(100% - 32px)}
 @media (max-width:560px){
   .opts,fieldset.opts{grid-template-columns:1fr}
@@ -148,8 +150,8 @@ details.fixes summary:focus-visible{outline:2px solid var(--accent);outline-offs
         <option value="pages">Página inteira como imagem</option>
       </select>
     </label>
-    <label class="check" for="fixwords"><input id="fixwords" type="checkbox" checked> Corrigir palavras separadas (“tam bem” → “também”). Depois de converter, você escolhe quais correções manter.</label>
-    <label class="check" for="shownums"><input id="shownums" type="checkbox" checked> Mostrar o número da página no texto, como [p. 12]</label>
+    <label class="check" for="fixwords"><input id="fixwords" type="checkbox"> Corrigir palavras separadas (“tam bem” → “também”). Depois de converter, você escolhe quais correções manter.</label>
+    <label class="check" for="shownums"><input id="shownums" type="checkbox"> Mostrar o número da página no texto, como [p. 12]</label>
   </div>
 
   <fieldset class="opts epubopts">
@@ -158,10 +160,10 @@ details.fixes summary:focus-visible{outline:2px solid var(--accent);outline-offs
       <input id="totalpages" type="number" min="1" max="20000" step="1" placeholder="Ex.: 320" inputmode="numeric">
     </label>
     <label for="cpp">Caracteres por página
-      <input id="cpp" type="number" min="300" max="10000" step="50" value="1800" inputmode="numeric">
+      <input id="cpp" type="number" min="300" max="10000" step="50" placeholder="Ex.: 1800" inputmode="numeric">
     </label>
     <label class="check" for="keeppages"><input id="keeppages" type="checkbox" checked> Manter a paginação original se o EPUB já tiver uma</label>
-    <p class="hint">Se você informar quantas páginas tem o livro impresso, o texto é dividido nesse número de páginas e a numeração fica próxima à do livro físico. Se deixar em branco, cada página tem o número de caracteres indicado (1.800 é próximo de um livro de bolso).</p>
+    <p class="hint">Preencha um dos dois para numerar as páginas. Com as páginas do livro impresso, o texto é dividido nesse total e a numeração fica próxima à do livro físico. Com caracteres por página, cada página tem esse tamanho (1.800 é próximo de um livro de bolso). Com os dois em branco, o EPUB não ganha numeração nova.</p>
   </fieldset>
 
   <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
@@ -185,6 +187,7 @@ details.fixes summary:focus-visible{outline:2px solid var(--accent);outline-offs
     <div><b>Números de página:</b> o EPUB ganha a lista de páginas do padrão EPUB 3. Leitores compatíveis, como Apple Books, Kobo e Thorium, mostram “página 12 de 300” e permitem ir direto a uma página. Em PDF, vale a numeração do próprio PDF. Em EPUB, as páginas são calculadas pelo tamanho do texto, a não ser que o arquivo já traga as suas.</div>
     <div><b>Títulos e capítulos (PDF):</b> linhas com fonte maior que o corpo do texto viram títulos, e cada título principal abre um capítulo.</div>
     <div><b>Modo página inteira (PDF):</b> use para quadrinhos, revistas ou apostilas muito diagramadas. O EPUB fica idêntico ao PDF, mas o texto não se ajusta à tela.</div>
+    <div><b>Enviar ao Kindle:</b> no celular, o botão abre o compartilhamento do sistema; escolha o app Kindle e o livro vai para a sua biblioteca. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não permite que outros sites enviem o arquivo sozinhos, porque o envio exige o seu login.</div>
     <div><b>EPUB com DRM</b> (comprado em loja com proteção) não pode ser aberto. Funciona com EPUB sem proteção.</div>
   </div>
 </div>
@@ -218,7 +221,7 @@ const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
 function median(arr){ if(!arr.length) return 0; const a=[...arr].sort((x,y)=>x-y); return a[a.length>>1]; }
 
 let toastT;
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,3200); }
+function toast(msg, ms){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>t.hidden=true,ms||3200); }
 
 async function offer(filename, blob){
   const dl = await downloadsP;
@@ -885,9 +888,10 @@ async function fixEpub(file, opt, onProgress){
   const ncxPageList = ncxDoc && ncxDoc.getElementsByTagNameNS("*", "pageList")[0];
   const existing = navPageList ? navPageList.getElementsByTagNameNS("*", "a").length : ncxPageList ? ncxPageList.getElementsByTagNameNS("*", "pageTarget").length : 0;
 
-  let pageCount = 0, keptPages = false;
+  let pageCount = 0, keptPages = false, paginated = false;
   if (existing && opt.keepPages) { pageCount = existing; keptPages = true; }
-  else {
+  else if (opt.totalPages > 0 || opt.cpp > 0) {
+    paginated = true;
     onProgress("numerando páginas");
     // remove marcações de página antigas para não duplicar
     for (const d of docs) for (const el of [...d.doc.getElementsByTagNameNS("*", "*")]) {
@@ -987,8 +991,8 @@ async function fixEpub(file, opt, onProgress){
   onProgress("montando EPUB");
   const changed = new Map();
   for (const d of docs) if (d.changed) changed.set(d.path, serializeXml(d.doc, d.hadDecl || !d.html));
-  if (!keptPages && navDoc) changed.set(navPath, serializeXml(navDoc, true));
-  if (!keptPages && ncxDoc) changed.set(ncxPath, serializeXml(ncxDoc, true));
+  if (paginated && navDoc) changed.set(navPath, serializeXml(navDoc, true));
+  if (paginated && ncxDoc) changed.set(ncxPath, serializeXml(ncxDoc, true));
   const zout = new JSZip();
   zout.file("mimetype", "application/epub+zip", { compression: "STORE" });
   for (const [name, entry] of Object.entries(zin.files)) {
@@ -1030,6 +1034,7 @@ function render(job){
     </div>
     <div class="actions">
       <button class="btn" data-a="epub" ${job.epub ? "" : "disabled"}>Baixar EPUB</button>
+      <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener" ${job.epub ? "" : 'aria-disabled="true" tabindex="-1"'}>Enviar ao Kindle</a>
       ${job.kind === "pdf" ? `<button class="btn ghost" data-a="docx" ${job.docx ? "" : "disabled"}>DOCX</button>` : ""}
     </div>
     ${fx && fx.list.length ? `<details class="fixes"><summary>Escolher palavras corrigidas (${fx.list.length - job.draftOff.size} de ${fx.list.length} marcadas)</summary>
@@ -1048,6 +1053,7 @@ function render(job){
   if (job.error) row.querySelector(".errmsg").textContent = job.error;
   const outName = () => job.kind === "epub" ? safeFile(baseName(job.file.name)) + " (corrigido).epub" : safeFile(job.title) + ".epub";
   row.querySelector('[data-a="epub"]').onclick = () => offer(outName(), job.epub);
+  row.querySelector('[data-a="kindle"]').onclick = e => sendToKindle(e, job, outName());
   const d = row.querySelector('[data-a="docx"]'); if (d) d.onclick = () => offer(safeFile(job.title) + ".docx", job.docx);
   const det = row.querySelector("details");
   if (det) {
@@ -1064,6 +1070,23 @@ function render(job){
     det.querySelector('[data-f="apply"]').onclick = () => rerun(job);
   }
   $("#allZip").hidden = jobs.filter(j => j.epub).length < 2;
+}
+
+// Celular: compartilha direto com o app Kindle. Computador: baixa e abre a página da Amazon.
+async function sendToKindle(e, job, name){
+  if (!job.epub) { e.preventDefault(); return; }
+  const file = new File([job.epub], name, { type: "application/epub+zip" });
+  let canShareFile = false;
+  try { canShareFile = !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch {}
+  if (canShareFile) {
+    e.preventDefault();
+    try { await navigator.share({ files: [file], title: job.title }); }
+    catch (err) { if (!err || err.name !== "AbortError") toast("Não deu para compartilhar. Use “Baixar EPUB” e envie pelo app Kindle."); }
+    return;
+  }
+  // o link abre amazon.com.br/sendtokindle em outra aba; aqui baixamos o arquivo
+  offer(name, job.epub);
+  toast("EPUB baixado. Na página da Amazon que abriu, arraste o arquivo para “Enviar para o Kindle”.", 9000);
 }
 
 const sameSet = (a, b) => a.size === b.size && [...a].every(x => b.has(x));
@@ -1097,7 +1120,7 @@ async function runEpub(job){
       showNums: $("#shownums").checked,
       keepPages: $("#keeppages").checked,
       totalPages: parseInt($("#totalpages").value, 10) || 0,
-      cpp: parseInt($("#cpp").value, 10) || 1800
+      cpp: parseInt($("#cpp").value, 10) || 0
     }, msg => {
       if (msg === "corrigindo palavras") { job.done.push("read"); job.stage = "fix"; }
       if (msg === "numerando páginas") { if (!job.done.includes("read")) job.done.push("read"); if (job.fixOn) job.done.push("fix"); job.stage = "pages"; }
