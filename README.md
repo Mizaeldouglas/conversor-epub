@@ -3,13 +3,9 @@
 Página única que roda inteira no navegador (nenhum arquivo é enviado para servidor):
 
 - **PDF → DOCX → EPUB**: texto, títulos, imagens e páginas escaneadas, com a numeração de páginas do PDF.
-- **EPUB → EPUB corrigido**: junta palavras quebradas ("tam bem" → "também") e adiciona números de página.
-- Correções revisáveis palavra por palavra antes de gerar o arquivo final.
+- **Texto igual ao PDF**: o espaço entre palavras só entra onde o PDF tem um caractere de espaço de verdade, evitando quebras como "tam bem".
+- **Conferência palavra por palavra**: antes de liberar o download, o EPUB gerado é lido de volta e comparado com o texto do PDF; diferenças aparecem com a página e o trecho.
+- **EPUB → EPUB**: coloca números de página sem mexer no texto (também conferido).
+- **Enviar ao Kindle**: no celular abre o compartilhamento com o app Kindle; no computador baixa o EPUB e abre amazon.com.br/sendtokindle.
 
 Bibliotecas: [pdf.js](https://mozilla.github.io/pdf.js/) e [JSZip](https://stuk.github.io/jszip/), carregadas do cdnjs.
-Dicionário: [pythonprobr/palavras](https://github.com/pythonprobr/palavras) e frequências de [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords), embutidos compactados no `index.html`.
-
-## Licenças dos dados
-
-- Lista de palavras (pythonprobr/palavras): Mozilla Public License 2.0.
-- Frequências de palavras (hermitdave/FrequencyWords, a partir do OpenSubtitles): CC BY-SA 4.0.
