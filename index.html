@@ -479,10 +479,12 @@ async function resolveLigatures(state, texts, lang){
         }
         sc.push([tot ? good / tot : 0, out, tot, good]);
       }
-      sc.sort((a, b) => b[0] - a[0] || b[3] - a[3]);
+      // vence a opção que forma palavras reais e ganha com folga das outras
+      // (o livro pode ter muitas palavras fora da lista, como "influenciadoras"; o que conta é a comparação)
+      sc.sort((a, b) => b[3] - a[3] || b[0] - a[0]);
       const [b1, b2] = sc;
-      if (state.debug) state.debug.push(["palavras", e.ph.codePointAt(0) - 0xF0000, sc.slice(0, 3).map(x => x[1] + ":" + x[0].toFixed(2) + "/" + x[2]).join(" ")]);
-      if (b1 && b1[3] >= 3 && b1[0] >= 0.5 && (!b2 || b1[0] >= 2 * b2[0])) dec = b1[1];
+      if (state.debug) state.debug.push(["palavras", e.ph.codePointAt(0) - 0xF0000, sc.slice(0, 3).map(x => x[1] + ":" + x[3] + "/" + x[2]).join(" ")]);
+      if (b1 && b1[3] >= 1 && b1[0] >= 0.15 && (!b2 || b1[3] >= 4 * b2[3])) dec = b1[1];
     }
     if (!dec && e.shape && e.shape.decisive) dec = e.shape.out;
     e.final = dec;
@@ -528,6 +530,12 @@ function glyphStream(ol, liga){
   return { chars, keys, spaceBefore, y: new Array(keys.length), h: new Array(keys.length), real: keys.length > 20 && spaces / keys.length > 0.04 };
 }
 
+// há espaço real no PDF entre as letras a e b (na ordem do desenho)?
+function streamSpace(gs, a, b){
+  for (let k = a + 1; k <= b; k++) if (gs.spaceBefore[k]) return true;
+  return false;
+}
+
 // refaz os espaços de cada trecho de texto do pdf.js seguindo o PDF
 function respaceItems(items, gs){
   let p = 0;
@@ -543,7 +551,7 @@ function respaceItems(items, gs){
       for (let j = p, end = Math.min(gs.keys.length, p + 60); j < end; j++) if (gs.keys[j] === k) { q = j; break; }
       if (q >= 0) p = q + 1;
       if (out) {
-        const sp = q >= 0 && prevIdx >= 0 && q === prevIdx + 1 ? !!gs.spaceBefore[q] : hadSpace;
+        const sp = q >= 0 && prevIdx >= 0 && q > prevIdx ? streamSpace(gs, prevIdx, q) : hadSpace;
         if (sp) out += " ";
       }
       out += q >= 0 ? gs.chars[q] : ch; hadSpace = false;
@@ -717,7 +725,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
         if (it.blank) { if (!gs.real && text && !/\s$/.test(text)) text += " "; continue; }
         if (text && !/\s$/.test(text) && !/^\s/.test(it.str)) {
           let sp;
-          if (gs.real && prevIt && prevIt.lastIdx >= 0 && it.firstIdx === prevIt.lastIdx + 1) sp = !!gs.spaceBefore[it.firstIdx];
+          if (gs.real && prevIt && prevIt.lastIdx >= 0 && it.firstIdx > prevIt.lastIdx && it.firstIdx - prevIt.lastIdx <= 4) sp = streamSpace(gs, prevIt.lastIdx, it.firstIdx);
           // trechos desenhados fora de ordem (ex.: pontuação em outra fonte): vale o espaço real do PDF antes da palavra
           else sp = (gs.real && it.firstIdx >= 0 && !!gs.spaceBefore[it.firstIdx]) || (end !== null && it.x - end > it.size * (gs.real ? 0.6 : 0.25));
           if (sp) text += " ";
