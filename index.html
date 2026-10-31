@@ -97,6 +97,53 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
   .row{grid-template-columns:1fr}
   .actions{justify-content:flex-start}
 }
+.btn.sm{padding:5px 10px;font-size:13px}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.muted{color:var(--muted)}
+details.diffs li.user{opacity:.7}
+.fixbox{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
+.fixbox input,.edit input[type=text]{font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+.fixbox input{flex:1 1 220px}
+.fixbox input:focus-visible,.edit input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+details.edit{grid-column:1/-1;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+details.edit summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:13px}
+details.edit summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.edit-body{display:grid;gap:14px;margin-top:12px}
+.edit-top{display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:start}
+.edit-top.nocov{grid-template-columns:1fr}
+.coverbox{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.cv{width:130px;aspect-ratio:2/3;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.cv img{width:100%;height:100%;object-fit:cover;display:block}
+.nocover{font-size:12px;color:var(--muted)}
+.filebtn{cursor:pointer}
+.edit-fields{display:grid;gap:10px}
+.edit-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.chap-head{font-size:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.chap-list{margin:8px 0 0;padding-left:28px;display:grid;gap:6px;max-height:340px;overflow:auto}
+.chap-list li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chap-list li input[type=text]{flex:1 1 220px}
+.chap-list li.removed input[type=text]{text-decoration:line-through;opacity:.5}
+label.mini{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.edit-actions{display:flex;justify-content:flex-end}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;padding:10px 16px;border-top:1px solid var(--line);align-items:center}
+.hrow:first-child{border-top:0}
+body.noscroll{overflow:hidden}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal-box{background:var(--surface);color:var(--ink);border-radius:10px;width:min(760px,100%);height:min(88vh,100%);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line)}
+.pv-head,.pv-nav{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
+.pv-head b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-nav select{flex:1;min-width:0;font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.pv-body{flex:1;overflow:auto;padding:20px clamp(16px,5vw,48px);background:var(--bg)}
+.pv-page{font:17px/1.6 Georgia,"Times New Roman",serif;max-width:62ch;margin:0 auto}
+.pv-page img{max-width:100%;height:auto;display:block;margin:0 auto}
+.pv-page h1,.pv-page h2,.pv-page h3{font-family:var(--f-display);line-height:1.25}
+.pv-page p{margin:0 0 .2em;text-indent:1.4em}
+.pv-page sup a,.pv-page [data-anchor]{color:var(--accent);cursor:pointer}
+.pv-page aside{font-size:14px;border-top:1px solid var(--line);margin-top:1.5em;padding-top:.5em}
+.pv-page aside p{text-indent:0}
+.pv-page .pagebreak,.pv-page [epub\:type~="pagebreak"]{font:11px var(--f-mono);color:var(--muted)}
+@media (max-width:560px){.edit-top{grid-template-columns:1fr}.hrow{grid-template-columns:1fr}.modal{padding:0}.modal-box{height:100%;border-radius:0}}
 </style>
 
 <div class="wrap">
@@ -135,9 +182,14 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
       <select id="mode">
         <option value="auto" selected>Texto + imagens</option>
         <option value="pages">Página inteira como imagem</option>
+        <option value="comic">Quadrinhos (leitura da esquerda para a direita)</option>
+        <option value="manga">Mangá (leitura da direita para a esquerda)</option>
       </select>
     </label>
     <label class="check" for="shownums"><input id="shownums" type="checkbox"> Mostrar o número da página no texto, como [p. 12]</label>
+    <label class="check" for="headers"><input id="headers" type="checkbox" checked> Tirar cabeçalhos e rodapés que se repetem em todas as páginas (nome do livro, do capítulo, número da página)</label>
+    <label class="check" for="notes"><input id="notes" type="checkbox" checked> Transformar notas de rodapé em notas clicáveis (abrem em janelinha no Kindle)</label>
+    <label class="check" for="cover"><input id="cover" type="checkbox" checked> Usar a 1ª página do PDF como capa</label>
   </div>
 
   <fieldset class="opts epubopts">
@@ -168,15 +220,39 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
     </div>
   </section>
 
+  <section id="historySec" hidden>
+    <div class="queue-head"><h2>Convertidos neste navegador</h2></div>
+    <div class="list" id="history" style="margin-top:10px"></div>
+  </section>
+
   <div class="notes">
     <div><b>Texto igual ao PDF:</b> as palavras saem exatamente como estão no PDF. O espaço entre palavras só entra onde o PDF tem um espaço de verdade, então não aparecem mais quebras como “tam bem” ou “in teira”. Hifenização no fim da linha (“pala-” + “vra”) é juntada, como no livro impresso.</div>
     <div><b>Ligaduras (“fi”, “fl”):</b> alguns PDFs guardam essas letras unidas como um símbolo sem texto, e a conversão perdia o pedaço (“lmar” no lugar de “filmar”). Agora cada símbolo é identificado uma vez para o livro inteiro, pelas palavras em que aparece (com “fi”, “con?rmar” e “?lhos” viram “confirmar” e “filhos”), ou pelo desenho, no caso de sinais como as reticências. O que não der para identificar com segurança aparece na conferência.</div>
     <div><b>Conferência:</b> com a opção “Conferir palavra por palavra” marcada, antes de liberar o download o EPUB pronto é aberto e cada palavra é comparada com o texto original. Se algo estiver diferente, a fila mostra a página e o trecho, para você decidir.</div>
     <div><b>Números de página:</b> o EPUB ganha a lista de páginas do padrão EPUB 3. Leitores compatíveis, como Apple Books, Kobo e Thorium, mostram “página 12 de 300” e permitem ir direto a uma página. Em PDF, vale a numeração do próprio PDF. Em EPUB, as páginas são calculadas pelo tamanho do texto, a não ser que o arquivo já traga as suas.</div>
     <div><b>Títulos e capítulos (PDF):</b> linhas com fonte maior que o corpo do texto viram títulos, e cada título principal abre um capítulo.</div>
-    <div><b>Modo página inteira (PDF):</b> use para quadrinhos, revistas ou apostilas muito diagramadas. O EPUB fica idêntico ao PDF, mas o texto não se ajusta à tela.</div>
+    <div><b>Modo página inteira (PDF):</b> use para revistas ou apostilas muito diagramadas. O EPUB fica idêntico ao PDF, mas o texto não se ajusta à tela.</div>
+    <div><b>Quadrinhos e mangá:</b> cada página vira uma tela inteira (layout fixo), como no PDF. No modo mangá, o livro abre e vira as páginas da direita para a esquerda.</div>
+    <div><b>Editar livro:</b> depois de converter, abra “Editar livro” para trocar a capa, acertar título e autor (o nome do arquivo já é limpo, “693_A_SAGA_DE_ZEPHYRUS_EBOOK” vira “A Saga de Zephyrus”) e revisar os capítulos: renomear, juntar com o anterior ou remover um título. Na conferência, “Corrigir” deixa você acertar um trecho e gerar o EPUB de novo.</div>
+    <div><b>Notas de rodapé:</b> números elevados no texto com a nota correspondente no pé da página viram links. No Kindle, tocar no número abre a nota numa janelinha.</div>
+    <div><b>Histórico e opções:</b> os últimos 12 livros convertidos e as opções escolhidas ficam guardados só neste navegador.</div>
     <div><b>Enviar ao Kindle:</b> no celular, o botão abre o compartilhamento do sistema; escolha o app Kindle e o livro vai para a sua biblioteca. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não permite que outros sites enviem o arquivo sozinhos, porque o envio exige o seu login.</div>
     <div><b>EPUB com DRM</b> (comprado em loja com proteção) não pode ser aberto. Funciona com EPUB sem proteção.</div>
+  </div>
+</div>
+<div class="modal" id="preview" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
+  <div class="modal-box">
+    <div class="pv-head">
+      <b id="pvTitle">Prévia</b>
+      <button class="btn ghost sm" id="pvClose" aria-label="Fechar prévia">Fechar</button>
+    </div>
+    <div class="pv-nav">
+      <button class="btn ghost sm" id="pvPrev" aria-label="Parte anterior">←</button>
+      <select id="pvToc" aria-label="Ir para"></select>
+      <button class="btn ghost sm" id="pvNext" aria-label="Próxima parte">→</button>
+      <span class="meta" id="pvCount"></span>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -612,7 +688,7 @@ function compareWords(ref, outWords){
   const push = (x, dx, y, dy) => {
     const a = A.slice(x, x + dx), b = B.slice(y, y + dy);
     if (!b.length && a.every(w => /^([0-9]+|[ivxlcdm]+)$/i.test(w))) { ignored += a.length; return; }
-    if (diffs.length < 500) diffs.push({ p: P[Math.min(x, P.length - 1)], pdf: a.slice(0, 25).join(" "), epub: b.slice(0, 25).join(" ") });
+    if (diffs.length < 500) diffs.push({ p: P[Math.min(x, P.length - 1)], pdf: a.slice(0, 25).join(" "), epub: b.slice(0, 25).join(" "), prev: y > 0 ? B[y - 1] : "" });
   };
   while (i < A.length && j < B.length) {
     if (same(i, j)) { i++; j++; continue; }
@@ -638,6 +714,7 @@ function docWords(doc){
     if (/^(script|style|head|title)$/i.test(name)) return;
     const t = n.getAttributeNS(EPUB_NS, "type") || n.getAttribute("epub:type") || "";
     if (/\bpagebreak\b/.test(t) || n.getAttribute("role") === "doc-pagebreak" || /\bpgmark\b/.test(n.getAttribute("class") || "")) return;
+    if (/\bfootnote\b/.test(t) || n.getAttribute("role") === "doc-footnote") return;
     const block = BLOCK_RE.test(name);
     if (block) parts.push(" ");
     for (const c of n.childNodes) walk(c);
@@ -664,8 +741,35 @@ async function verifyPdfEpub(epubBlob, ref){
   return compareWords(ref, words);
 }
 
+/* ---------- ajustes na referência da conferência ---------- */
+const NOTE_RE = /\uE002([^\uE003]*)\uE003/g;
+const stripNotes = s => s.replace(/\uE002(?:\d+\|)?([^\uE003]*)\uE003/g, "$1");
+// troca (ou tira) uma sequência de palavras da referência numa página (p) ou nas vizinhas
+function refReplace(ref, p, oldText, newText){
+  const words = stripNotes(oldText).replace(PG_RE, " ").split(/\s+/).map(edgeW).filter(Boolean);
+  if (!words.length) return false;
+  for (const pp of [p, p - 1, p + 1]) {
+    for (let i = 0; i < ref.length; i++) {
+      if (ref[i].p !== pp) continue;
+      const idx = []; let k = 0, j = i;
+      while (j < ref.length && k < words.length && Math.abs(ref[j].p - pp) <= 1) {
+        const e = edgeW(ref[j].w); if (!e) { j++; continue; }
+        if (e !== words[k]) break;
+        idx.push(j); k++; j++;
+      }
+      if (k === words.length) {
+        const add = String(newText || "").split(/\s+/).filter(Boolean).map(w => ({ w, p: pp, eol: false }));
+        ref.splice(idx[0], idx[idx.length - 1] - idx[0] + 1, ...add);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+const joinLine = (a, b) => /\p{L}-$/u.test(a) && /^\p{Ll}/u.test(b) ? a.slice(0, -1) + b : a + " " + b;
+
 /* ---------- etapa 1: PDF -> blocos (texto + imagens) ---------- */
-async function pdfToBlocks(buf, mode, onProgress, lang){
+async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const pdf = await pdfjsLib.getDocument({ data: buf, isOffscreenCanvasSupported: false, fontExtraProperties: true }).promise;
   let metaTitle = "";
   try { const m = await pdf.getMetadata(); metaTitle = (m.info && m.info.Title || "").trim(); } catch {}
@@ -674,10 +778,13 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
   const labelOf = p => ((pageLabels && pageLabels[p - 1] || "").trim() || String(p)).slice(0, 14);
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
+  let cover = null;
   for (let p = 1; p <= pdf.numPages; p++) {
     onProgress(p, pdf.numPages);
     const page = await pdf.getPage(p);
-    if (mode === "pages") {
+    // capa: a primeira página desenhada como imagem
+    if (p === 1 && opts.cover) { try { cover = await renderPage(page); } catch (e) { console.warn("capa", e); } }
+    if (mode !== "auto") {
       const r = await renderPage(page);
       if (r) items.push({ page: p, kind: "pageimg", ...r });
       page.cleanup(); continue;
@@ -706,12 +813,15 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
       let ln = pl.find(l => Math.abs(l.y - y) < Math.max(size, l.size) * 0.5);
       if (!ln) { if (blank) continue; ln = { y, size, items: [] }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
-      ln.items.push({ x, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1 });
+      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1 });
     }
     const pageItems = []; let pageChars = 0;
+    const pageH = page.getViewport({ scale: 1 }).height;
     for (const ln of pl) {
       ln.items.sort((a, b) => a.x - b.x);
       let text = "", end = null, chars = 0, sizeSum = 0, prevIt = null;
+      // linha de base: o trecho de letra maior da linha (para achar números sobrescritos de nota)
+      const base = ln.items.filter(i => !i.blank).reduce((a, b) => (!a || b.size > a.size ? b : a), null);
       for (const it of ln.items) {
         if (it.blank) { if (!gs.real && text && !/\s$/.test(text)) text += " "; continue; }
         if (text && !/\s$/.test(text) && !/^\s/.test(it.str)) {
@@ -721,14 +831,16 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
           else sp = (gs.real && it.firstIdx >= 0 && !!gs.spaceBefore[it.firstIdx]) || (end !== null && it.x - end > it.size * (gs.real ? 0.6 : 0.25));
           if (sp) text += " ";
         }
-        text += it.str; end = it.x + it.w; prevIt = it;
+        const sup = opts.notes && base && it !== base && it.size < base.size * 0.8 && it.y - base.y > base.size * 0.15
+          && /^\s*([0-9]{1,3}|[*†‡])\s*$/.test(it.str);
+        text += sup ? "\uE002" + it.str.trim() + "\uE003" : it.str; end = it.x + it.w; prevIt = it;
         const n = it.str.replace(/\s/g, "").length; chars += n; sizeSum += n * it.size;
       }
       text = text.replace(/\s+/g, " ").trim();
       if (!text) continue;
       pageChars += chars;
       const firstReal = ln.items.find(i => !i.blank) || ln.items[0];
-      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, chars });
+      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, chars, pageH });
     }
     const vp = page.getViewport({ scale: 1 });
     const pageArea = vp.width * vp.height;
@@ -758,11 +870,64 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
   // imagens repetidas em muitas páginas (logo, cabeçalho) saem
   const seen = {};
   for (const it of items) if (it.kind === "img") (seen[it.key] ||= new Set()).add(it.page);
-  const filtered = items.filter(it => it.kind !== "img" || it.frac > 0.12 || !(seen[it.key].size >= 3 && seen[it.key].size >= numPages * 0.3));
+  let filtered = items.filter(it => it.kind !== "img" || it.frac > 0.12 || !(seen[it.key].size >= 3 && seen[it.key].size >= numPages * 0.3));
 
-  const lines = filtered.filter(i => i.kind === "line");
+  let lines = filtered.filter(i => i.kind === "line");
   const sizes = []; for (const l of lines) for (let i = 0; i < Math.min(l.chars, 200); i++) sizes.push(Math.round(l.size * 10) / 10);
   const body = median(sizes) || 10;
+
+  // cabeçalhos e rodapés repetidos (nome do livro, do capítulo): saem do EPUB e da conferência
+  const removed = new Set(); let headersRemoved = 0;
+  if (opts.headers) {
+    const zone = l => l.pageH && l.y > l.pageH * 0.88 ? "t" : l.pageH && l.y < l.pageH * 0.12 ? "b" : null;
+    const keyL = l => zone(l) + "|" + stripNotes(l.text).toLowerCase().replace(/\d+/g, "#").replace(/\s+/g, " ").trim();
+    // linhas que começam com o número de uma nota chamada na mesma página são notas, não rodapé
+    const pageRefs = new Map();
+    for (const l of lines) for (const m of l.text.matchAll(NOTE_RE)) { if (!pageRefs.has(l.page)) pageRefs.set(l.page, new Set()); pageRefs.get(l.page).add(m[1]); }
+    const noteLike = l => { const m = /^(?:\uE002([^\uE003|]+)\uE003|([0-9]{1,3}|[*†‡]))[\s.)]*\S/.exec(l.text); return !!(m && pageRefs.get(l.page)?.has(m[1] || m[2])); };
+    const pagesBy = new Map();
+    for (const l of lines) {
+      if (!zone(l) || l.text.length > 120 || PAGE_NUM_RE.test(l.text) || noteLike(l)) continue;
+      const k = keyL(l); if (!pagesBy.has(k)) pagesBy.set(k, new Set()); pagesBy.get(k).add(l.page);
+    }
+    for (const l of lines) {
+      if (!zone(l) || l.text.length > 120 || PAGE_NUM_RE.test(l.text) || noteLike(l)) continue;
+      if (pagesBy.get(keyL(l)).size >= 3) { removed.add(l); headersRemoved++; refReplace(ref, l.page, l.text, ""); }
+    }
+  }
+
+  // notas de rodapé: número sobrescrito no texto + nota com o mesmo número no pé da mesma página
+  const notesList = []; let noteSeq = 0;
+  if (opts.notes) {
+    const byPage = new Map();
+    for (const l of lines) { if (removed.has(l)) continue; if (!byPage.has(l.page)) byPage.set(l.page, []); byPage.get(l.page).push(l); }
+    for (const [p, pls] of byPage) {
+      const refs = new Set();
+      for (const l of pls) for (const m of l.text.matchAll(NOTE_RE)) refs.add(m[1]);
+      if (!refs.size) continue;
+      const zoneLines = [];
+      for (const l of [...pls].sort((a, b) => a.y - b.y)) {        // de baixo para cima
+        if (PAGE_NUM_RE.test(l.text)) continue;
+        if (l.pageH && l.y < l.pageH * 0.45 && l.size <= body * 0.92) zoneLines.push(l); else break;
+      }
+      zoneLines.reverse();
+      const notes = []; let cur = null;
+      for (const l of zoneLines) {
+        const m = /^(?:\uE002([^\uE003|]+)\uE003\s*|([0-9]{1,3}|[*†‡])[\s.)]+)(.+)$/.exec(l.text);
+        const label = m && (m[1] || m[2]);
+        if (label && refs.has(label) && !notes.some(n => n.label === label)) { cur = { label, lines: [l], text: stripNotes(m[3]) }; notes.push(cur); }
+        else if (cur) { cur.lines.push(l); cur.text = joinLine(cur.text, stripNotes(l.text)); }
+      }
+      for (const n of notes) {
+        n.id = ++noteSeq; n.page = p; notesList.push(n);
+        for (const l of n.lines) { removed.add(l); refReplace(ref, p, l.text, ""); }
+        const tag = "\uE002" + n.label + "\uE003";
+        const host = pls.find(l => !n.lines.includes(l) && l.text.includes(tag));
+        if (host) host.text = host.text.replace(tag, "\uE002" + n.id + "|" + n.label + "\uE003");
+      }
+    }
+  }
+  if (removed.size) { filtered = filtered.filter(l => !removed.has(l)); lines = lines.filter(l => !removed.has(l)); }
 
   const geo = {};
   for (const l of lines) {
@@ -783,7 +948,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
 
   const blocks = [];
   let cur = null, prev = null, lastPage = 0;
-  const terminal = /[.!?:;»”"')\]]$/;
+  const terminalRe = /[.!?:;»”"')\]]$/;
+  const terminal = { test: t => terminalRe.test(t.replace(/\uE002[^\uE003]*\uE003/g, "").trimEnd()) };   // chamada de nota no fim não conta
   for (const l of filtered) {
     if (l.kind !== "line") {
       if (l.page !== lastPage) { blocks.push({ type: "pg", label: labelOf(l.page) }); lastPage = l.page; }
@@ -797,8 +963,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
     if (level && l.text.length < 160) {
       const last = blocks[blocks.length - 1];
       if (last && last.type === "h" + level && prev && prev.page === l.page && prev.isHead && prev.y - l.y < l.size * 2)
-        last.text += " " + mark + l.text;
-      else blocks.push({ type: "h" + level, text: mark + l.text });
+        { last.text += " " + mark + l.text; last.last = l.page; }
+      else blocks.push({ type: "h" + level, text: mark + l.text, page: l.page, last: l.page });
       cur = null; prev = { ...l, isHead: true }; continue;
     }
     const g = geo[l.page] || { left: l.x0, right: l.x1 };
@@ -810,7 +976,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
         else if (l.x0 > g.left + body * 0.9 && l.x0 < g.left + body * 6) start = true;
       } else if (terminal.test(prev.text) && l.x0 > g.left + body * 0.9) start = true;
     }
-    if (start) { cur = { type: "p", text: mark + l.text }; blocks.push(cur); }
+    if (!start) cur.last = l.page;
+    if (start) { cur = { type: "p", text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur); }
     else if (/\p{L}-$/u.test(cur.text) && /^\p{Ll}/u.test(l.text)) {
       // palavra hifenizada no fim da linha: junta (o número de página entra depois da palavra)
       const head = (cur.text.match(/(\p{L}+)-$/u) || ["", ""])[1];
@@ -822,12 +989,31 @@ async function pdfToBlocks(buf, mode, onProgress, lang){
     else cur.text += " " + mark + l.text;
     prev = { ...l, isHead: false };
   }
+  // notas entram logo depois do parágrafo que as chama; chamadas sem nota voltam a ser texto comum
+  if (notesList.length) {
+    const byId = new Map(notesList.map(n => [n.id, n])), out = [];
+    for (const b of blocks) {
+      out.push(b);
+      if (typeof b.text !== "string") continue;
+      for (const m of b.text.matchAll(/\uE002(\d+)\|[^\uE003]*\uE003/g)) {
+        const n = byId.get(+m[1]);
+        if (n) { out.push({ type: "note", id: n.id, label: n.label, text: n.text, page: n.page, last: n.page }); byId.delete(n.id); }
+      }
+    }
+    blocks.splice(0, blocks.length, ...out);
+  }
+  let notesLinked = 0;
+  for (const b of blocks) if (typeof b.text === "string") {
+    b.text = b.text.replace(/\uE002([^\uE003|]+)\uE003/g, "$1");
+    if (b.type !== "note") notesLinked += (b.text.match(/\uE002\d+\|/g) || []).length;
+  }
   // ligaduras sem texto: decide cada código uma vez, com o livro inteiro
   await resolveLigatures(liga, blocks.filter(b => typeof b.text === "string").map(b => b.text), lang);
   for (const b of blocks) if (typeof b.text === "string") b.text = applyLigatures(liga, b.text, "");
   const used = liga.used, unresolved = liga.unresolved;
   liga.used = {}; for (const r of ref) r.w = applyLigatures(liga, r.w, "\uFFFD");
-  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, approx: textPages > 0 && realPages < textPages / 2 };
+  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked,
+    approx: textPages > 0 && realPages < textPages / 2 };
 }
 
 /* ---------- etapa 2: blocos -> DOCX ---------- */
@@ -839,8 +1025,14 @@ async function blocksToDocx(blocks, title, author){
   const z = new JSZip();
   let bm = 0;
   const bookmark = label => { bm++; return `<w:bookmarkStart w:id="${bm}" w:name="pdfpg${bm}_${hexEnc(label)}"/><w:bookmarkEnd w:id="${bm}"/>`; };
-  const runs = text => text.split(/(\uE000[^\uE001]*\uE001)/).filter(Boolean).map(seg =>
-    seg[0] === PG_A ? bookmark(seg.slice(1, -1)) : `<w:r><w:t xml:space="preserve">${esc(seg)}</w:t></w:r>`).join("");
+  const sup = label => `<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t xml:space="preserve">${esc(label)}</w:t></w:r>`;
+  // chamada de nota: marcador invisível (para o EPUB achar a nota) + número sobrescrito
+  const noteRef = s => {
+    const i = s.indexOf("|"); if (i < 0) return sup(s);
+    bm++; return `<w:bookmarkStart w:id="${bm}" w:name="note${s.slice(0, i)}_${hexEnc(s.slice(i + 1))}"/><w:bookmarkEnd w:id="${bm}"/>` + sup(s.slice(i + 1));
+  };
+  const runs = text => text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003)/).filter(Boolean).map(seg =>
+    seg[0] === PG_A ? bookmark(seg.slice(1, -1)) : seg[0] === "\uE002" ? noteRef(seg.slice(1, -1)) : `<w:r><w:t xml:space="preserve">${esc(seg)}</w:t></w:r>`).join("");
   const para = (style, text) =>
     `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs(text)}</w:p>`;
   const styleOf = { h1: "Heading1", h2: "Heading2", p: "" };
@@ -850,7 +1042,12 @@ async function blocksToDocx(blocks, title, author){
   const parts = [para("Title", title)];
   for (const b of blocks) {
     if (b.type === "pg") { pendingPg = b.label; continue; }
-    if (b.type !== "img") { parts.push(para(styleOf[b.type], b.text)); continue; }
+    if (b.type === "note") {
+      bm++;
+      parts.push(`<w:p><w:pPr><w:pStyle w:val="NotaRodape"/></w:pPr><w:bookmarkStart w:id="${bm}" w:name="notebody${b.id}"/><w:bookmarkEnd w:id="${bm}"/>${sup(b.label)}${runs(" " + b.text)}</w:p>`);
+      continue;
+    }
+    if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : styleOf[b.type], b.text)); continue; }
     n++;
     const file = `image${n}.jpg`;
     z.file("word/media/" + file, b.blob);
@@ -870,6 +1067,8 @@ async function blocksToDocx(blocks, title, author){
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>
 <w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:jc w:val="center"/><w:spacing w:after="480"/></w:pPr><w:rPr><w:b/><w:sz w:val="48"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:pageBreakBefore/><w:spacing w:before="240" w:after="240"/><w:jc w:val="left"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:b/><w:sz w:val="36"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="100"/><w:jc w:val="left"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="NotaRodape"><w:name w:val="Nota de rodapé"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>`;
   const now = new Date().toISOString().replace(/\.\d+Z$/, "Z");
@@ -888,7 +1087,7 @@ async function blocksToDocx(blocks, title, author){
 }
 
 /* ---------- etapa 3: DOCX -> EPUB (lê o DOCX gerado) ---------- */
-async function docxToEpub(docxBlob, author, lang, showNums){
+async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
   const dz = await JSZip.loadAsync(docxBlob);
   const parse = s => new DOMParser().parseFromString(s, "application/xml");
   const xml = parse(await dz.file("word/document.xml").async("string"));
@@ -927,13 +1126,19 @@ async function docxToEpub(docxBlob, author, lang, showNums){
     }
     const ps = p.getElementsByTagNameNS(W, "pStyle")[0];
     const style = ps ? (ps.getAttributeNS(W, "val") || ps.getAttribute("w:val")) : "";
-    let text = "";
+    let text = "", skipSup = false, noteBody = null, noteLabel = "";
     for (const n of p.getElementsByTagNameNS(W, "*")) {
-      if (n.localName === "t") text += n.textContent;
+      if (n.localName === "t") { if (skipSup) { skipSup = false; if (noteBody && !noteLabel) noteLabel = n.textContent; continue; } text += n.textContent; }
       else if (n.localName === "tab" || n.localName === "br") text += " ";
-      else if (n.localName === "bookmarkStart") { const l = pgLabel(n); if (l !== null) text += pgMark(l); }
+      else if (n.localName === "bookmarkStart") {
+        const nm = n.getAttributeNS(W, "name") || n.getAttribute("w:name") || ""; let m;
+        if ((m = /^note(\d+)_([0-9a-f]*)$/.exec(nm))) { text += "\uE002" + m[1] + "|" + hexDec(m[2]) + "\uE003"; skipSup = true; }
+        else if ((m = /^notebody(\d+)$/.exec(nm))) { noteBody = +m[1]; skipSup = true; }
+        else { const l = pgLabel(n); if (l !== null) text += pgMark(l); }
+      }
     }
     text = text.trim();
+    if (style === "NotaRodape" && noteBody) { paras.push({ style: "note", id: noteBody, label: noteLabel, text }); continue; }
     if (!text) continue;
     if (!stripPg(text)) { for (const m of text.matchAll(PG_RE)) paras.push({ style: "pg", label: m[1] }); continue; }
     paras.push({ style, text });
@@ -946,21 +1151,28 @@ async function docxToEpub(docxBlob, author, lang, showNums){
   const splitStyle = hasH1 ? "Heading1" : hasH2 ? "Heading2" : null;
   const chapters = [];
   let ch = null;
-  const newCh = name => { ch = { title: name, items: [], weight: 0 }; chapters.push(ch); };
+  const newCh = name => { ch = { title: name, items: [], weight: 0, notes: [] }; chapters.push(ch); };
+  const titleOf = t => stripPg(t.replace(NOTE_RE, ""));
   for (const p of content) {
-    if (splitStyle && p.style === splitStyle) { newCh(stripPg(p.text)); ch.items.push({ tag: "h1", text: p.text }); continue; }
+    if (splitStyle && p.style === splitStyle) { newCh(titleOf(p.text)); ch.items.push({ tag: "h1", text: p.text }); continue; }
     if (!ch) newCh(splitStyle ? "Início" : "Parte 1");
+    if (p.style === "note") { ch.notes.push(p); continue; }
     if (p.style === "pg") { ch.items.push({ tag: "pg", label: p.label }); continue; }
     if (!splitStyle && ch.weight >= 60) newCh("Parte " + (chapters.length + 1));
     if (p.style === "img") { ch.items.push({ tag: "img", src: p.src, full: p.full }); ch.weight += 5; continue; }
-    const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : "p";
+    const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : p.style === "Heading3" ? "h2" : "p";
     ch.items.push({ tag, text: p.text }); ch.weight += 1;
   }
   if (!chapters.length) newCh("Texto");
 
   // capa: primeira imagem, se for página inteira logo no início
   const firstImg = content.slice(0, 3).find(p => p.style === "img" && p.full);
-  const cover = firstImg ? images.find(i => i.href === firstImg.src) : null;
+  let cover = firstImg ? images.find(i => i.href === firstImg.src) : null, coverPage = false;
+  // capa escolhida (primeira página do PDF ou imagem enviada): vira a capa do Kindle
+  if (!cover && extra.cover) {
+    z.file("OEBPS/images/cover.jpg", extra.cover);
+    cover = { id: "cover-img", href: "images/cover.jpg" }; images.unshift(cover); coverPage = true;
+  }
 
   const id = "urn:uuid:" + uuid();
   const modified = new Date().toISOString().replace(/\.\d+Z$/, "Z");
@@ -984,6 +1196,10 @@ figure img{max-width:100%;height:auto}
 .pn{font-size:.7em;font-weight:normal;font-style:normal;color:#888;white-space:nowrap;padding:0 .3em;text-indent:0}
 h1 .pn,h2 .pn{display:block;padding:0;margin-bottom:.3em}
 .pnb{font-size:.7em;color:#888;text-align:center;text-indent:0;margin:.8em 0 .2em}
+.cover{margin:0;padding:0;text-align:center}.cover img{max-width:100%;max-height:100vh;height:auto}
+sup a{text-decoration:none}
+aside{font-size:.85em;margin-top:1em}
+p.nota{text-indent:0;text-align:left}
 .title{text-align:center;margin-top:30%}.title h1{font-size:2em;text-align:center}.title p{text-indent:0;text-align:center;font-style:italic}`);
 
   const files = [], pageList = [];
@@ -994,8 +1210,14 @@ h1 .pn,h2 .pn{display:block;padding:0;margin-bottom:.3em}
     if (block) return showNums ? `<div ${attrs} class="pnb">p. ${esc(label)}</div>` : `<div ${attrs}></div>`;
     return showNums ? `<span ${attrs} class="pn">[p. ${esc(label)}]</span>` : `<span ${attrs}></span>`;
   };
-  const rich = (text, fn) => text.split(/(\uE000[^\uE001]*\uE001)/).filter(Boolean)
-    .map(seg => seg[0] === PG_A ? pgSpan(seg.slice(1, -1), fn, false) : esc(seg)).join("");
+  const noteRef = s => {
+    const i = s.indexOf("|"); if (i < 0) return esc(s);
+    const id = s.slice(0, i);
+    return `<sup><a epub:type="noteref" role="doc-noteref" href="#fn${id}" id="fnref${id}">${esc(s.slice(i + 1))}</a></sup>`;
+  };
+  const rich = (text, fn) => text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003)/).filter(Boolean)
+    .map(seg => seg[0] === PG_A ? pgSpan(seg.slice(1, -1), fn, false) : seg[0] === "\uE002" ? noteRef(seg.slice(1, -1)) : esc(seg)).join("");
+  if (coverPage) z.file("OEBPS/text/cover.xhtml", xhtml(title, `<div class="cover" epub:type="cover"><img src="../images/cover.jpg" alt="${esc(title)}"/></div>`));
   if (!cover) z.file("OEBPS/text/titlepage.xhtml", xhtml(title,
     `<section class="title" epub:type="titlepage"><h1>${esc(title)}</h1>${author ? `<p>${esc(author)}</p>` : ""}</section>`));
   chapters.forEach((c, i) => {
@@ -1006,7 +1228,8 @@ h1 .pn,h2 .pn{display:block;padding:0;margin-bottom:.3em}
       : it.tag === "img"
         ? (it.full ? `<div class="pg">${(c.items[k - 1] || {}).tag === "pg" ? pgSpan(c.items[k - 1].label, fn, true) : ""}<img src="../${it.src}" alt=""/></div>` : `<figure><img src="../${it.src}" alt=""/></figure>`)
         : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
-    z.file("OEBPS/text/" + fn, xhtml(c.title, `<section epub:type="chapter">${inner}</section>`));
+    const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
+    z.file("OEBPS/text/" + fn, xhtml(c.title, `<section epub:type="chapter">${inner}</section>${notes ? "\n" + notes : ""}`));
   });
 
   z.file("OEBPS/nav.xhtml", `<?xml version="1.0" encoding="UTF-8"?>
@@ -1045,17 +1268,86 @@ ${cover ? `<meta name="cover" content="${cover.id}"/>` : ""}
 <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
 <item id="css" href="style.css" media-type="text/css"/>
 ${cover ? "" : `<item id="titlepage" href="text/titlepage.xhtml" media-type="application/xhtml+xml"/>`}
+${coverPage ? `<item id="coverpage" href="text/cover.xhtml" media-type="application/xhtml+xml"/>` : ""}
 ${images.map(im => `<item id="${im.id}" href="${im.href}" media-type="image/jpeg"${cover && im.id === cover.id ? ` properties="cover-image"` : ""}/>`).join("\n")}
 ${files.map((f, i) => `<item id="c${i + 1}" href="text/${f.fn}" media-type="application/xhtml+xml"/>`).join("\n")}
 </manifest>
 <spine toc="ncx">
 ${cover ? "" : `<itemref idref="titlepage"/>`}
+${coverPage ? `<itemref idref="coverpage"/>` : ""}
 ${files.map((f, i) => `<itemref idref="c${i + 1}"/>`).join("\n")}
 </spine>
 </package>`);
 
   const blob = await z.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
-  return { blob, chapters: chapters.length, images: images.length, pages: pageList.length, title };
+  return { blob, chapters: chapters.length, images: images.length - (coverPage ? 1 : 0), pages: pageList.length, title, notes: chapters.reduce((s, c) => s + c.notes.length, 0) };
+}
+
+/* ---------- quadrinhos e mangá: EPUB de página fixa ---------- */
+async function buildFixedEpub(blocks, { title, author, lang, rtl }){
+  const pages = []; let label = null;
+  for (const b of blocks) {
+    if (b.type === "pg") label = b.label;
+    else if (b.type === "img") { pages.push({ blob: b.blob, w: b.w, h: b.h, label: label || String(pages.length + 1) }); label = null; }
+  }
+  if (!pages.length) throw new Error("Não encontrei páginas para montar o EPUB.");
+  const z = new JSZip();
+  z.file("mimetype", "application/epub+zip", { compression: "STORE" });
+  const id = "urn:uuid:" + uuid(), modified = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+  z.file("META-INF/container.xml", `<?xml version="1.0" encoding="UTF-8"?>
+<container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>`);
+  pages.forEach((pg, i) => {
+    const n = String(i + 1).padStart(4, "0");
+    z.file(`OEBPS/images/p${n}.jpg`, pg.blob);
+    z.file(`OEBPS/text/p${n}.xhtml`, `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=${pg.w}, height=${pg.h}"/><title>${esc(title)} – ${esc(pg.label)}</title>
+<style>html,body{margin:0;padding:0;width:${pg.w}px;height:${pg.h}px;overflow:hidden}img{display:block;width:${pg.w}px;height:${pg.h}px}</style></head>
+<body><div id="pg${i + 1}" epub:type="pagebreak" role="doc-pagebreak" aria-label="${esc(pg.label)}"></div><img src="../images/p${n}.jpg" alt="Página ${esc(pg.label)}"/></body></html>`);
+  });
+  const files = pages.map((pg, i) => ({ fn: `p${String(i + 1).padStart(4, "0")}.xhtml`, label: pg.label, i }));
+  z.file("OEBPS/nav.xhtml", `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}">
+<head><meta charset="UTF-8"/><title>Sumário</title></head>
+<body><nav epub:type="toc" id="toc"><h1>Sumário</h1><ol><li><a href="text/${files[0].fn}">${esc(title)}</a></li></ol></nav>
+<nav epub:type="page-list" id="page-list" hidden=""><h2>Páginas</h2><ol>
+${files.map(f => `<li><a href="text/${f.fn}#pg${f.i + 1}">${esc(f.label)}</a></li>`).join("\n")}
+</ol></nav></body></html>`);
+  z.file("OEBPS/toc.ncx", `<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1"><head><meta name="dtb:uid" content="${id}"/><meta name="dtb:depth" content="1"/><meta name="dtb:totalPageCount" content="${pages.length}"/><meta name="dtb:maxPageNumber" content="0"/></head>
+<docTitle><text>${esc(title)}</text></docTitle><navMap><navPoint id="np1" playOrder="1"><navLabel><text>${esc(title)}</text></navLabel><content src="text/${files[0].fn}"/></navPoint></navMap></ncx>`);
+  const first = pages[0];
+  z.file("OEBPS/content.opf", `<?xml version="1.0" encoding="UTF-8"?>
+<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="bookid" xml:lang="${lang}">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+<dc:identifier id="bookid">${id}</dc:identifier>
+<dc:title>${esc(title)}</dc:title>
+${author ? `<dc:creator>${esc(author)}</dc:creator>` : ""}
+<dc:language>${lang}</dc:language>
+<meta property="dcterms:modified">${modified}</meta>
+<meta property="rendition:layout">pre-paginated</meta>
+<meta property="rendition:orientation">auto</meta>
+<meta property="rendition:spread">landscape</meta>
+<meta name="cover" content="img1"/>
+<meta name="fixed-layout" content="true"/>
+<meta name="book-type" content="comic"/>
+<meta name="original-resolution" content="${first.w}x${first.h}"/>
+${rtl ? `<meta name="primary-writing-mode" content="horizontal-rl"/>` : ""}
+</metadata>
+<manifest>
+<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+<item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+${files.map(f => `<item id="img${f.i + 1}" href="images/${f.fn.replace(".xhtml", ".jpg")}" media-type="image/jpeg"${f.i === 0 ? ` properties="cover-image"` : ""}/>
+<item id="pg${f.i + 1}x" href="text/${f.fn}" media-type="application/xhtml+xml"/>`).join("\n")}
+</manifest>
+<spine toc="ncx" page-progression-direction="${rtl ? "rtl" : "ltr"}">
+${files.map(f => `<itemref idref="pg${f.i + 1}x"/>`).join("\n")}
+</spine>
+</package>`);
+  const blob = await z.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
+  return { blob, chapters: 1, images: pages.length, pages: pages.length, title };
 }
 
 /* ---------- EPUB -> EPUB (numera páginas sem mexer no texto) ---------- */
@@ -1100,8 +1392,20 @@ async function fixEpub(file, opt, onProgress){
   const opfDir = dirOf(opfPath);
   const opf = parseXml(await zin.file(opfPath).async("string"));
   const isV3 = parseFloat(opf.documentElement.getAttribute("version") || "2") >= 3;
-  const titleEl = opf.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", "title")[0];
+  const DC = "http://purl.org/dc/elements/1.1/";
+  const titleEl = opf.getElementsByTagNameNS(DC, "title")[0];
+  let creatorEl = opf.getElementsByTagNameNS(DC, "creator")[0];
+  let opfChanged = false;
+  if (opt.title && titleEl && opt.title !== titleEl.textContent.trim()) { titleEl.textContent = opt.title; opfChanged = true; }
+  if (opt.author != null && opt.author !== (creatorEl ? creatorEl.textContent.trim() : "")) {
+    if (!creatorEl && opt.author) {
+      const md = opf.getElementsByTagNameNS("*", "metadata")[0];
+      creatorEl = opf.createElementNS(DC, "dc:creator"); md.appendChild(creatorEl);
+    }
+    if (creatorEl) { creatorEl.textContent = opt.author; opfChanged = true; }
+  }
   const title = (titleEl && titleEl.textContent.trim()) || baseName(file.name);
+  const author = creatorEl ? creatorEl.textContent.trim() : "";
 
   const manifest = new Map();
   for (const it of opf.getElementsByTagNameNS("*", "item"))
@@ -1251,6 +1555,7 @@ async function fixEpub(file, opt, onProgress){
   for (const d of docs) if (d.changed) changed.set(d.path, serializeXml(d.doc, d.hadDecl || !d.html));
   if (paginated && navDoc) changed.set(navPath, serializeXml(navDoc, true));
   if (paginated && ncxDoc) changed.set(ncxPath, serializeXml(ncxDoc, true));
+  if (opfChanged) changed.set(opfPath, serializeXml(opf, true));
   const zout = new JSZip();
   zout.file("mimetype", "application/epub+zip", { compression: "STORE" });
   for (const [name, entry] of Object.entries(zin.files)) {
@@ -1259,7 +1564,7 @@ async function fixEpub(file, opt, onProgress){
   }
   const blob = await zout.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
 
-  if (!opt.verify) return { blob, title, pages: pageCount, keptPages, verify: null };
+  if (!opt.verify) return { blob, title, author, pages: pageCount, keptPages, verify: null };
 
   // conferência: abre o EPUB gerado e compara as palavras com as do original
   onProgress("conferindo o texto");
@@ -1270,7 +1575,7 @@ async function fixEpub(file, opt, onProgress){
     if (hasParseError(doc)) { if (!d.html) throw new Error("Um arquivo do EPUB gerado ficou inválido: " + d.path); doc = new DOMParser().parseFromString(src, "text/html"); }
     after.push(...docWords(doc));
   }
-  return { blob, title, pages: pageCount, keptPages, verify: compareWords(before, after) };
+  return { blob, title, author, pages: pageCount, keptPages, verify: compareWords(before, after) };
 }
 
 /* ---------- fila ---------- */
@@ -1279,6 +1584,86 @@ const STAGES = {
   epub: [["read", "EPUB lido", "epub"], ["pages", "Páginas", "epub"], ["epub", "EPUB pronto", "epub"], ["check", "Conferência", "epub"]]
 };
 const fmtN = n => n.toLocaleString("pt-BR");
+const fileNameOf = job => job.kind === "epub"
+  ? safeFile(job.title || baseName(job.file.name)) + " (com páginas).epub"
+  : safeFile(job.title + (job.author ? " - " + job.author : "")) + ".epub";
+
+// "693_A_SAGA_DE_ZEPHYRUS_EBOOK" -> "A Saga de Zephyrus"
+function cleanTitle(raw){
+  const s = String(raw || "");
+  let t = s.replace(/_+/g, " ").replace(/\s+/g, " ").trim();
+  if (/^\d+_/.test(s)) t = t.replace(/^\d+\s+/, "");
+  t = t.replace(/\s*[-–(]?\s*\b(e-?book|pdf|epub)\b\)?\s*$/i, "").trim();
+  if (t && t === t.toUpperCase() && /\p{Lu}/u.test(t)) {
+    const small = new Set("a o as os e de da do das dos em na no nas nos para por com sem um uma à ao".split(" "));
+    t = t.toLowerCase().split(" ").map((w, i) => i && small.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  }
+  return t || s || "Livro";
+}
+
+// imagem enviada pelo usuário -> JPEG (capa)
+async function imageToJpeg(file){
+  const bmp = await createImageBitmap(file);
+  const s = Math.min(1, 1600 / bmp.height, 1200 / bmp.width);
+  const c = document.createElement("canvas"); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+  const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bmp, 0, 0, c.width, c.height);
+  return toJpeg(c, 0.9);
+}
+const blobUrls = new WeakMap();
+const urlOf = blob => { if (!blob) return ""; if (!blobUrls.has(blob)) blobUrls.set(blob, URL.createObjectURL(blob)); return blobUrls.get(blob); };
+
+// títulos que abrem capítulo (o mesmo critério do EPUB)
+function chapterHeads(job){
+  const B = job.src.blocks;
+  const lv = B.some(b => b.type === "h1") ? "h1" : "h2";
+  return B.map((b, bi) => ({ b, bi })).filter(x => x.b.type === lv).map(x => ({ bi: x.bi, text: stripPg(stripNotes(x.b.text)), demote: !!x.b.demote }));
+}
+
+// acha no texto do livro o trecho apontado pela conferência
+function locateDiff(job, d){
+  const toks = (d.epub || d.prev || "").split(" ").filter(Boolean);
+  if (!toks.length) return null;
+  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003)+";
+  const re = new RegExp(toks.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join(SEP), "u");
+  const B = job.src.blocks;
+  const exact = b => b.page != null && d.p >= b.page && d.p <= (b.last ?? b.page);
+  const near = b => b.page == null || (d.p >= b.page - 1 && d.p <= (b.last ?? b.page) + 1);
+  const order = [...B.keys()].filter(bi => exact(B[bi])).concat([...B.keys()].filter(bi => !exact(B[bi]) && near(B[bi])));
+  for (const bi of order) {
+    const b = B[bi];
+    if (typeof b.text !== "string") continue;
+    const m = re.exec(b.text);
+    if (!m) continue;
+    return d.epub ? { bi, start: m.index, end: m.index + m[0].length, text: m[0] }
+                  : { bi, start: m.index + m[0].length, end: m.index + m[0].length, text: "", insert: true };
+  }
+  return null;
+}
+
+function editPanelHtml(job){
+  if (!job.epub || job.busy) return "";
+  const pdf = job.kind === "pdf";
+  const heads = pdf && !job.fixed ? chapterHeads(job) : [];
+  return `<details class="edit"${job.editOpen ? " open" : ""}><summary>Editar livro: ${pdf && !job.fixed ? "capa, título, autor e capítulos" : "título e autor"}</summary>
+    <div class="edit-body">
+      <div class="edit-top${pdf && !job.fixed ? "" : " nocov"}">
+        ${pdf && !job.fixed ? `<div class="coverbox"><div class="cv"></div>
+          <label class="btn ghost sm filebtn">Trocar capa<input type="file" accept="image/*" data-e="coverfile" hidden></label>
+          <button class="linkbtn" data-e="coverpdf">1ª página do PDF</button>
+          <button class="linkbtn" data-e="coveroff">Sem capa</button></div>` : ""}
+        <div class="edit-fields">
+          <label>Título <input type="text" data-e="title" autocomplete="off"></label>
+          <label>Autor <input type="text" data-e="author" autocomplete="off" placeholder="Opcional"></label>
+        </div>
+      </div>
+      ${heads.length ? `<div class="chap"><div class="chap-head"><b>Capítulos (${heads.length})</b> <span class="muted">Renomeie, junte com o anterior (desmarque “abre capítulo”) ou remova o título.</span></div>
+        <ol class="chap-list">${heads.map(h => `<li data-bi="${h.bi}"><input type="text" data-c="text" aria-label="Título do capítulo">
+          <label class="mini"><input type="checkbox" data-c="split"> abre capítulo</label>
+          <button class="linkbtn" data-c="remove"></button></li>`).join("")}</ol></div>` : ""}
+      <div class="edit-actions"><button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
+    </div></details>`;
+}
+
 function render(job){
   let row = job.el;
   if (!row) {
@@ -1296,17 +1681,25 @@ function render(job){
     job.chapters ? job.chapters + " capítulo" + (job.chapters > 1 ? "s" : "") : "",
     job.images ? job.images + (job.images > 1 ? " imagens" : " imagem") : "",
     job.pageMarks ? job.pageMarks + (job.pageMarks > 1 ? " páginas numeradas" : " página numerada") + (job.keptPages ? " (originais)" : "") : "",
+    job.notesN ? job.notesN + (job.notesN > 1 ? " notas clicáveis" : " nota clicável") : "",
+    job.headersRemoved ? job.headersRemoved + " linhas de cabeçalho/rodapé tiradas" : "",
     job.progress && !job.error ? job.progress : ""].filter(Boolean).join(" · ");
   const ligSrc = job.ligatures || (v && v.ligatures);
   const lig = ligSrc ? Object.entries(ligSrc).sort((a, b) => b[1] - a[1]) : [];
   const ligHtml = lig.length ? `<div class="verify neutral">Este PDF guarda as ligaduras (letras unidas, como “fi” e “fl”) com um código sem texto. Elas foram identificadas pelas palavras do próprio livro (e, nos sinais, pelo desenho da letra): ${lig.map(([k, n]) => `“${esc(k)}” ×${fmtN(n)}`).join(", ")}.</div>` : "";
   let verifyHtml = "";
   if (v) {
+    const user = job.userTexts || [];
+    v.diffs.forEach(d => { d.user = !!(d.epub && user.some(u => u && d.epub.includes(u))); });
+    const real = v.diffs.filter(d => !d.user).length, mine = v.diffs.length - real;
+    const mineTxt = mine ? ` ${mine} trecho${mine > 1 ? "s" : ""} diferente${mine > 1 ? "s" : ""} por correção sua.` : "";
     if (!v.total) verifyHtml = `<div class="verify neutral">Sem texto para conferir: as páginas entraram como imagem.</div>`;
-    else if (!v.diffs.length) verifyHtml = `<div class="verify ok">✓ Conferido: as ${fmtN(v.total)} palavras do EPUB são iguais às do ${src}.${v.ignored ? ` Ficaram de fora ${v.ignored} números de página soltos.` : ""}${v.approx ? " Este PDF não guarda os espaços como caracteres, então os espaços foram calculados pela posição das letras." : ""}${v.hidden ? ` O PDF tem ${fmtN(v.hidden)} letras escondidas fora da área visível da página, que não aparecem na leitura e não foram incluídas.` : ""}</div>`;
-    else verifyHtml = `<div class="verify warn">⚠ ${v.diffs.length} trecho${v.diffs.length > 1 ? "s" : ""} diferente${v.diffs.length > 1 ? "s" : ""} do ${src}, em ${fmtN(v.total)} palavras conferidas. Veja abaixo antes de baixar.</div>
-      <details class="diffs"><summary>Ver diferenças</summary><ul>${v.diffs.slice(0, 300).map(d =>
-        `<li><span class="where">${job.kind === "pdf" ? "p. " + (d.p || "?") : "arquivo " + (d.p || "?")}</span> ${src}: <b>${esc(d.pdf || "—")}</b> · EPUB: <b>${esc(d.epub || "—")}</b></li>`).join("")}</ul></details>`;
+    else if (!real) verifyHtml = `<div class="verify ok">✓ Conferido: as ${fmtN(v.total)} palavras do EPUB são iguais às do ${src}.${mineTxt}${v.ignored ? ` Ficaram de fora ${v.ignored} números de página soltos.` : ""}${v.approx ? " Este PDF não guarda os espaços como caracteres, então os espaços foram calculados pela posição das letras." : ""}${v.hidden ? ` O PDF tem ${fmtN(v.hidden)} letras escondidas fora da área visível da página, que não aparecem na leitura e não foram incluídas.` : ""}</div>`;
+    else verifyHtml = `<div class="verify warn">⚠ ${real} trecho${real > 1 ? "s" : ""} diferente${real > 1 ? "s" : ""} do ${src}, em ${fmtN(v.total)} palavras conferidas.${mineTxt} ${job.kind === "pdf" ? "Use “Corrigir” para acertar o texto e gerar de novo." : "Veja abaixo antes de baixar."}</div>`;
+    if (v.diffs.length) verifyHtml += `<details class="diffs"${job.detailsOpen ? " open" : ""}><summary>Ver diferenças</summary><ul>${v.diffs.slice(0, 300).map((d, i) =>
+      `<li class="${d.user ? "user" : ""}"><span class="where">${job.kind === "pdf" ? "p. " + (d.p || "?") : "arquivo " + (d.p || "?")}</span> ${src}: <b>${esc(d.pdf || "—")}</b> · EPUB: <b>${esc(d.epub || "—")}</b>${d.user ? ` <span class="muted">(corrigido por você)</span>` : ""}
+        ${job.kind === "pdf" && !job.busy && !job.fixed ? ` <button class="linkbtn" data-fix="${i}">Corrigir</button>` : ""}
+        ${job.fixing === i ? `<div class="fixbox"><input type="text" data-fx="input" aria-label="Texto correto"><button class="btn sm" data-fx="ok">Aplicar e gerar de novo</button><button class="btn ghost sm" data-fx="cancel">Cancelar</button></div>` : ""}</li>`).join("")}</ul></details>`;
   }
   row.innerHTML = `
     <div style="min-width:0">
@@ -1317,20 +1710,111 @@ function render(job){
     <div class="actions">
       <button class="btn" data-a="epub" ${job.epub ? "" : "disabled"}>Baixar EPUB</button>
       <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener" ${job.epub ? "" : 'aria-disabled="true" tabindex="-1"'}>Enviar ao Kindle</a>
+      <button class="btn ghost" data-a="pv" ${job.epub ? "" : "disabled"}>Prévia</button>
       ${job.kind === "pdf" ? `<button class="btn ghost" data-a="docx" ${job.docx && job.epub ? "" : "disabled"}>DOCX</button>` : ""}
     </div>
     ${verifyHtml}
     ${ligHtml}
+    ${editPanelHtml(job)}
     ${job.error ? `<div class="errmsg"></div>` : ""}`;
-  row.querySelector(".name").textContent = job.title || job.file.name;
+  row.querySelector(".name").textContent = (job.title || job.file.name) + (job.author ? " — " + job.author : "");
   if (job.error) row.querySelector(".errmsg").textContent = job.error;
-  const outName = () => job.kind === "epub" ? safeFile(baseName(job.file.name)) + " (com páginas).epub" : safeFile(job.title) + ".epub";
-  row.querySelector('[data-a="epub"]').onclick = () => offer(outName(), job.epub);
-  row.querySelector('[data-a="kindle"]').onclick = e => sendToKindle(e, job, outName());
+  row.querySelector('[data-a="epub"]').onclick = () => offer(fileNameOf(job), job.epub);
+  row.querySelector('[data-a="kindle"]').onclick = e => sendToKindle(e, job, fileNameOf(job));
+  row.querySelector('[data-a="pv"]').onclick = () => openPreview(job.epub, job.title);
   const d = row.querySelector('[data-a="docx"]'); if (d) d.onclick = () => offer(safeFile(job.title) + ".docx", job.docx);
   const det = row.querySelector("details.diffs");
-  if (det) { if (job.detailsOpen) det.open = true; det.ontoggle = () => { job.detailsOpen = det.open; }; }
+  if (det) det.ontoggle = () => { job.detailsOpen = det.open; };
+  bindFixes(job, row);
+  bindEditPanel(job, row);
   $("#allZip").hidden = jobs.filter(j => j.epub).length < 2;
+}
+
+// corrigir um trecho apontado pela conferência
+function bindFixes(job, row){
+  row.querySelectorAll("[data-fix]").forEach(btn => btn.onclick = () => {
+    const d = job.verify.diffs[+btn.dataset.fix];
+    const loc = locateDiff(job, d);
+    if (!loc) { toast("Não encontrei esse trecho no texto do livro para editar."); return; }
+    job.fixing = +btn.dataset.fix; job.fixLoc = loc;
+    job.fixDraft = loc.insert ? d.pdf : stripPg(stripNotes(loc.text));
+    job.detailsOpen = true; render(job);
+    const inp = job.el.querySelector('[data-fx="input"]'); if (inp) { inp.focus(); inp.select(); }
+  });
+  const inp = row.querySelector('[data-fx="input"]');
+  if (!inp) return;
+  inp.value = job.fixDraft || "";
+  inp.oninput = () => { job.fixDraft = inp.value; };
+  inp.onkeydown = e => { if (e.key === "Enter") row.querySelector('[data-fx="ok"]').click(); if (e.key === "Escape") row.querySelector('[data-fx="cancel"]').click(); };
+  row.querySelector('[data-fx="cancel"]').onclick = () => { job.fixing = null; render(job); };
+  row.querySelector('[data-fx="ok"]').onclick = () => {
+    const loc = job.fixLoc, b = job.src.blocks[loc.bi], txt = (job.fixDraft || "").trim();
+    const marks = (loc.text.match(/\uE000[^\uE001]*\uE001/g) || []).join("");
+    b.text = b.text.slice(0, loc.start) + (loc.insert ? (txt ? " " + txt : "") : marks + txt) + b.text.slice(loc.end);
+    (job.userTexts ||= []).push(txt.split(/\s+/).map(edgeW).filter(Boolean).join(" "));
+    job.fixing = null; rebuild(job);
+  };
+}
+
+function bindEditPanel(job, row){
+  const box = row.querySelector("details.edit");
+  if (!box) return;
+  box.ontoggle = () => { job.editOpen = box.open; };
+  const dr = job.draft ||= { heads: {} };
+  const q = s => box.querySelector(s);
+  q('[data-e="title"]').value = dr.title ?? job.title ?? "";
+  q('[data-e="author"]').value = dr.author ?? job.author ?? "";
+  q('[data-e="title"]').oninput = e => { dr.title = e.target.value; };
+  q('[data-e="author"]').oninput = e => { dr.author = e.target.value; };
+  const cv = q(".cv");
+  if (cv) {
+    const on = dr.coverOn ?? job.coverOn, blob = dr.cover !== undefined ? dr.cover : job.coverBlob;
+    cv.innerHTML = on && blob ? `<img alt="Capa">` : `<div class="nocover">Sem capa</div>`;
+    if (on && blob) cv.querySelector("img").src = urlOf(blob);
+    q('[data-e="coverfile"]').onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      try { dr.cover = await imageToJpeg(f); dr.coverOn = true; render(job); } catch { toast("Não consegui abrir essa imagem."); }
+    };
+    q('[data-e="coverpdf"]').onclick = () => { dr.cover = job.src.cover ? job.src.cover.blob : null; dr.coverOn = !!dr.cover; render(job); };
+    q('[data-e="coveroff"]').onclick = () => { dr.coverOn = false; render(job); };
+  }
+  box.querySelectorAll(".chap-list li").forEach(li => {
+    const bi = +li.dataset.bi, b = job.src.blocks[bi], h = dr.heads[bi] ||= {};
+    const t = li.querySelector('[data-c="text"]'), sp = li.querySelector('[data-c="split"]'), rm = li.querySelector('[data-c="remove"]');
+    t.value = h.text ?? stripPg(stripNotes(b.text));
+    sp.checked = h.split ?? !b.demote;
+    rm.textContent = h.remove ? "Desfazer" : "Remover título";
+    li.classList.toggle("removed", !!h.remove);
+    t.oninput = () => { h.text = t.value; };
+    sp.onchange = () => { h.split = sp.checked; };
+    rm.onclick = () => { h.remove = !h.remove; rm.textContent = h.remove ? "Desfazer" : "Remover título"; li.classList.toggle("removed", h.remove); };
+  });
+  q('[data-e="apply"]').onclick = () => { applyDraft(job); rebuild(job); };
+}
+
+function applyDraft(job){
+  const dr = job.draft; job.draft = null;
+  if (!dr) return;
+  if (dr.title != null && dr.title.trim()) job.title = dr.title.trim();
+  if (dr.author != null) job.author = dr.author.trim();
+  if (job.kind === "epub") { job.titleOverride = job.title; job.authorOverride = job.author; return; }
+  if (dr.cover !== undefined) job.coverBlob = dr.cover;
+  if (dr.coverOn !== undefined) job.coverOn = dr.coverOn;
+  const B = job.src.blocks, ref = job.src.ref;
+  for (const [k, h] of Object.entries(dr.heads || {})) {
+    const b = B[+k]; if (!b || !/^h[12]$/.test(b.type)) continue;
+    const marks = (b.text.match(/\uE000[^\uE001]*\uE001/g) || []).join("");
+    const old = stripPg(stripNotes(b.text));
+    if (h.remove) { refReplace(ref, b.page, old, ""); b.type = "p"; b.text = marks; continue; }
+    const nt = (h.text ?? "").trim();
+    if (nt && nt !== old) { refReplace(ref, b.page, old, nt); b.text = marks + nt; }
+    if (h.split !== undefined) b.demote = !h.split;
+  }
+}
+
+function rebuild(job){
+  job.busy = true; job.progress = "na fila"; render(job);
+  chain = chain.then(() => job.kind === "pdf" ? buildPdf(job) : runEpub(job));
 }
 
 // Celular: compartilha direto com o app Kindle. Computador: baixa e abre a página da Amazon.
@@ -1356,13 +1840,15 @@ function addFiles(list){
     const kind = /\.epub$/i.test(file.name) || file.type === "application/epub+zip" ? "epub"
       : /\.pdf$/i.test(file.name) || file.type === "application/pdf" ? "pdf" : null;
     if (!kind) { toast(file.name + " não é PDF nem EPUB e foi ignorado."); continue; }
-    const job = { file, kind, title: baseName(file.name), done: [], stage: kind === "pdf" ? "pdf" : "read", progress: "na fila", verifyOn: $("#verify").checked };
+    const job = { file, kind, title: kind === "pdf" ? cleanTitle(baseName(file.name)) : baseName(file.name), done: [], stage: kind === "pdf" ? "pdf" : "read",
+      progress: "na fila", verifyOn: $("#verify").checked, histId: uuid() };
     jobs.push(job); render(job);
     chain = chain.then(() => kind === "pdf" ? runPdf(job) : runEpub(job));
   }
 }
 
 async function runEpub(job){
+  job.busy = true; job.epub = null; job.verify = null; job.error = null; job.done = []; job.stage = "read";
   try {
     job.progress = "abrindo"; render(job);
     const res = await fixEpub(job.file, {
@@ -1370,57 +1856,74 @@ async function runEpub(job){
       keepPages: $("#keeppages").checked,
       totalPages: parseInt($("#totalpages").value, 10) || 0,
       cpp: parseInt($("#cpp").value, 10) || 0,
-      verify: job.verifyOn
+      verify: job.verifyOn,
+      title: job.titleOverride, author: job.authorOverride
     }, msg => {
       const order = ["read", "pages", "epub", "check"];
       const stage = { "numerando páginas": "pages", "montando EPUB": "epub", "conferindo o texto": "check" }[msg];
       if (stage) { for (const k of order.slice(0, order.indexOf(stage))) if (!job.done.includes(k)) job.done.push(k); job.stage = stage; }
       job.progress = msg; render(job);
     });
-    job.title = res.title; job.pageMarks = res.pages; job.keptPages = res.keptPages; job.verify = res.verify;
+    job.title = res.title; job.author = res.author; job.pageMarks = res.pages; job.keptPages = res.keptPages; job.verify = res.verify;
     for (const k of ["read", "pages", "epub", "check"]) if (!job.done.includes(k)) job.done.push(k);
-    job.epub = res.blob; job.stage = null; job.progress = ""; render(job);
+    job.epub = res.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
+    saveHistory(job);
   } catch (e) {
     console.error(e);
-    job.error = (e && e.message) || "Falha ao processar o EPUB.";
+    job.busy = false; job.error = (e && e.message) || "Falha ao processar o EPUB.";
     render(job);
   }
 }
 
 async function runPdf(job){
-  const author = $("#author").value.trim();
-  const lang = $("#lang").value;
-  const mode = $("#mode").value;
+  job.lang = $("#lang").value; job.mode = $("#mode").value; job.fixed = job.mode === "comic" || job.mode === "manga";
+  job.showNums = $("#shownums").checked; job.coverOn = $("#cover").checked; job.author = $("#author").value.trim();
+  job.busy = true;
   try {
     const buf = await job.file.arrayBuffer();
     let lastPaint = 0;
-    const { blocks, metaTitle, numPages, ref, approx, hiddenChars, ligatures } = await pdfToBlocks(buf, mode, (p, total) => {
+    const res = await pdfToBlocks(buf, job.fixed ? "pages" : job.mode, (p, total) => {
       job.progress = `lendo página ${p} de ${total}`;
       const now = Date.now(); if (now - lastPaint > 250 || p === total) { lastPaint = now; render(job); }
-    }, lang);
-    job.pages = numPages;
-    if (metaTitle && metaTitle.length > 2 && !/^(untitled|microsoft word|document)/i.test(metaTitle)) job.title = metaTitle;
-    job.done.push("pdf");
-
-    job.stage = "docx"; job.progress = "montando DOCX"; render(job);
-    job.docx = await blocksToDocx(blocks, job.title, author);
-    job.done.push("docx"); job.stage = "epub"; job.progress = "montando EPUB"; render(job);
-
-    const ep = await docxToEpub(job.docx, author, lang, $("#shownums").checked);
-    job.chapters = ep.chapters; job.images = ep.images; job.pageMarks = ep.pages;
-    job.done.push("epub"); job.ligatures = ligatures;
-    if (job.verifyOn) {
-      job.stage = "check"; job.progress = "conferindo palavra por palavra"; render(job);
-      // conferência: lê o EPUB pronto e compara cada palavra com o PDF
-      job.verify = await verifyPdfEpub(ep.blob, ref);
-      job.verify.approx = approx; job.verify.hidden = hiddenChars; job.verify.ligatures = ligatures;
-      job.done.push("check");
-    }
-    job.epub = ep.blob; job.stage = null; job.progress = ""; render(job);
+    }, job.lang, { headers: $("#headers").checked, notes: $("#notes").checked, cover: !job.fixed });
+    job.src = res; job.pages = res.numPages; job.ligatures = res.ligatures; job.headersRemoved = res.headersRemoved;
+    const meta = res.metaTitle;
+    if (meta && meta.length > 2 && !/^(untitled|microsoft word|document|\(anonymous\)|sem t[íi]tulo)/i.test(meta)) job.title = cleanTitle(meta);
+    job.coverBlob = res.cover ? res.cover.blob : null;
+    await buildPdf(job);
   } catch (e) {
     console.error(e);
+    job.busy = false;
     job.error = (e && e.name === "PasswordException") ? "PDF protegido por senha. Remova a senha e tente de novo."
       : "Falha na conversão: " + ((e && e.message) || "erro desconhecido") + ". Tente o modo “Página inteira como imagem”.";
+    render(job);
+  }
+}
+
+// monta DOCX + EPUB a partir do texto já lido (também usado depois de editar)
+async function buildPdf(job){
+  const src = job.src;
+  job.busy = true; job.epub = null; job.verify = null; job.error = null; job.done = ["pdf"];
+  try {
+    job.stage = "docx"; job.progress = "montando DOCX"; render(job);
+    job.docx = await blocksToDocx(src.blocks, job.title, job.author);
+    job.done.push("docx"); job.stage = "epub"; job.progress = "montando EPUB"; render(job);
+    const ep = job.fixed
+      ? await buildFixedEpub(src.blocks, { title: job.title, author: job.author, lang: job.lang, rtl: job.mode === "manga" })
+      : await docxToEpub(job.docx, job.author, job.lang, job.showNums, { cover: job.coverOn ? job.coverBlob : null });
+    job.chapters = ep.chapters; job.images = ep.images; job.pageMarks = ep.pages; job.notesN = ep.notes || 0;
+    job.done.push("epub");
+    if (job.verifyOn && !job.fixed) {
+      job.stage = "check"; job.progress = "conferindo palavra por palavra"; render(job);
+      job.verify = await verifyPdfEpub(ep.blob, src.ref);
+      job.verify.approx = src.approx; job.verify.hidden = src.hiddenChars; job.verify.ligatures = src.ligatures;
+      job.done.push("check");
+    }
+    job.epub = ep.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
+    saveHistory(job);
+  } catch (e) {
+    console.error(e);
+    job.busy = false; job.error = "Falha ao montar o EPUB: " + ((e && e.message) || "erro desconhecido") + ".";
     render(job);
   }
 }
@@ -1428,11 +1931,175 @@ async function runPdf(job){
 $("#allZip").onclick = async () => {
   const z = new JSZip(); const used = new Set();
   for (const j of jobs.filter(j => j.epub)) {
-    let n = safeFile(j.title), k = 2; while (used.has(n)) n = safeFile(j.title) + " (" + k++ + ")";
+    const base = fileNameOf(j).replace(/\.epub$/, "");
+    let n = base, k = 2; while (used.has(n)) n = base + " (" + k++ + ")";
     used.add(n); z.file(n + ".epub", j.epub);
   }
   offer("livros-epub.zip", await z.generateAsync({ type: "blob" }));
 };
+
+/* ---------- prévia do EPUB na tela ---------- */
+const pv = { z: null, docs: [], i: 0, urls: [] };
+function closePreview(){
+  $("#preview").hidden = true; document.body.classList.remove("noscroll");
+  for (const u of pv.urls) URL.revokeObjectURL(u); pv.urls = []; $("#pvBody").innerHTML = "";
+}
+async function openPreview(blob, title){
+  if (!blob) return;
+  try {
+    const z = await JSZip.loadAsync(blob);
+    const cont = parseXml(await z.file("META-INF/container.xml").async("string"));
+    const opfPath = cont.getElementsByTagNameNS("*", "rootfile")[0].getAttribute("full-path");
+    const opfDir = dirOf(opfPath), opf = parseXml(await z.file(opfPath).async("string"));
+    const man = new Map();
+    for (const it of opf.getElementsByTagNameNS("*", "item")) man.set(it.getAttribute("id"), { href: it.getAttribute("href"), type: it.getAttribute("media-type") || "" });
+    const docs = [];
+    for (const r of opf.getElementsByTagNameNS("*", "itemref")) {
+      const m = man.get(r.getAttribute("idref"));
+      if (!m || !/html/.test(m.type)) continue;
+      const path = resolvePath(opfDir, decodeURIComponent(m.href.split("#")[0]));
+      const f = z.file(path); if (!f) continue;
+      const s = await f.async("string");
+      let doc = new DOMParser().parseFromString(s, "application/xhtml+xml");
+      if (hasParseError(doc)) doc = new DOMParser().parseFromString(s, "text/html");
+      const h = doc.querySelector("h1, h2, h3"), t = doc.querySelector("title");
+      let name = ((h && h.textContent) || (t && t.textContent) || "").replace(/\[p\. [^\]]*\]/g, "").replace(/\s+/g, " ").trim();
+      if (doc.querySelector(".cover, [epub\\:type~='cover']") || /cover/i.test(path)) name = "Capa";
+      docs.push({ path, doc, name: name.slice(0, 70) || "Parte " + (docs.length + 1) });
+    }
+    if (!docs.length) throw new Error("vazio");
+    pv.z = z; pv.docs = docs;
+    $("#pvTitle").textContent = title || "Prévia";
+    $("#pvToc").innerHTML = docs.map((d, i) => `<option value="${i}">${i + 1}. ${esc(d.name)}</option>`).join("");
+    $("#preview").hidden = false; document.body.classList.add("noscroll");
+    await showPage(0);
+    $("#pvClose").focus();
+  } catch (e) { console.error(e); toast("Não consegui abrir a prévia deste EPUB."); }
+}
+async function showPage(i){
+  pv.i = Math.max(0, Math.min(pv.docs.length - 1, i));
+  const d = pv.docs[pv.i];
+  for (const u of pv.urls) URL.revokeObjectURL(u); pv.urls = [];
+  const body = d.doc.getElementsByTagNameNS("*", "body")[0] || d.doc.documentElement;
+  const page = document.createElement("div"); page.className = "pv-page";
+  for (const c of body.childNodes) page.appendChild(document.importNode(c, true));
+  // nada de scripts, estilos ou eventos vindos do livro; imagens viram endereços locais
+  for (const el of [...page.querySelectorAll("*")]) {
+    const name = el.localName;
+    if (/^(script|style|link|iframe|object|embed|form|input|button|meta|audio|video)$/i.test(name)) { el.remove(); continue; }
+    for (const a of [...el.attributes]) if (/^on/i.test(a.name) || a.name === "style") el.removeAttribute(a.name);
+    if (name === "img" || name === "image") {
+      const src = el.getAttribute("src") || el.getAttribute("href") || el.getAttribute("xlink:href") || "";
+      const path = src && !/^[a-z]+:/i.test(src) ? resolvePath(dirOf(d.path), decodeURIComponent(src.split("#")[0])) : null;
+      const f = path && pv.z.file(path);
+      if (f) {
+        const type = /\.png$/i.test(path) ? "image/png" : /\.svg$/i.test(path) ? "image/svg+xml" : /\.gif$/i.test(path) ? "image/gif" : "image/jpeg";
+        const url = URL.createObjectURL(new Blob([await f.async("uint8array")], { type })); pv.urls.push(url);
+        if (name === "img") el.setAttribute("src", url); else el.setAttribute("href", url);
+      } else if (name === "img") el.removeAttribute("src");
+    }
+    if (name === "a") {
+      const h = el.getAttribute("href") || "";
+      el.removeAttribute("href");
+      if (h.includes("#")) { el.dataset.anchor = h.split("#")[1]; el.setAttribute("role", "link"); el.tabIndex = 0; }
+    }
+  }
+  page.querySelectorAll("[data-anchor]").forEach(a => a.onclick = () => {
+    const t = page.querySelector(`[id="${CSS.escape(a.dataset.anchor)}"]`); if (t) t.scrollIntoView({ block: "center" });
+  });
+  const box = $("#pvBody"); box.innerHTML = ""; box.appendChild(page); box.scrollTop = 0;
+  $("#pvToc").value = String(pv.i);
+  $("#pvPrev").disabled = pv.i === 0; $("#pvNext").disabled = pv.i === pv.docs.length - 1;
+  $("#pvCount").textContent = `${pv.i + 1} de ${pv.docs.length}`;
+}
+$("#pvClose").onclick = closePreview;
+$("#pvPrev").onclick = () => showPage(pv.i - 1);
+$("#pvNext").onclick = () => showPage(pv.i + 1);
+$("#pvToc").onchange = e => showPage(+e.target.value);
+$("#preview").onclick = e => { if (e.target.id === "preview") closePreview(); };
+document.addEventListener("keydown", e => {
+  if ($("#preview").hidden) return;
+  if (e.key === "Escape") closePreview();
+  else if (e.key === "ArrowRight" && !/input|select|textarea/i.test(document.activeElement.tagName)) showPage(pv.i + 1);
+  else if (e.key === "ArrowLeft" && !/input|select|textarea/i.test(document.activeElement.tagName)) showPage(pv.i - 1);
+});
+
+/* ---------- histórico: últimos livros guardados neste navegador ---------- */
+const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12;
+let histDbP = null;
+function histDb(){
+  return histDbP ||= new Promise((res, rej) => {
+    try {
+      const r = indexedDB.open(HIST_DB, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore(HIST_STORE, { keyPath: "id" });
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    } catch (e) { rej(e); }
+  });
+}
+const idbReq = (mode, fn) => histDb().then(db => new Promise((res, rej) => {
+  const tx = db.transaction(HIST_STORE, mode), st = tx.objectStore(HIST_STORE), r = fn(st);
+  tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
+}));
+const histAll = () => idbReq("readonly", st => st.getAll()).then(a => (a || []).sort((x, y) => y.date - x.date));
+const histDel = id => idbReq("readwrite", st => st.delete(id));
+async function saveHistory(job){
+  if (!job.epub) return;
+  try {
+    await idbReq("readwrite", st => st.put({ id: job.histId, title: job.title, author: job.author || "", name: fileNameOf(job), date: Date.now(), size: job.epub.size, blob: job.epub }));
+    const all = await histAll();
+    for (const r of all.slice(HIST_MAX)) await histDel(r.id);
+    renderHistory();
+  } catch (e) { console.warn("histórico", e); }
+}
+async function renderHistory(){
+  const sec = $("#historySec"), box = $("#history");
+  let all;
+  try { all = await histAll(); } catch { sec.hidden = true; return; }
+  sec.hidden = false;
+  if (!all.length) { box.innerHTML = `<div class="empty">Os livros que você converter ficam guardados aqui, neste navegador, para baixar de novo sem refazer a conversão.</div>`; return; }
+  box.innerHTML = "";
+  for (const r of all) {
+    const el = document.createElement("div"); el.className = "hrow";
+    el.innerHTML = `<div style="min-width:0"><div class="name"></div><div class="meta">${esc(new Date(r.date).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))} · ${kb(r.size)}</div></div>
+      <div class="actions"><button class="btn sm" data-h="dl">Baixar</button><a class="btn ghost sm" data-h="kd" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Kindle</a>
+      <button class="btn ghost sm" data-h="pv">Prévia</button><button class="btn ghost sm" data-h="rm">Remover</button></div>`;
+    el.querySelector(".name").textContent = r.title + (r.author ? " — " + r.author : "");
+    el.querySelector('[data-h="dl"]').onclick = () => offer(r.name, r.blob);
+    el.querySelector('[data-h="kd"]').onclick = e => sendToKindle(e, { epub: r.blob, title: r.title }, r.name);
+    el.querySelector('[data-h="pv"]').onclick = () => openPreview(r.blob, r.title);
+    const rm = el.querySelector('[data-h="rm"]');
+    rm.onclick = async () => {
+      if (rm.dataset.confirm) { await histDel(r.id).catch(() => {}); renderHistory(); return; }
+      rm.dataset.confirm = "1"; rm.textContent = "Confirmar"; setTimeout(() => { if (rm.isConnected) { delete rm.dataset.confirm; rm.textContent = "Remover"; } }, 4000);
+    };
+    box.appendChild(el);
+  }
+}
+
+/* ---------- opções lembradas neste navegador ---------- */
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "lang", "mode", "keeppages", "totalpages", "cpp"];
+const OPT_KEY = "conversor-epub:opcoes";
+function loadOptions(){
+  try {
+    const o = JSON.parse(localStorage.getItem(OPT_KEY) || "{}");
+    for (const id of OPT_IDS) {
+      const el = document.getElementById(id);
+      if (!el || !(id in o)) continue;
+      if (el.type === "checkbox") el.checked = !!o[id]; else el.value = o[id];
+    }
+  } catch {}
+}
+function saveOptions(){
+  try {
+    const o = {};
+    for (const id of OPT_IDS) { const el = document.getElementById(id); if (el) o[id] = el.type === "checkbox" ? el.checked : el.value; }
+    localStorage.setItem(OPT_KEY, JSON.stringify(o));
+  } catch {}
+}
+loadOptions();
+OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });
+renderHistory();
+
 
 const drop = $("#drop"), input = $("#file");
 drop.onclick = () => input.click();
