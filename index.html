@@ -1,19 +1,9 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Converte PDF em EPUB com o texto igual ao PDF, conferido palavra por palavra, e coloca números de página em EPUBs. Roda no navegador.">
+<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Conversor PDF para EPUB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-*,*::before,*::after{box-sizing:border-box}
-body{margin:0}
-img{max-width:100%}
-[hidden]{display:none!important}
-
 /* Layout: coluna única de bancada — esteira de etapas no topo, área de soltar, fila de arquivos como linhas de produção */
 :root{
   --bg:#eef1f4; --surface:#ffffff; --ink:#18212c; --muted:#5b6876; --line:#d5dbe2;
@@ -52,6 +42,8 @@ h1{font:700 clamp(1.7rem,4.5vw,2.3rem)/1.15 var(--f-display);margin:0;text-wrap:
 .opts label.check input{width:18px;height:18px;padding:0;margin:0;accent-color:var(--accent)}
 fieldset.opts{border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px;margin:0;grid-template-columns:1fr 1fr}
 fieldset.opts legend{font:600 13px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 6px}
+.opts label.check.ask{font-weight:600}
+.hint-inline{color:var(--muted);font-weight:400}
 .hint{grid-column:1/-1;margin:0;font-size:13px;color:var(--muted);max-width:70ch}
 .opts input:focus-visible,.opts select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 
@@ -106,13 +98,11 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
   .actions{justify-content:flex-start}
 }
 </style>
-</head>
-<body>
 
 <div class="wrap">
   <header>
     <h1>Conversor PDF para EPUB</h1>
-    <p class="lede">Solte PDFs para converter em EPUB, ou EPUBs prontos para colocar números de página. O texto sai exatamente como está no arquivo original, e cada livro é conferido palavra por palavra antes do download. Tudo roda no seu navegador; nenhum arquivo sai da sua máquina.</p>
+    <p class="lede">Solte PDFs para converter em EPUB, ou EPUBs prontos para colocar números de página. O texto sai exatamente como está no arquivo original e, se você quiser, cada livro é conferido palavra por palavra antes do download. Tudo roda no seu navegador; nenhum arquivo sai da sua máquina.</p>
   </header>
 
   <div class="belts" aria-label="O que acontece com cada arquivo">
@@ -120,7 +110,7 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
       <span class="fmt pdf">PDF</span><span class="arrow">→</span>
       <span class="fmt docx">DOCX</span><span class="arrow">→</span>
       <span class="fmt epub">EPUB</span>
-      <small>converte com o texto igual ao PDF e confere palavra por palavra</small>
+      <small>converte com o texto igual ao PDF e, se quiser, confere palavra por palavra</small>
     </div>
     <div class="belt">
       <span class="fmt epub">EPUB</span><span class="arrow">→</span>
@@ -130,6 +120,7 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
   </div>
 
   <div class="opts">
+    <label class="check ask" for="verify"><input id="verify" type="checkbox"> <span>Conferir palavra por palavra antes de liberar o download? <span class="hint-inline">(mais lento: compara cada palavra do EPUB com o arquivo original)</span></span></label>
     <label for="author">Autor (opcional, só PDF)
       <input id="author" type="text" placeholder="Ex.: Machado de Assis" autocomplete="off">
     </label>
@@ -180,7 +171,7 @@ details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
   <div class="notes">
     <div><b>Texto igual ao PDF:</b> as palavras saem exatamente como estão no PDF. O espaço entre palavras só entra onde o PDF tem um espaço de verdade, então não aparecem mais quebras como “tam bem” ou “in teira”. Hifenização no fim da linha (“pala-” + “vra”) é juntada, como no livro impresso.</div>
     <div><b>Ligaduras (“fi”, “fl”):</b> alguns PDFs guardam essas letras unidas como um símbolo sem texto, e a conversão perdia o pedaço (“lmar” no lugar de “filmar”). Agora cada símbolo é identificado uma vez para o livro inteiro, pelas palavras em que aparece (com “fi”, “con?rmar” e “?lhos” viram “confirmar” e “filhos”), ou pelo desenho, no caso de sinais como as reticências. O que não der para identificar com segurança aparece na conferência.</div>
-    <div><b>Conferência:</b> antes de liberar o download, o EPUB pronto é aberto e cada palavra é comparada com o texto original. Se algo estiver diferente, a fila mostra a página e o trecho, para você decidir.</div>
+    <div><b>Conferência:</b> com a opção “Conferir palavra por palavra” marcada, antes de liberar o download o EPUB pronto é aberto e cada palavra é comparada com o texto original. Se algo estiver diferente, a fila mostra a página e o trecho, para você decidir.</div>
     <div><b>Números de página:</b> o EPUB ganha a lista de páginas do padrão EPUB 3. Leitores compatíveis, como Apple Books, Kobo e Thorium, mostram “página 12 de 300” e permitem ir direto a uma página. Em PDF, vale a numeração do próprio PDF. Em EPUB, as páginas são calculadas pelo tamanho do texto, a não ser que o arquivo já traga as suas.</div>
     <div><b>Títulos e capítulos (PDF):</b> linhas com fonte maior que o corpo do texto viram títulos, e cada título principal abre um capítulo.</div>
     <div><b>Modo página inteira (PDF):</b> use para quadrinhos, revistas ou apostilas muito diagramadas. O EPUB fica idêntico ao PDF, mas o texto não se ajusta à tela.</div>
@@ -1268,6 +1259,8 @@ async function fixEpub(file, opt, onProgress){
   }
   const blob = await zout.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
 
+  if (!opt.verify) return { blob, title, pages: pageCount, keptPages, verify: null };
+
   // conferência: abre o EPUB gerado e compara as palavras com as do original
   onProgress("conferindo o texto");
   const zchk = await JSZip.loadAsync(blob), after = [];
@@ -1304,7 +1297,8 @@ function render(job){
     job.images ? job.images + (job.images > 1 ? " imagens" : " imagem") : "",
     job.pageMarks ? job.pageMarks + (job.pageMarks > 1 ? " páginas numeradas" : " página numerada") + (job.keptPages ? " (originais)" : "") : "",
     job.progress && !job.error ? job.progress : ""].filter(Boolean).join(" · ");
-  const lig = v && v.ligatures ? Object.entries(v.ligatures).sort((a, b) => b[1] - a[1]) : [];
+  const ligSrc = job.ligatures || (v && v.ligatures);
+  const lig = ligSrc ? Object.entries(ligSrc).sort((a, b) => b[1] - a[1]) : [];
   const ligHtml = lig.length ? `<div class="verify neutral">Este PDF guarda as ligaduras (letras unidas, como “fi” e “fl”) com um código sem texto. Elas foram identificadas pelas palavras do próprio livro (e, nos sinais, pelo desenho da letra): ${lig.map(([k, n]) => `“${esc(k)}” ×${fmtN(n)}`).join(", ")}.</div>` : "";
   let verifyHtml = "";
   if (v) {
@@ -1318,7 +1312,7 @@ function render(job){
     <div style="min-width:0">
       <div class="name"></div>
       <div class="meta">${esc(info)}</div>
-      <div class="stages">${STAGES[job.kind].map(st).join("")}</div>
+      <div class="stages">${STAGES[job.kind].filter(s => s[0] !== "check" || job.verifyOn).map(st).join("")}</div>
     </div>
     <div class="actions">
       <button class="btn" data-a="epub" ${job.epub ? "" : "disabled"}>Baixar EPUB</button>
@@ -1362,7 +1356,7 @@ function addFiles(list){
     const kind = /\.epub$/i.test(file.name) || file.type === "application/epub+zip" ? "epub"
       : /\.pdf$/i.test(file.name) || file.type === "application/pdf" ? "pdf" : null;
     if (!kind) { toast(file.name + " não é PDF nem EPUB e foi ignorado."); continue; }
-    const job = { file, kind, title: baseName(file.name), done: [], stage: kind === "pdf" ? "pdf" : "read", progress: "na fila" };
+    const job = { file, kind, title: baseName(file.name), done: [], stage: kind === "pdf" ? "pdf" : "read", progress: "na fila", verifyOn: $("#verify").checked };
     jobs.push(job); render(job);
     chain = chain.then(() => kind === "pdf" ? runPdf(job) : runEpub(job));
   }
@@ -1375,7 +1369,8 @@ async function runEpub(job){
       showNums: $("#shownums").checked,
       keepPages: $("#keeppages").checked,
       totalPages: parseInt($("#totalpages").value, 10) || 0,
-      cpp: parseInt($("#cpp").value, 10) || 0
+      cpp: parseInt($("#cpp").value, 10) || 0,
+      verify: job.verifyOn
     }, msg => {
       const order = ["read", "pages", "epub", "check"];
       const stage = { "numerando páginas": "pages", "montando EPUB": "epub", "conferindo o texto": "check" }[msg];
@@ -1413,12 +1408,14 @@ async function runPdf(job){
 
     const ep = await docxToEpub(job.docx, author, lang, $("#shownums").checked);
     job.chapters = ep.chapters; job.images = ep.images; job.pageMarks = ep.pages;
-    job.done.push("epub"); job.stage = "check"; job.progress = "conferindo palavra por palavra"; render(job);
-
-    // conferência: lê o EPUB pronto e compara cada palavra com o PDF
-    job.verify = await verifyPdfEpub(ep.blob, ref);
-    job.verify.approx = approx; job.verify.hidden = hiddenChars; job.verify.ligatures = ligatures;
-    job.done.push("check");
+    job.done.push("epub"); job.ligatures = ligatures;
+    if (job.verifyOn) {
+      job.stage = "check"; job.progress = "conferindo palavra por palavra"; render(job);
+      // conferência: lê o EPUB pronto e compara cada palavra com o PDF
+      job.verify = await verifyPdfEpub(ep.blob, ref);
+      job.verify.approx = approx; job.verify.hidden = hiddenChars; job.verify.ligatures = ligatures;
+      job.done.push("check");
+    }
     job.epub = ep.blob; job.stage = null; job.progress = ""; render(job);
   } catch (e) {
     console.error(e);
@@ -1449,5 +1446,4 @@ document.addEventListener("drop", e => e.preventDefault());
 })();
 </script>
 
-</body>
-</html>
+</body></html>
