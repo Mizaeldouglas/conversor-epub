@@ -2,310 +2,442 @@
 <title>Conversor PDF para EPUB</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-/* Layout: coluna única de bancada — esteira de etapas no topo, área de soltar, fila de arquivos como linhas de produção */
+/* Conversor PDF para EPUB — tons de tela de papel eletrônico; os livros aparecem como capas numa estante */
 :root{
-  --bg:#eef1f4; --surface:#ffffff; --ink:#18212c; --muted:#5b6876; --line:#d5dbe2;
-  --accent:#28537f; --accent-ink:#ffffff; --accent-soft:#dfe8f2;
-  --pdf:#b4412f; --docx:#2b5fa8; --epub:#2f7a52; --ok-soft:#e2f1e7; --err:#b3261e; --err-soft:#fbe9e7;
-  --f-display:"Literata",Georgia,"Times New Roman",serif;
-  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --bg:#e9ecea; --paper:#f7f8f6; --surface:#ffffff; --ink:#1a1f22; --muted:#5b6469; --line:#d3d9d6; --line-soft:#e3e7e5;
+  --accent:#1d5c57; --accent-ink:#ffffff; --accent-soft:#d9ebe7; --accent-line:#9cc6be;
+  --ok:#24704a; --ok-soft:#e1f1e6; --warn:#9a4d12; --warn-soft:#fbeedd; --err:#b3261e; --err-soft:#fbe7e5;
+  --pdf:#a8432f; --epub:#24704a;
+  --shadow:0 1px 2px rgba(26,31,34,.06),0 4px 14px rgba(26,31,34,.06);
+  --f-book:"Literata",Georgia,"Times New Roman",serif;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;
+  color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#12171d; --surface:#1a2129; --ink:#e6ebf0; --muted:#97a3b0; --line:#2c3642;
-  --accent:#7fa9d6; --accent-ink:#0f1720; --accent-soft:#1f2c3a;
-  --pdf:#e3826f; --docx:#80a9e6; --epub:#76c296; --ok-soft:#1c3226; --err:#f2958c; --err-soft:#3a1f1d; color-scheme:dark}}
+  --bg:#141819; --paper:#1a1f21; --surface:#20272a; --ink:#e4eae8; --muted:#98a3a6; --line:#323c3f; --line-soft:#283033;
+  --accent:#73c2b6; --accent-ink:#0e1b1a; --accent-soft:#1f3532; --accent-line:#3d6b64;
+  --ok:#7fcf9c; --ok-soft:#1b3125; --warn:#f0b27a; --warn-soft:#3a2a1a; --err:#f2958c; --err-soft:#3b1f1d;
+  --pdf:#e89a86; --epub:#7fcf9c; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#12171d; --surface:#1a2129; --ink:#e6ebf0; --muted:#97a3b0; --line:#2c3642;
-  --accent:#7fa9d6; --accent-ink:#0f1720; --accent-soft:#1f2c3a;
-  --pdf:#e3826f; --docx:#80a9e6; --epub:#76c296; --ok-soft:#1c3226; --err:#f2958c; --err-soft:#3a1f1d; color-scheme:dark}
+  --bg:#141819; --paper:#1a1f21; --surface:#20272a; --ink:#e4eae8; --muted:#98a3a6; --line:#323c3f; --line-soft:#283033;
+  --accent:#73c2b6; --accent-ink:#0e1b1a; --accent-soft:#1f3532; --accent-line:#3d6b64;
+  --ok:#7fcf9c; --ok-soft:#1b3125; --warn:#f0b27a; --warn-soft:#3a2a1a; --err:#f2958c; --err-soft:#3b1f1d;
+  --pdf:#e89a86; --epub:#7fcf9c; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
 
-body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body)}
-.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:32px 56px;display:flex;flex-direction:column;gap:24px}
-h1{font:700 clamp(1.7rem,4.5vw,2.3rem)/1.15 var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
-.lede{margin:6px 0 0;color:var(--muted);max-width:60ch}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent)}
 
-.belts{display:flex;flex-direction:column;gap:8px}
-.belt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font:500 13px var(--f-mono)}
-.fmt{padding:4px 10px;border:1.5px solid currentColor;border-radius:4px;letter-spacing:.04em}
-.fmt.pdf{color:var(--pdf)} .fmt.docx{color:var(--docx)} .fmt.epub{color:var(--epub)}
-.fmt.solid{background:var(--epub);color:var(--surface);border-color:var(--epub)}
-.belt .arrow{color:var(--muted)}
-.belt small{font:400 12px var(--f-body);color:var(--muted)}
+/* topo */
+.top{max-width:1240px;margin:0 auto;padding:22px 16px 6px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;flex:1;min-width:240px}
+.brand svg{flex:none}
+.brand h1{font:600 clamp(1.35rem,3vw,1.7rem)/1.15 var(--f-book);margin:0;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.top-actions{display:flex;gap:8px;align-items:center}
 
-.opts{display:grid;grid-template-columns:1fr 170px 200px;gap:12px}
-.opts label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.opts input,.opts select{font:15px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:9px 10px;text-transform:none;letter-spacing:0}
-.opts label.check{grid-column:1/-1;flex-direction:row;align-items:center;gap:8px;font-size:14px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink);cursor:pointer}
-.opts label.check input{width:18px;height:18px;padding:0;margin:0;accent-color:var(--accent)}
-fieldset.opts{border:1px solid var(--line);border-radius:10px;padding:14px 16px 16px;margin:0;grid-template-columns:1fr 1fr}
-fieldset.opts legend{font:600 13px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 6px}
-.opts label.check.ask{font-weight:600}
-.hint-inline{color:var(--muted);font-weight:400}
-.hint{grid-column:1/-1;margin:0;font-size:13px;color:var(--muted);max-width:70ch}
-.opts input:focus-visible,.opts select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+/* grade */
+.layout{max-width:1240px;margin:0 auto;padding:14px 16px 64px;display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.main-col{display:flex;flex-direction:column;gap:28px;min-width:0}
+.side{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;border-radius:var(--r);scrollbar-width:thin}
 
-.drop{border:2px dashed var(--line);border-radius:10px;background:var(--surface);padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;display:flex;flex-direction:column;align-items:center;gap:8px}
-.drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
-.drop:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.drop strong{font:600 1.15rem var(--f-display)}
-.drop span{color:var(--muted);font-size:14px}
-.btn{font:600 14px var(--f-body);border-radius:6px;padding:8px 14px;border:1px solid transparent;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
-.btn:hover{filter:brightness(1.08)}
-.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn.ghost:hover{border-color:var(--accent)}
-.btn:disabled,.btn[aria-disabled="true"]{opacity:.45;cursor:default;filter:none;pointer-events:none}
-a.btn{display:inline-flex;align-items:center;text-decoration:none}
-
-.queue-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.queue-head h2{margin:0;font:600 13px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.list{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
-.empty{padding:22px;color:var(--muted);text-align:center;font-size:14px}
-.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;padding:14px 16px;border-top:1px solid var(--line);align-items:center}
-.row:first-child{border-top:0}
-.name{font-weight:600;overflow-wrap:anywhere}
-.meta{font:12px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
-.stages{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.st{font:500 11px var(--f-mono);padding:2px 7px;border-radius:3px;border:1px solid var(--line);color:var(--muted)}
-.st.done.pdf{border-color:var(--pdf);color:var(--pdf)}
-.st.done.docx{border-color:var(--docx);color:var(--docx)}
-.st.done.epub{border-color:var(--epub);color:var(--epub)}
-.st.work{border-color:var(--accent);color:var(--accent);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.45}}
-@media (prefers-reduced-motion:reduce){.st.work{animation:none}}
-.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
-.verify{grid-column:1/-1;font-size:13px;border-radius:6px;padding:8px 10px}
-.verify.ok{background:var(--ok-soft);color:var(--epub)}
-.verify.warn{background:var(--err-soft);color:var(--err)}
-.verify.neutral{background:var(--accent-soft);color:var(--muted)}
-details.diffs{grid-column:1/-1;font-size:13px}
-details.diffs summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.diffs summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-details.diffs ul{margin:8px 0 0;padding-left:18px;max-height:260px;overflow:auto;display:grid;gap:4px}
-details.diffs .where{font:12px var(--f-mono);color:var(--muted)}
-.errmsg{grid-column:1/-1;background:var(--err-soft);color:var(--err);border-radius:6px;padding:8px 10px;font-size:13px}
-
-.notes{font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;display:grid;gap:6px}
-.notes b{color:var(--ink);font-weight:600}
-.notes a{color:var(--accent)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:6px;font-size:14px;max-width:calc(100% - 32px)}
-@media (max-width:560px){
-  .opts,fieldset.opts{grid-template-columns:1fr}
-  .row{grid-template-columns:1fr}
-  .actions{justify-content:flex-start}
-}
-.btn.sm{padding:5px 10px;font-size:13px}
-.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
-.linkbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* botões */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:600;font-size:14px;line-height:1.2;border-radius:8px;padding:8px 14px;border:1px solid transparent;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--accent-line);filter:none}
+.btn.quiet{background:transparent;color:var(--ink);border-color:transparent}
+.btn.quiet:hover{background:var(--accent-soft);filter:none}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:7px}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.4;cursor:default;filter:none;pointer-events:none}
+.icon-btn{width:36px;height:36px;padding:0}
+.linkbtn{background:none;border:0;padding:0;font-size:13px;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 .muted{color:var(--muted)}
-details.diffs li.user{opacity:.7}
-.fixbox{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 4px}
-.fixbox input,.edit input[type=text]{font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
-.fixbox input{flex:1 1 220px}
-.fixbox input:focus-visible,.edit input[type=text]:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-details.edit{grid-column:1/-1;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 12px}
-details.edit summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:13px}
-details.edit summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.edit-body{display:grid;gap:14px;margin-top:12px}
-.edit-top{display:grid;grid-template-columns:130px 1fr;gap:16px;align-items:start}
+
+/* área de soltar: a "tela" onde os livros entram */
+.drop{position:relative;background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:30px 28px;display:grid;grid-template-columns:auto 1fr;gap:6px 24px;align-items:center;cursor:pointer;transition:border-color .15s,background-color .15s;box-shadow:var(--shadow)}
+.drop::after{content:"";position:absolute;inset:8px;border:1.5px dashed var(--line);border-radius:9px;pointer-events:none;transition:border-color .15s}
+.drop:hover::after,.drop.over::after{border-color:var(--accent)}
+.drop.over{background:var(--accent-soft)}
+.drop:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.drop-art{grid-row:1/4;width:92px;height:112px;display:block}
+.drop h2{font:600 clamp(1.25rem,2.6vw,1.6rem)/1.2 var(--f-book);margin:0;letter-spacing:-.01em}
+.drop .what{margin:0;color:var(--muted);font-size:14px;max-width:58ch}
+.drop .what b{color:var(--ink);font-weight:600}
+.drop-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+.privacy{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+
+/* seções */
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.sec-head h2{font:600 1.15rem/1.2 var(--f-book);margin:0;display:flex;align-items:baseline;gap:8px}
+.count{font:500 13px var(--f-ui);color:var(--muted)}
+.sec-head .actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* fila */
+.list{display:flex;flex-direction:column;gap:12px}
+.empty{padding:20px;color:var(--muted);text-align:center;font-size:14px;border:1px dashed var(--line);border-radius:var(--r)}
+.row{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 16px}
+.row > .row-extra{grid-column:1/-1}
+.thumb{grid-row:1/3;width:64px;height:90px;border-radius:3px 6px 6px 3px;overflow:hidden;background:var(--accent-soft);box-shadow:inset 3px 0 0 rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.15);display:flex;align-items:flex-end;justify-content:flex-start}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .spine{font:600 11px/1.15 var(--f-book);color:var(--accent);padding:8px 6px 8px 9px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.thumb.epub{background:var(--ok-soft)} .thumb.epub .spine{color:var(--ok)}
+.row-top{display:flex;gap:12px 16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;min-width:0}
+.row-title{min-width:0;flex:1 1 260px}
+.name{font:600 1.05rem/1.3 var(--f-book);overflow-wrap:anywhere;margin:0}
+.byline{color:var(--muted);font-size:14px;margin-top:1px}
+.facts{display:flex;flex-wrap:wrap;gap:2px 14px;margin:6px 0 0;padding:0;list-style:none;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row-status{min-width:0}
+.steps{display:flex;align-items:center;flex-wrap:wrap;gap:4px 0;margin:10px 0 0;padding:0;list-style:none;font-size:12.5px;color:var(--muted)}
+.steps li{display:flex;align-items:center;gap:6px}
+.steps li + li::before{content:"";width:18px;height:1px;background:var(--line);margin:0 8px 0 6px}
+.steps .dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line);flex:none}
+.steps .done{color:var(--ink)} .steps .done .dot{background:var(--ok);border-color:var(--ok)}
+.steps .work{color:var(--accent);font-weight:500} .steps .work .dot{border-color:var(--accent);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+.bar{height:4px;background:var(--line-soft);border-radius:2px;overflow:hidden;margin-top:10px}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.bar.indet span{width:35%;animation:slide 1.2s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(300%)}}
+.progress-txt{font-size:13px;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.steps .work .dot,.bar.indet span{animation:none}}
+
+.note{font-size:13.5px;border-radius:8px;padding:9px 12px;margin-top:10px;line-height:1.5}
+.verify{font-size:13.5px;border-radius:8px;padding:9px 12px;margin-top:10px;line-height:1.5}
+.verify.ok{background:var(--ok-soft);color:var(--ok)}
+.verify.warn{background:var(--warn-soft);color:var(--warn)}
+.verify.neutral{background:var(--paper);color:var(--muted);border:1px solid var(--line-soft)}
+.errmsg{background:var(--err-soft);color:var(--err);border-radius:8px;padding:9px 12px;font-size:13.5px;margin-top:10px}
+details.diffs{font-size:13.5px;margin-top:8px}
+details.diffs summary,details.edit > summary{cursor:pointer;color:var(--accent);font-weight:500;font-size:14px;width:max-content;max-width:100%}
+details.diffs ul{margin:8px 0 0;padding:0;list-style:none;max-height:300px;overflow:auto;display:grid;gap:2px;border:1px solid var(--line-soft);border-radius:8px}
+details.diffs li{padding:7px 10px;border-top:1px solid var(--line-soft)}
+details.diffs li:first-child{border-top:0}
+details.diffs li.user{opacity:.65}
+details.diffs .where{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-right:4px}
+.fixbox{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 2px}
+.fixbox input[type=text]{flex:1 1 220px}
+
+/* campos */
+.field input[type=text],.field input[type=number],.field select,.field textarea,
+.edit input[type=text],.edit textarea,.fixbox input[type=text],.findrep input[type=text]{width:100%;font-size:14px;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:7px 9px;min-width:0}
+.field textarea,.edit textarea{resize:vertical;min-height:64px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;color:var(--muted)}
+.field > span{color:var(--ink)}
+
+/* painel de edição */
+details.edit{margin-top:12px;border-top:1px solid var(--line-soft);padding-top:12px}
+.edit-body{display:grid;gap:16px;margin-top:14px}
+.edit-top{display:grid;grid-template-columns:120px minmax(0,1fr);gap:18px;align-items:start}
 .edit-top.nocov{grid-template-columns:1fr}
 .coverbox{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
-.cv{width:130px;aspect-ratio:2/3;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.cv{width:120px;aspect-ratio:2/3;border-radius:3px 6px 6px 3px;overflow:hidden;background:var(--paper);border:1px solid var(--line-soft);display:flex;align-items:center;justify-content:center;box-shadow:inset 3px 0 0 rgba(0,0,0,.1)}
 .cv img{width:100%;height:100%;object-fit:cover;display:block}
 .nocover{font-size:12px;color:var(--muted)}
 .filebtn{cursor:pointer}
 .edit-fields{display:grid;gap:10px}
-.edit-fields label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.chap-head{font-size:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
-.chap-list{margin:8px 0 0;padding-left:28px;display:grid;gap:6px;max-height:340px;overflow:auto}
+.edit-fields label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 84px;gap:10px}
+.chap-head{font-size:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:baseline}
+.chap-head b{font-weight:600}
+.chap-list{margin:8px 0 0;padding-left:26px;display:grid;gap:6px;max-height:340px;overflow:auto;font-variant-numeric:tabular-nums;color:var(--muted)}
 .chap-list li{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.chap-list li input[type=text]{flex:1 1 220px}
+.chap-list li input[type=text]{flex:1 1 220px;width:auto}
 .chap-list li.removed input[type=text]{text-decoration:line-through;opacity:.5}
-label.mini{display:flex;gap:4px;align-items:center;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+label.mini{display:inline-flex;gap:5px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.findrep{display:grid;gap:8px;font-size:14px;border-top:1px solid var(--line-soft);padding-top:14px}
+.findrep b{font-weight:600}
+.fr-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fr-row input[type=text]{flex:1 1 180px;width:auto}
+.fr-count{flex:1;text-align:right;font-size:13px}
 .edit-actions{display:flex;justify-content:flex-end}
-.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;padding:10px 16px;border-top:1px solid var(--line);align-items:center}
-.hrow:first-child{border-top:0}
+
+/* estante (histórico) */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:22px 18px;padding:18px 16px 14px;background:var(--paper);border:1px solid var(--line-soft);border-radius:var(--r);background-image:linear-gradient(to bottom,transparent calc(100% - 1px),var(--line-soft) 0)}
+.book{display:flex;flex-direction:column;gap:6px;min-width:0;position:relative}
+.book .cover{aspect-ratio:2/3;border-radius:3px 7px 7px 3px;overflow:hidden;background:var(--accent-soft);box-shadow:inset 4px 0 0 rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.18);border:0;padding:0;cursor:pointer;display:flex;align-items:flex-end;text-align:left;transition:transform .15s}
+.book .cover:hover{transform:translateY(-2px)}
+@media (prefers-reduced-motion:reduce){.book .cover:hover{transform:none}}
+.book .cover img{width:100%;height:100%;object-fit:cover;display:block}
+.book .cover .spine{font:600 13px/1.2 var(--f-book);color:var(--accent);padding:12px 10px 12px 14px;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.book .t{font:600 13.5px/1.3 var(--f-book);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.book .d{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.book .acts{display:flex;gap:6px;flex-wrap:wrap}
+.book .rm{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(20,24,25,.62);color:#fff;font-size:15px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s}
+.book:hover .rm,.book .rm:focus-visible,.book .rm[data-confirm]{opacity:1}
+.book .rm[data-confirm]{width:auto;border-radius:13px;padding:0 9px;font-size:12px;background:var(--err)}
+@media (hover:none){.book .rm{opacity:1}}
+
+/* ajuda */
+.help h2{font:600 1.15rem/1.2 var(--f-book);margin:0 0 10px}
+.faq{border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{cursor:pointer;padding:12px 2px;font-weight:500;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--muted);font-size:18px;line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq .ans{padding:0 2px 14px;color:var(--muted);font-size:14.5px;max-width:72ch}
+.faq .ans p{margin:0 0 8px}
+
+/* painel de opções */
+.panel{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r);box-shadow:var(--shadow)}
+.panel > summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.panel > summary::-webkit-details-marker{display:none}
+.panel > summary h2{font:600 1.05rem/1.2 var(--f-book);margin:0}
+.opt-sum{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;font-size:12px}
+.chip{background:var(--accent-soft);color:var(--accent);padding:2px 8px;border-radius:999px;white-space:nowrap}
+.grp{border-top:1px solid var(--line-soft);padding:14px 16px}
+.grp > h3,.grp > summary{font:600 14px var(--f-ui);margin:0 0 10px;color:var(--ink)}
+details.grp > summary{cursor:pointer;margin:0;list-style:none;display:flex;justify-content:space-between}
+details.grp > summary::-webkit-details-marker{display:none}
+details.grp > summary::after{content:"+";color:var(--muted)}
+details.grp[open] > summary{margin-bottom:10px}
+details.grp[open] > summary::after{content:"–"}
+.grp-body{display:grid;gap:12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sw-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 12px;align-items:start;cursor:pointer}
+.sw-row .lbl{font-size:14px;font-weight:500;color:var(--ink)}
+.sw-row .desc{grid-column:1;font-size:12.5px;color:var(--muted);line-height:1.4}
+.sw-row input{grid-column:2;grid-row:1/3}
+input.sw{appearance:none;-webkit-appearance:none;width:38px;height:22px;border-radius:11px;background:var(--line);position:relative;cursor:pointer;margin:1px 0 0;transition:background-color .15s;flex:none}
+input.sw::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+input.sw:checked{background:var(--accent)}
+input.sw:checked::after{transform:translateX(16px)}
+@media (prefers-reduced-motion:reduce){input.sw,input.sw::after{transition:none}}
+.hint{margin:0;font-size:12.5px;color:var(--muted);line-height:1.45}
+details.fixmem{font-size:13.5px}
+details.fixmem summary{cursor:pointer;font-weight:600;font-size:14px}
+details.fixmem ul{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:4px;max-height:220px;overflow:auto}
+details.fixmem li{display:flex;justify-content:space-between;gap:8px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25);z-index:20}
+
+/* prévia */
 body.noscroll{overflow:hidden}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
-.modal-box{background:var(--surface);color:var(--ink);border-radius:10px;width:min(760px,100%);height:min(88vh,100%);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line)}
-.pv-head,.pv-nav{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line)}
-.pv-head b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pv-nav select{flex:1;min-width:0;font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
-.pv-body{flex:1;overflow:auto;padding:20px clamp(16px,5vw,48px);background:var(--bg)}
-.pv-page{font:17px/1.6 Georgia,"Times New Roman",serif;max-width:62ch;margin:0 auto}
+.modal{position:fixed;inset:0;background:rgba(10,14,15,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal-box{background:var(--surface);color:var(--ink);border-radius:12px;width:min(780px,100%);height:min(90vh,100%);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal.pv-side .modal-box{width:min(1300px,100%)}
+.pv-head,.pv-nav{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line-soft)}
+.pv-head b{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:600 1.02rem var(--f-book)}
+.pv-nav select{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:14px}
+.pv-nav .meta,.pv-pdfnav .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pv-main{flex:1;display:flex;min-height:0}
+.pv-body{flex:1;min-width:0;overflow:auto;padding:28px clamp(16px,5vw,56px);background:var(--paper)}
+.pv-pdf{flex:1;min-width:0;display:flex;flex-direction:column;border-left:1px solid var(--line-soft);background:var(--bg)}
+.pv-pdfnav{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line-soft);background:var(--surface)}
+.pv-canvas{flex:1;overflow:auto;padding:12px;display:flex;justify-content:center;align-items:flex-start}
+.pv-canvas canvas{box-shadow:0 2px 10px rgba(0,0,0,.2);background:#fff}
+.pv-page{font:17px/1.65 var(--f-book);max-width:36em;margin:0 auto}
+.modal.pv-side .pv-page{cursor:pointer}
 .pv-page img{max-width:100%;height:auto;display:block;margin:0 auto}
-.pv-page h1,.pv-page h2,.pv-page h3{font-family:var(--f-display);line-height:1.25}
+.pv-page h1,.pv-page h2,.pv-page h3{font-family:var(--f-book);line-height:1.25}
 .pv-page p{margin:0 0 .2em;text-indent:1.4em}
+.pv-page h1+p,.pv-page h2+p{text-indent:0}
 .pv-page sup a,.pv-page [data-anchor]{color:var(--accent);cursor:pointer}
 .pv-page aside{font-size:14px;border-top:1px solid var(--line);margin-top:1.5em;padding-top:.5em}
 .pv-page aside p{text-indent:0}
-.pv-page .pagebreak,.pv-page [epub\:type~="pagebreak"]{font:11px var(--f-mono);color:var(--muted)}
-@media (max-width:560px){.edit-top{grid-template-columns:1fr}.hrow{grid-template-columns:1fr}.modal{padding:0}.modal-box{height:100%;border-radius:0}}
-.two{display:grid;grid-template-columns:1fr 90px;gap:10px}
-.edit textarea{font:14px var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;resize:vertical;min-height:60px}
-.edit textarea:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.findrep{display:grid;gap:8px;font-size:13px;border-top:1px solid var(--line);padding-top:12px}
-.fr-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.fr-row input[type=text]{flex:1 1 180px}
-.fr-count{flex:1;text-align:right}
-details.fixmem{border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:14px;background:var(--surface)}
-details.fixmem summary{cursor:pointer;color:var(--accent);font-weight:500}
-details.fixmem ul{margin:10px 0 0;padding-left:18px;display:grid;gap:4px;max-height:220px;overflow:auto}
-.queue-head .actions{gap:8px}
-.pv-main{flex:1;display:flex;min-height:0}
-.pv-main .pv-body{flex:1;min-width:0}
-.pv-pdf{flex:1;min-width:0;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--surface)}
-.pv-pdfnav{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid var(--line)}
-.pv-canvas{flex:1;overflow:auto;padding:8px;display:flex;justify-content:center;align-items:flex-start}
-.pv-canvas canvas{box-shadow:0 1px 4px rgba(0,0,0,.25);background:#fff}
-.modal.side .modal-box{width:min(1280px,100%)}
-.pv-page .pv-hit{outline:2px solid var(--accent);outline-offset:2px}
-.pv-page{cursor:default}
-.modal.side .pv-page{cursor:pointer}
-.pv-page p.cena{text-align:center;text-indent:0}
+.pv-page p.cena{text-align:center;text-indent:0;margin:1em 0}
 .pv-page hr.cena{border:0;height:1.2em;margin:0}
-@media (max-width:760px){.pv-main{flex-direction:column}.pv-pdf{border-left:0;border-bottom:1px solid var(--line);order:-1;max-height:48%}}
+.pv-page .pv-hit{outline:2px solid var(--accent);outline-offset:2px}
+
+/* telas menores */
+@media (max-width:1040px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .side{position:static;max-height:none;overflow:visible;order:-1}
+  .main-col{display:contents}
+  .drop{order:-2}
+}
+@media (max-width:640px){
+  .top{flex-wrap:nowrap;align-items:flex-start;padding-top:18px}
+  .brand{min-width:0;align-items:flex-start}
+  .brand svg{width:34px;height:34px}
+  .top-actions .quiet{display:none}
+  .steps{gap:6px 14px}
+  .steps li + li::before{display:none}
+  .drop{grid-template-columns:1fr;padding:24px 20px;text-align:left}
+  .drop-art{grid-row:auto;width:64px;height:78px}
+  .row{grid-template-columns:52px minmax(0,1fr);padding:14px}
+  .thumb{width:52px;height:74px}
+  .row-top .actions{width:100%}
+  .edit-top{grid-template-columns:1fr}
+  .cols{grid-template-columns:1fr}
+  .shelf{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:18px 12px}
+  .modal{padding:0}.modal-box{height:100%;border-radius:0}
+  .pv-main{flex-direction:column}.pv-pdf{border-left:0;border-bottom:1px solid var(--line-soft);order:-1;max-height:48%}
+}
 </style>
 
-<div class="wrap">
-  <header>
-    <h1>Conversor PDF para EPUB</h1>
-    <p class="lede">Solte PDFs para converter em EPUB, ou EPUBs prontos para colocar números de página. O texto sai exatamente como está no arquivo original e, se você quiser, cada livro é conferido palavra por palavra antes do download. Tudo roda no seu navegador; nenhum arquivo sai da sua máquina.</p>
-  </header>
-
-  <div class="belts" aria-label="O que acontece com cada arquivo">
-    <div class="belt">
-      <span class="fmt pdf">PDF</span><span class="arrow">→</span>
-      <span class="fmt docx">DOCX</span><span class="arrow">→</span>
-      <span class="fmt epub">EPUB</span>
-      <small>converte com o texto igual ao PDF e, se quiser, confere palavra por palavra</small>
-    </div>
-    <div class="belt">
-      <span class="fmt epub">EPUB</span><span class="arrow">→</span>
-      <span class="fmt epub solid">EPUB</span>
-      <small>coloca números de página sem mexer no texto</small>
+<header class="top">
+  <div class="brand">
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="4" width="26" height="32" rx="3" fill="var(--accent)"/><rect x="11" y="8" width="18" height="21" rx="1.5" fill="var(--paper)"/><path d="M14 13h12M14 17h12M14 21h8" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/><circle cx="20" cy="32.3" r="1.4" fill="var(--paper)"/></svg>
+    <div>
+      <h1>Conversor PDF para EPUB</h1>
+      <p>Livros para o Kindle, com capítulos, páginas e o texto igual ao original.</p>
     </div>
   </div>
-
-  <div class="opts">
-    <label class="check ask" for="verify"><input id="verify" type="checkbox"> <span>Conferir palavra por palavra antes de liberar o download? <span class="hint-inline">(mais lento: compara cada palavra do EPUB com o arquivo original)</span></span></label>
-    <label for="author">Autor (opcional, só PDF)
-      <input id="author" type="text" placeholder="Ex.: Machado de Assis" autocomplete="off">
-    </label>
-    <label for="lang">Idioma
-      <select id="lang">
-        <option value="pt-BR" selected>Português (BR)</option>
-        <option value="en">Inglês</option>
-        <option value="es">Espanhol</option>
-      </select>
-    </label>
-    <label for="mode">Modo do PDF
-      <select id="mode">
-        <option value="auto" selected>Texto + imagens</option>
-        <option value="pages">Página inteira como imagem</option>
-        <option value="comic">Quadrinhos (leitura da esquerda para a direita)</option>
-        <option value="manga">Mangá (leitura da direita para a esquerda)</option>
-      </select>
-    </label>
-    <label class="check" for="shownums"><input id="shownums" type="checkbox"> Mostrar o número da página no texto, como [p. 12]</label>
-    <label class="check" for="headers"><input id="headers" type="checkbox" checked> Tirar cabeçalhos e rodapés que se repetem em todas as páginas (nome do livro, do capítulo, número da página)</label>
-    <label class="check" for="notes"><input id="notes" type="checkbox" checked> Transformar notas de rodapé em notas clicáveis (abrem em janelinha no Kindle)</label>
-    <label class="check" for="cover"><input id="cover" type="checkbox" checked> Usar a 1ª página do PDF como capa</label>
-    <label class="check" for="ocr"><input id="ocr" type="checkbox"> <span>Ler páginas escaneadas com OCR (reconhecimento de texto) <span class="hint-inline">(mais lento; na primeira vez baixa o leitor de OCR)</span></span></label>
+  <div class="top-actions">
+    <button class="btn ghost sm" id="installBtn" hidden>Instalar app</button>
+    <a class="btn quiet sm" href="#ajuda">Como funciona</a>
+    <button class="btn ghost icon-btn" id="themeBtn" aria-label="Tema: automático" title="Tema: automático">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
+    </button>
   </div>
+</header>
 
-  <fieldset class="opts epubopts">
-    <legend>Páginas para EPUB que você enviar</legend>
-    <label for="totalpages">Páginas do livro impresso (opcional)
-      <input id="totalpages" type="number" min="1" max="20000" step="1" placeholder="Ex.: 320" inputmode="numeric">
-    </label>
-    <label for="cpp">Caracteres por página
-      <input id="cpp" type="number" min="300" max="10000" step="50" placeholder="Ex.: 1800" inputmode="numeric">
-    </label>
-    <label class="check" for="keeppages"><input id="keeppages" type="checkbox" checked> Manter a paginação original se o EPUB já tiver uma</label>
-    <p class="hint">Preencha um dos dois para numerar as páginas. Com as páginas do livro impresso, o texto é dividido nesse total e a numeração fica próxima à do livro físico. Com caracteres por página, cada página tem esse tamanho (1.800 é próximo de um livro de bolso). Com os dois em branco, o EPUB não ganha numeração nova.</p>
-  </fieldset>
-
-  <fieldset class="opts look">
-    <legend>Aparência do EPUB (PDF)</legend>
-    <label for="lookFont">Fonte
-      <select id="lookFont">
-        <option value="serif" selected>Serifada (padrão)</option>
-        <option value="sans">Sem serifa</option>
-        <option value="reader">A que o leitor escolher</option>
-      </select>
-    </label>
-    <label for="lookLh">Espaço entre linhas
-      <select id="lookLh">
-        <option value="1.3">Compacto</option>
-        <option value="1.5" selected>Normal</option>
-        <option value="1.7">Amplo</option>
-        <option value="2">Bem amplo</option>
-      </select>
-    </label>
-    <label for="lookIndent">Parágrafos
-      <select id="lookIndent">
-        <option value="indent" selected>Recuo na primeira linha</option>
-        <option value="space">Sem recuo, com espaço entre eles</option>
-      </select>
-    </label>
-    <label class="check" for="lookJustify"><input id="lookJustify" type="checkbox" checked> Texto justificado</label>
-    <p class="hint">O Kindle às vezes troca a fonte e o espaçamento pelas configurações dele; o que você escolher aqui vale como padrão do livro.</p>
-  </fieldset>
-
-  <details class="fixmem" id="fixMemBox" hidden>
-    <summary>Correções lembradas (<span id="fixMemN">0</span>): aplicadas sozinhas nos próximos PDFs</summary>
-    <ul id="fixMem"></ul>
-  </details>
-
-  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
-    <strong>Arraste PDFs ou EPUBs aqui</strong>
-    <span>ou clique para escolher. Pode mandar vários, misturando os dois tipos.</span>
-    <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple hidden>
-  </div>
-
-  <section>
-    <div class="queue-head">
-      <h2>Fila</h2>
-      <div class="actions">
-        <button class="btn ghost" id="mergeBtn" hidden>Juntar os PDFs num EPUB só</button>
-        <button class="btn ghost" id="allZip" hidden>Baixar todos os EPUB (.zip)</button>
+<main class="layout">
+  <div class="main-col">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
+      <svg class="drop-art" viewBox="0 0 92 112" aria-hidden="true">
+        <rect x="18" y="6" width="62" height="84" rx="4" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="10" y="16" width="62" height="84" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/>
+        <path d="M20 30h30M20 38h42M20 46h42M20 54h36M20 62h42M20 70h28" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
+        <circle cx="66" cy="90" r="16" fill="var(--accent)"/>
+        <path d="M66 82v14M59.5 89.5 66 96l6.5-6.5" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h2>Solte aqui seus PDFs ou EPUBs</h2>
+      <p class="what"><b>PDF</b> vira EPUB com capítulos, notas e números de página. <b>EPUB</b> pronto ganha números de página sem mexer no texto. Pode mandar vários de uma vez.</p>
+      <div class="drop-row">
+        <span class="btn">Escolher arquivos</span>
+        <span class="privacy"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Os arquivos não saem do seu aparelho</span>
       </div>
+      <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple hidden>
     </div>
-    <div class="list" id="list" style="margin-top:10px">
-      <div class="empty" id="empty">Nenhum arquivo ainda. Cada arquivo adicionado aparece aqui com o andamento de cada etapa.</div>
-    </div>
-  </section>
 
-  <section id="historySec" hidden>
-    <div class="queue-head"><h2>Convertidos neste navegador</h2></div>
-    <div class="list" id="history" style="margin-top:10px"></div>
-  </section>
+    <section aria-labelledby="filaT">
+      <div class="sec-head">
+        <h2 id="filaT">Fila <span class="count" id="queueCount"></span></h2>
+        <div class="actions">
+          <button class="btn ghost sm" id="mergeBtn" hidden>Juntar os PDFs num EPUB só</button>
+          <button class="btn ghost sm" id="allZip" hidden>Baixar todos (.zip)</button>
+          <button class="btn quiet sm" id="clearDone" hidden>Limpar concluídos</button>
+        </div>
+      </div>
+      <div class="list" id="list">
+        <div class="empty" id="empty">Os arquivos que você soltar aparecem aqui, com o andamento de cada etapa.</div>
+      </div>
+    </section>
 
-  <div class="notes">
-    <div><b>Texto igual ao PDF:</b> as palavras saem exatamente como estão no PDF. O espaço entre palavras só entra onde o PDF tem um espaço de verdade, então não aparecem mais quebras como “tam bem” ou “in teira”. Hifenização no fim da linha (“pala-” + “vra”) é juntada, como no livro impresso.</div>
-    <div><b>Ligaduras (“fi”, “fl”):</b> alguns PDFs guardam essas letras unidas como um símbolo sem texto, e a conversão perdia o pedaço (“lmar” no lugar de “filmar”). Agora cada símbolo é identificado uma vez para o livro inteiro, pelas palavras em que aparece (com “fi”, “con?rmar” e “?lhos” viram “confirmar” e “filhos”), ou pelo desenho, no caso de sinais como as reticências. O que não der para identificar com segurança aparece na conferência.</div>
-    <div><b>Conferência:</b> com a opção “Conferir palavra por palavra” marcada, antes de liberar o download o EPUB pronto é aberto e cada palavra é comparada com o texto original. Se algo estiver diferente, a fila mostra a página e o trecho, para você decidir.</div>
-    <div><b>Números de página:</b> o EPUB ganha a lista de páginas do padrão EPUB 3. Leitores compatíveis, como Apple Books, Kobo e Thorium, mostram “página 12 de 300” e permitem ir direto a uma página. Em PDF, vale a numeração do próprio PDF. Em EPUB, as páginas são calculadas pelo tamanho do texto, a não ser que o arquivo já traga as suas.</div>
-    <div><b>Títulos e capítulos (PDF):</b> linhas com fonte maior que o corpo do texto viram títulos, e cada título principal abre um capítulo.</div>
-    <div><b>Modo página inteira (PDF):</b> use para revistas ou apostilas muito diagramadas. O EPUB fica idêntico ao PDF, mas o texto não se ajusta à tela.</div>
-    <div><b>Quadrinhos e mangá:</b> cada página vira uma tela inteira (layout fixo), como no PDF. No modo mangá, o livro abre e vira as páginas da direita para a esquerda.</div>
-    <div><b>Editar livro:</b> depois de converter, abra “Editar livro” para trocar a capa, acertar título e autor (o nome do arquivo já é limpo, “693_A_SAGA_DE_ZEPHYRUS_EBOOK” vira “A Saga de Zephyrus”) e revisar os capítulos: renomear, juntar com o anterior ou remover um título. Na conferência, “Corrigir” deixa você acertar um trecho e gerar o EPUB de novo.</div>
-    <div><b>Notas de rodapé:</b> números elevados no texto com a nota correspondente no pé da página viram links. No Kindle, tocar no número abre a nota numa janelinha.</div>
-    <div><b>Itálico, negrito e cenas:</b> o itálico e o negrito do PDF vão para o EPUB. Linhas como “* * *” e linhas em branco entre parágrafos viram quebra de cena. A letra capitular (a letra grande no começo do capítulo) volta para a palavra, e linhas como “Capítulo 12” ou “PARTE II” abrem capítulo mesmo sem fonte maior.</div>
-    <div><b>OCR:</b> com a opção marcada, páginas escaneadas (só imagem) viram texto que se ajusta à tela. O reconhecimento roda no seu navegador e pode trocar letras; use a prévia com o PDF ao lado para conferir.</div>
-    <div><b>Correções lembradas e localizar/substituir:</b> o que você acerta em “Corrigir” fica guardado e é aplicado sozinho nos próximos PDFs. Em “Editar livro” dá para localizar e substituir no livro todo.</div>
-    <div><b>Juntar volumes:</b> com dois ou mais PDFs convertidos na fila, “Juntar os PDFs num EPUB só” cria um livro com todos, na ordem do nome do arquivo. As páginas ficam como “1.12”, “2.12”…</div>
-    <div><b>Série e sinopse:</b> em “Editar livro” você coloca série, número do volume, gênero e sinopse. Apple Books e Kobo agrupam os livros da mesma série.</div>
-    <div><b>Instalar no celular:</b> no site, use “Adicionar à tela inicial” (ou “Instalar app”). Depois de instalado, funciona sem internet e aparece no “Compartilhar” do Android para receber PDFs direto.</div>
-    <div><b>Histórico e opções:</b> os últimos 12 livros convertidos e as opções escolhidas ficam guardados só neste navegador.</div>
-    <div><b>Enviar ao Kindle:</b> no celular, o botão abre o compartilhamento do sistema; escolha o app Kindle e o livro vai para a sua biblioteca. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não permite que outros sites enviem o arquivo sozinhos, porque o envio exige o seu login.</div>
-    <div><b>EPUB com DRM</b> (comprado em loja com proteção) não pode ser aberto. Funciona com EPUB sem proteção.</div>
+    <section id="historySec" aria-labelledby="estanteT" hidden>
+      <div class="sec-head">
+        <h2 id="estanteT">Sua estante <span class="count" id="shelfCount"></span></h2>
+        <span class="muted" style="font-size:13px">Os últimos 12 livros ficam guardados neste navegador.</span>
+      </div>
+      <div class="shelf" id="history"></div>
+    </section>
+
+    <section class="help" id="ajuda" aria-labelledby="ajudaT">
+      <h2 id="ajudaT">Como funciona</h2>
+      <div class="faq">
+        <details><summary>O texto sai igual ao PDF?</summary><div class="ans">
+          <p>Sim. As palavras saem exatamente como estão no PDF, e o espaço só entra onde o PDF tem um espaço de verdade, então não aparecem quebras como “tam bem”. Palavras separadas só pela posição na página são juntadas de novo quando os pedaços formam palavras conhecidas.</p>
+          <p>Itálico e negrito são mantidos. A letra capitular volta para a palavra (“M” + “ira” = “Mira”), e letras unidas como “fi” e “fl” são reconhecidas pelas palavras do próprio livro.</p></div></details>
+        <details><summary>Como mando para o Kindle?</summary><div class="ans">
+          <p>No celular, “Enviar ao Kindle” abre o compartilhamento do sistema: escolha o app Kindle. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não deixa outros sites enviarem sozinhos, porque o envio exige o seu login.</p></div></details>
+        <details><summary>Para que serve a conferência palavra por palavra?</summary><div class="ans">
+          <p>Antes de liberar o download, o EPUB pronto é aberto e cada palavra é comparada com o original. Se algo estiver diferente, a fila mostra a página e o trecho. “Ver no PDF” abre a página original ao lado, e “Corrigir” acerta o texto e gera o EPUB de novo.</p>
+          <p>O que você corrige pode ficar lembrado e ser aplicado sozinho nos próximos livros.</p></div></details>
+        <details><summary>Capítulos, notas, cenas e números de página</summary><div class="ans">
+          <p>Linhas em fonte maior, ou como “Capítulo 12”, “PARTE II” e “Prólogo”, abrem capítulo. Notas de rodapé viram links que abrem numa janelinha no Kindle. “* * *” e linhas em branco entre parágrafos viram quebra de cena.</p>
+          <p>Os números de página seguem o padrão EPUB 3: Apple Books, Kobo e Thorium mostram “página 12 de 300”. O Kindle mostra posições, então use a opção de mostrar o número no texto se quiser vê-lo lá.</p></div></details>
+        <details><summary>Editar o livro depois de converter</summary><div class="ans">
+          <p>Em “Editar livro” você troca a capa, acerta título e autor, coloca série, volume, gênero e sinopse, renomeia ou junta capítulos e localiza e substitui no livro todo. O nome do arquivo já vem limpo: “693_A_SAGA_DE_ZEPHYRUS_EBOOK” vira “A Saga de Zephyrus”.</p></div></details>
+        <details><summary>PDF escaneado, quadrinhos e mangá</summary><div class="ans">
+          <p>Com o OCR ligado, páginas que são só imagem viram texto. O reconhecimento roda no navegador e pode trocar letras: confira na prévia com o PDF ao lado. O OCR funciona no site e no app instalado.</p>
+          <p>Nos modos quadrinhos e mangá, cada página vira uma tela inteira, como no PDF; no mangá, as páginas viram da direita para a esquerda.</p></div></details>
+        <details><summary>Juntar volumes num livro só</summary><div class="ans">
+          <p>Com dois ou mais PDFs convertidos na fila, “Juntar os PDFs num EPUB só” cria um livro com todos, na ordem do nome do arquivo. As páginas ficam como “1.12”, “2.12”…</p></div></details>
+        <details><summary>Instalar no celular</summary><div class="ans">
+          <p>No site, use “Instalar app” ou “Adicionar à tela inicial”. Instalado, funciona sem internet e, no Android, aparece no “Compartilhar” para receber PDFs direto de outros apps.</p></div></details>
+        <details><summary>Um EPUB não abre</summary><div class="ans">
+          <p>EPUB com DRM (comprado em loja com proteção) não pode ser aberto. Funciona com EPUB sem proteção.</p></div></details>
+      </div>
+    </section>
   </div>
-</div>
+
+  <aside class="side" aria-label="Opções de conversão">
+    <details class="panel" id="optPanel" open>
+      <summary><h2>Opções</h2><span class="opt-sum" id="optSum"></span></summary>
+
+      <div class="grp">
+        <div class="grp-body">
+          <label class="sw-row" for="verify"><span class="lbl">Conferir palavra por palavra</span><input class="sw" id="verify" type="checkbox"><span class="desc">Compara cada palavra do EPUB com o original antes do download. Mais lento.</span></label>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h3>Livro (PDF)</h3>
+        <div class="grp-body">
+          <label class="field" for="author"><span>Autor</span><input id="author" type="text" placeholder="Opcional, ex.: Machado de Assis" autocomplete="off"></label>
+          <div class="cols">
+            <label class="field" for="lang"><span>Idioma</span>
+              <select id="lang"><option value="pt-BR" selected>Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
+            <label class="field" for="mode"><span>Tipo de PDF</span>
+              <select id="mode">
+                <option value="auto" selected>Livro de texto</option>
+                <option value="pages">Página como imagem</option>
+                <option value="comic">Quadrinhos</option>
+                <option value="manga">Mangá</option>
+              </select></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="grp">
+        <h3>Texto (PDF)</h3>
+        <div class="grp-body">
+          <label class="sw-row" for="headers"><span class="lbl">Tirar cabeçalhos e rodapés</span><input class="sw" id="headers" type="checkbox" checked><span class="desc">Nome do livro, do capítulo e número da página repetidos em toda página.</span></label>
+          <label class="sw-row" for="notes"><span class="lbl">Notas de rodapé clicáveis</span><input class="sw" id="notes" type="checkbox" checked><span class="desc">Abrem numa janelinha no Kindle.</span></label>
+          <label class="sw-row" for="cover"><span class="lbl">1ª página como capa</span><input class="sw" id="cover" type="checkbox" checked><span class="desc">Dá para trocar depois em “Editar livro”.</span></label>
+          <label class="sw-row" for="ocr"><span class="lbl">OCR em páginas escaneadas</span><input class="sw" id="ocr" type="checkbox"><span class="desc">Transforma página que é só imagem em texto. Mais lento.</span></label>
+          <label class="sw-row" for="shownums"><span class="lbl">Número da página no texto</span><input class="sw" id="shownums" type="checkbox"><span class="desc">Mostra “[p. 12]” no meio do texto, útil no Kindle.</span></label>
+        </div>
+      </div>
+
+      <details class="grp">
+        <summary>Aparência do EPUB</summary>
+        <div class="grp-body">
+          <div class="cols">
+            <label class="field" for="lookFont"><span>Fonte</span>
+              <select id="lookFont"><option value="serif" selected>Serifada</option><option value="sans">Sem serifa</option><option value="reader">A do leitor</option></select></label>
+            <label class="field" for="lookLh"><span>Entrelinhas</span>
+              <select id="lookLh"><option value="1.3">Compacta</option><option value="1.5" selected>Normal</option><option value="1.7">Ampla</option><option value="2">Bem ampla</option></select></label>
+          </div>
+          <label class="field" for="lookIndent"><span>Parágrafos</span>
+            <select id="lookIndent"><option value="indent" selected>Recuo na primeira linha</option><option value="space">Sem recuo, com espaço entre eles</option></select></label>
+          <label class="sw-row" for="lookJustify"><span class="lbl">Texto justificado</span><input class="sw" id="lookJustify" type="checkbox" checked></label>
+          <p class="hint">O Kindle pode trocar fonte e espaçamento pelas configurações dele; isto vale como padrão do livro.</p>
+        </div>
+      </details>
+
+      <details class="grp">
+        <summary>Páginas do EPUB que você enviar</summary>
+        <div class="grp-body">
+          <div class="cols">
+            <label class="field" for="totalpages"><span>Páginas do impresso</span><input id="totalpages" type="number" min="1" max="20000" step="1" placeholder="Ex.: 320" inputmode="numeric"></label>
+            <label class="field" for="cpp"><span>Letras por página</span><input id="cpp" type="number" min="300" max="10000" step="50" placeholder="Ex.: 1800" inputmode="numeric"></label>
+          </div>
+          <label class="sw-row" for="keeppages"><span class="lbl">Manter a paginação original</span><input class="sw" id="keeppages" type="checkbox" checked><span class="desc">Se o EPUB já tiver números de página.</span></label>
+          <p class="hint">Preencha um dos dois para numerar. Com as páginas do impresso, o texto é dividido nesse total; com letras por página, cada página tem esse tamanho (1.800 é perto de um livro de bolso). Em branco, o EPUB não ganha numeração nova.</p>
+        </div>
+      </details>
+
+      <div class="grp" id="fixMemBox" hidden>
+        <details class="fixmem">
+          <summary>Correções lembradas (<span id="fixMemN">0</span>)</summary>
+          <p class="hint" style="margin-top:6px">Aplicadas sozinhas nos próximos PDFs.</p>
+          <ul id="fixMem"></ul>
+        </details>
+      </div>
+    </details>
+  </aside>
+</main>
+
 <div class="modal" id="preview" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
   <div class="modal-box">
     <div class="pv-head">
@@ -2120,30 +2252,46 @@ function editPanelHtml(job){
     </div></details>`;
 }
 
+// capa pequena para a fila e a estante
+function coverOf(job){
+  if (job.kind !== "pdf" || !job.src) return null;
+  if (job.fixed) { const b = job.src.blocks.find(b => b.type === "img"); return b ? b.blob : null; }
+  return job.coverOn ? job.coverBlob : null;
+}
+async function thumbBlob(blob){
+  if (!blob) return null;
+  try {
+    const bmp = await createImageBitmap(blob);
+    const s = Math.min(1, 360 / bmp.height);
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return await toJpeg(c, 0.8);
+  } catch { return null; }
+}
+
 function render(job){
   let row = job.el;
   if (!row) {
     row = document.createElement("div"); row.className = "row"; job.el = row;
     $("#list").appendChild(row); $("#empty").hidden = true;
   }
-  const st = ([k, label, color]) => {
-    const done = job.done.includes(k), work = job.stage === k && !job.error && !job.cancelled;
-    return `<span class="st ${color} ${done ? "done" : work ? "work" : ""}">${done ? "✓ " : ""}${label}</span>`;
-  };
+  const steps = STAGES[job.kind].filter(s => s[0] !== "check" || job.verifyOn).map(([k, label]) => {
+    const done = job.done.includes(k), work = job.stage === k && !job.error && !job.cancelled && job.busy;
+    return `<li class="${done ? "done" : work ? "work" : ""}"><span class="dot"></span>${label}</li>`;
+  }).join("");
   const v = job.verify;
   const src = job.kind === "pdf" ? "PDF" : "EPUB original";
-  const info = [job.kind === "epub" ? "EPUB " + kb(job.file.size) : (job.merged ? job.merged + " PDFs juntos · " : "PDF ") + kb(job.file.size),
-    job.pages ? job.pages + " pág. no PDF" : "",
+  const facts = [job.kind === "epub" ? "EPUB de " + kb(job.file.size) : job.merged ? job.merged + " PDFs juntos, " + kb(job.file.size) : "PDF de " + kb(job.file.size),
+    job.pages ? job.pages + (job.pages > 1 ? " páginas no PDF" : " página no PDF") : "",
     job.chapters ? job.chapters + " capítulo" + (job.chapters > 1 ? "s" : "") : "",
     job.images ? job.images + (job.images > 1 ? " imagens" : " imagem") : "",
     job.pageMarks ? job.pageMarks + (job.pageMarks > 1 ? " páginas numeradas" : " página numerada") + (job.keptPages ? " (originais)" : "") : "",
     job.notesN ? job.notesN + (job.notesN > 1 ? " notas clicáveis" : " nota clicável") : "",
-    job.headersRemoved ? job.headersRemoved + " linhas de cabeçalho/rodapé tiradas" : "",
-    job.autoFixed ? job.autoFixed + (job.autoFixed > 1 ? " correções suas aplicadas" : " correção sua aplicada") : "",
-    job.progress && !job.error && !job.cancelled ? job.progress : ""].filter(Boolean).join(" · ");
+    job.headersRemoved ? job.headersRemoved + " linhas de cabeçalho e rodapé tiradas" : "",
+    job.autoFixed ? job.autoFixed + (job.autoFixed > 1 ? " correções suas aplicadas" : " correção sua aplicada") : ""].filter(Boolean);
   const ligSrc = job.ligatures || (v && v.ligatures);
   const lig = ligSrc ? Object.entries(ligSrc).sort((a, b) => b[1] - a[1]) : [];
-  const ligHtml = lig.length ? `<div class="verify neutral">Este PDF guarda as ligaduras (letras unidas, como “fi” e “fl”) com um código sem texto. Elas foram identificadas pelas palavras do próprio livro (e, nos sinais, pelo desenho da letra): ${lig.map(([k, n]) => `“${esc(k)}” ×${fmtN(n)}`).join(", ")}.</div>` : "";
+  const ligHtml = lig.length ? `<div class="verify neutral">Este PDF guarda as letras unidas (como “fi” e “fl”) com um código sem texto. Elas foram reconhecidas pelas palavras do próprio livro: ${lig.map(([k, n]) => `“${esc(k)}” ×${fmtN(n)}`).join(", ")}.</div>` : "";
   const ocrHtml = job.ocrPages ? `<div class="verify neutral">${job.ocrPages} página${job.ocrPages > 1 ? "s" : ""} escaneada${job.ocrPages > 1 ? "s" : ""} lida${job.ocrPages > 1 ? "s" : ""} por OCR. O reconhecimento pode trocar letras: confira na prévia, com o PDF ao lado.</div>`
     : job.ocrError ? `<div class="verify warn">O OCR não funcionou (${esc(job.ocrError)}). As páginas escaneadas entraram como imagem.${/\.github\.io$/i.test(location.hostname) ? "" : ` Aqui o navegador bloqueia o download do leitor de OCR; use o site <a href="https://mizaeldouglas.github.io/conversor-epub/" target="_blank" rel="noopener">mizaeldouglas.github.io/conversor-epub</a>.`}</div>` : "";
   let verifyHtml = "";
@@ -2155,43 +2303,58 @@ function render(job){
     const canPdf = job.kind === "pdf" && !job.merged;
     if (!v.total) verifyHtml = `<div class="verify neutral">Sem texto para conferir: as páginas entraram como imagem.</div>`;
     else if (!real) verifyHtml = `<div class="verify ok">✓ Conferido: as ${fmtN(v.total)} palavras do EPUB são iguais às do ${src}.${mineTxt}${v.ignored ? ` Ficaram de fora ${v.ignored} números de página soltos.` : ""}${v.approx ? " Este PDF não guarda os espaços como caracteres, então os espaços foram calculados pela posição das letras." : ""}${v.hidden ? ` O PDF tem ${fmtN(v.hidden)} letras escondidas fora da área visível da página, que não aparecem na leitura e não foram incluídas.` : ""}</div>`;
-    else verifyHtml = `<div class="verify warn">⚠ ${real} trecho${real > 1 ? "s" : ""} diferente${real > 1 ? "s" : ""} do ${src}, em ${fmtN(v.total)} palavras conferidas.${mineTxt} ${job.kind === "pdf" ? "Use “Corrigir” para acertar o texto e gerar de novo." : "Veja abaixo antes de baixar."}</div>`;
-    if (v.diffs.length) verifyHtml += `<details class="diffs"${job.detailsOpen ? " open" : ""}><summary>Ver diferenças</summary><ul>${v.diffs.slice(0, 300).map((d, i) =>
-      `<li class="${d.user ? "user" : ""}"><span class="where">${job.kind === "pdf" ? "p. " + (d.p || "?") : "arquivo " + (d.p || "?")}</span> ${src}: <b>${esc(d.pdf || "—")}</b> · EPUB: <b>${esc(d.epub || "—")}</b>${d.user ? ` <span class="muted">(corrigido por você)</span>` : ""}
+    else verifyHtml = `<div class="verify warn">${real} trecho${real > 1 ? "s" : ""} diferente${real > 1 ? "s" : ""} do ${src}, em ${fmtN(v.total)} palavras conferidas.${mineTxt} ${job.kind === "pdf" ? "Use “Corrigir” para acertar o texto e gerar de novo." : "Veja abaixo antes de baixar."}</div>`;
+    if (v.diffs.length) verifyHtml += `<details class="diffs"${job.detailsOpen ? " open" : ""}><summary>Ver as diferenças (${v.diffs.length})</summary><ul>${v.diffs.slice(0, 300).map((d, i) =>
+      `<li class="${d.user ? "user" : ""}"><span class="where">${job.kind === "pdf" ? "p. " + (d.p || "?") : "arquivo " + (d.p || "?")}</span> ${src}: <b>${esc(d.pdf || "—")}</b>, EPUB: <b>${esc(d.epub || "—")}</b>${d.user ? ` <span class="muted">(corrigido por você)</span>` : ""}
         ${canPdf && d.p && !job.busy ? ` <button class="linkbtn" data-see="${i}">Ver no PDF</button>` : ""}
         ${job.kind === "pdf" && !job.busy && !job.fixed ? ` <button class="linkbtn" data-fix="${i}">Corrigir</button>` : ""}
         ${job.fixing === i ? `<div class="fixbox"><input type="text" data-fx="input" aria-label="Texto correto"><button class="btn sm" data-fx="ok">Aplicar e gerar de novo</button><button class="btn ghost sm" data-fx="cancel">Cancelar</button>
           <label class="mini"><input type="checkbox" data-fx="mem" checked> lembrar nos próximos livros</label></div>` : ""}</li>`).join("")}</ul></details>`;
   }
-  const busy = job.busy && !job.epub;
+  const busy = job.busy && !job.epub && !job.cancelled;
+  const pct = busy && job.pct != null ? Math.max(3, Math.round(job.pct * 100)) : null;
+  const cov = coverOf(job);
   row.innerHTML = `
-    <div style="min-width:0">
-      <div class="name"></div>
-      <div class="meta">${esc(info)}</div>
-      <div class="stages">${STAGES[job.kind].filter(s => s[0] !== "check" || job.verifyOn).map(st).join("")}</div>
+    <div class="thumb ${job.kind}">${cov ? `<img alt="">` : `<span class="spine"></span>`}</div>
+    <div class="row-top">
+      <div class="row-title">
+        <h3 class="name"></h3>
+        ${job.author ? `<div class="byline"></div>` : ""}
+        <ul class="facts">${facts.map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+      </div>
+      <div class="actions">
+        ${busy ? `<button class="btn ghost sm" data-a="cancel">Cancelar</button>` : ""}
+        ${job.cancelled || job.error ? `<button class="btn ghost sm" data-a="remove">Tirar da fila</button>` : ""}
+        ${job.epub ? `<button class="btn" data-a="epub">Baixar EPUB</button>
+        <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>
+        <button class="btn ghost" data-a="pv">Prévia</button>
+        ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}` : ""}
+      </div>
     </div>
-    <div class="actions">
-      ${busy ? `<button class="btn ghost" data-a="cancel">Cancelar</button>` : ""}
-      ${job.cancelled || job.error ? `<button class="btn ghost" data-a="remove">Tirar da fila</button>` : ""}
-      <button class="btn" data-a="epub" ${job.epub ? "" : "disabled"}>Baixar EPUB</button>
-      <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener" ${job.epub ? "" : 'aria-disabled="true" tabindex="-1"'}>Enviar ao Kindle</a>
-      <button class="btn ghost" data-a="pv" ${job.epub ? "" : "disabled"}>Prévia</button>
-      ${job.kind === "pdf" ? `<button class="btn ghost" data-a="docx" ${job.docx && job.epub ? "" : "disabled"}>DOCX</button>` : ""}
+    <div class="row-status">
+      ${busy ? `<div class="bar${pct == null ? " indet" : ""}" role="progressbar" aria-label="Andamento"${pct != null ? ` aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"` : ""}><span${pct != null ? ` style="width:${pct}%"` : ""}></span></div>
+        <div class="progress-txt">${esc(job.progress || "")}</div>` : ""}
+      <ol class="steps" aria-label="Etapas">${steps}</ol>
     </div>
-    ${job.cancelled ? `<div class="verify neutral">Conversão cancelada.</div>` : ""}
-    ${verifyHtml}
-    ${ocrHtml}
-    ${ligHtml}
-    ${editPanelHtml(job)}
-    ${job.error ? `<div class="errmsg"></div>` : ""}`;
-  row.querySelector(".name").textContent = (job.title || job.file.name) + (job.author ? " — " + job.author : "");
+    <div class="row-extra">
+      ${job.cancelled ? `<div class="verify neutral">Conversão cancelada.</div>` : ""}
+      ${verifyHtml}
+      ${ocrHtml}
+      ${ligHtml}
+      ${editPanelHtml(job)}
+      ${job.error ? `<div class="errmsg"></div>` : ""}
+    </div>`;
+  row.querySelector(".name").textContent = job.title || job.file.name;
+  const by = row.querySelector(".byline"); if (by) by.textContent = job.author;
+  if (cov) row.querySelector(".thumb img").src = urlOf(cov); else row.querySelector(".thumb .spine").textContent = job.title || job.file.name;
   if (job.error) row.querySelector(".errmsg").textContent = job.error;
-  row.querySelector('[data-a="epub"]').onclick = () => offer(fileNameOf(job), job.epub);
-  row.querySelector('[data-a="kindle"]').onclick = e => sendToKindle(e, job, fileNameOf(job));
-  row.querySelector('[data-a="pv"]').onclick = () => openPreview(job.epub, job.title, job);
-  const d = row.querySelector('[data-a="docx"]'); if (d) d.onclick = () => offer(safeFile(job.title) + ".docx", job.docx);
-  const cb = row.querySelector('[data-a="cancel"]'); if (cb) cb.onclick = () => cancelJob(job);
-  const rb = row.querySelector('[data-a="remove"]'); if (rb) rb.onclick = () => removeJob(job);
+  const on = (sel, fn) => { const el = row.querySelector(sel); if (el) el.onclick = fn; };
+  on('[data-a="epub"]', () => offer(fileNameOf(job), job.epub));
+  on('[data-a="kindle"]', e => sendToKindle(e, job, fileNameOf(job)));
+  on('[data-a="pv"]', () => openPreview(job.epub, job.title, job));
+  on('[data-a="docx"]', () => offer(safeFile(job.title) + ".docx", job.docx));
+  on('[data-a="cancel"]', () => cancelJob(job));
+  on('[data-a="remove"]', () => removeJob(job));
   const det = row.querySelector("details.diffs");
   if (det) det.ontoggle = () => { job.detailsOpen = det.open; };
   row.querySelectorAll("[data-see]").forEach(btn => btn.onclick = () => openPreview(job.epub, job.title, job, { pdfPage: job.verify.diffs[+btn.dataset.see].p }));
@@ -2199,10 +2362,21 @@ function render(job){
   bindEditPanel(job, row);
   updateQueueButtons();
 }
+// durante a leitura só a barra e o texto mudam: não redesenha a linha (os botões não "pulam")
+function paintProgress(job){
+  const row = job.el, bar = row && row.querySelector(".bar");
+  if (!bar || bar.classList.contains("indet") || job.pct == null) return render(job);
+  const pct = Math.max(3, Math.round(job.pct * 100));
+  bar.firstElementChild.style.width = pct + "%"; bar.setAttribute("aria-valuenow", pct);
+  row.querySelector(".progress-txt").textContent = job.progress || "";
+}
 function updateQueueButtons(){
   $("#allZip").hidden = jobs.filter(j => j.epub).length < 2;
   $("#mergeBtn").hidden = mergeable().length < 2;
+  $("#clearDone").hidden = !jobs.some(j => !j.busy && (j.epub || j.cancelled || j.error));
+  $("#queueCount").textContent = jobs.length ? String(jobs.length) : "";
 }
+$("#clearDone").onclick = () => { for (const j of jobs.filter(j => !j.busy && (j.epub || j.cancelled || j.error))) removeJob(j); };
 
 function cancelJob(job){
   if (!job.ctrl) return;
@@ -2410,8 +2584,8 @@ async function runPdf(job){
     const buf = await job.file.arrayBuffer();
     let lastPaint = 0;
     const res = await pdfToBlocks(buf, job.fixed ? "pages" : job.mode, (p, total, what) => {
-      job.progress = what ? `${what}: página ${p} de ${total}` : `lendo página ${p} de ${total}`;
-      const now = Date.now(); if (now - lastPaint > 250 || p === total || what) { lastPaint = now; render(job); }
+      job.progress = what ? `${what}: página ${p} de ${total}` : `lendo página ${p} de ${total}`; job.pct = p / total;
+      const now = Date.now(); if (now - lastPaint > 250 || p === total || what) { lastPaint = now; paintProgress(job); }
     }, job.lang, { headers: $("#headers").checked, notes: $("#notes").checked, cover: !job.fixed, ocr: $("#ocr").checked && !job.fixed, signal: job.ctrl.signal });
     job.src = res; job.pages = res.numPages; job.ligatures = res.ligatures; job.headersRemoved = res.headersRemoved;
     job.ocrPages = res.ocrPages; job.ocrError = res.ocrError;
@@ -2433,7 +2607,7 @@ async function runPdf(job){
 // monta DOCX + EPUB a partir do texto já lido (também usado depois de editar)
 async function buildPdf(job){
   const src = job.src;
-  job.busy = true; job.epub = null; job.verify = null; job.error = null; job.done = ["pdf"];
+  job.busy = true; job.epub = null; job.verify = null; job.error = null; job.done = ["pdf"]; job.pct = null;
   try {
     stopIfCancelled(job);
     job.stage = "docx"; job.progress = "montando DOCX"; render(job);
@@ -2633,7 +2807,7 @@ function pdfPageOfLabel(label){
 }
 function setSide(on){
   pv.side = !!on;
-  $("#preview").classList.toggle("side", pv.side);
+  $("#preview").classList.toggle("pv-side", pv.side);
   $("#pvSideBtn").textContent = pv.side ? "Esconder o PDF" : "PDF ao lado";
   $("#pvSideBtn").setAttribute("aria-pressed", String(pv.side));
   $("#pvPdf").hidden = !pv.side;
@@ -2700,7 +2874,8 @@ const histDel = id => idbReq("readwrite", st => st.delete(id));
 async function saveHistory(job){
   if (!job.epub) return;
   try {
-    await idbReq("readwrite", st => st.put({ id: job.histId, title: job.title, author: job.author || "", name: fileNameOf(job), date: Date.now(), size: job.epub.size, blob: job.epub }));
+    const cover = await thumbBlob(coverOf(job));
+    await idbReq("readwrite", st => st.put({ id: job.histId, title: job.title, author: job.author || "", name: fileNameOf(job), date: Date.now(), size: job.epub.size, blob: job.epub, cover }));
     const all = await histAll();
     for (const r of all.slice(HIST_MAX)) await histDel(r.id);
     renderHistory();
@@ -2710,26 +2885,64 @@ async function renderHistory(){
   const sec = $("#historySec"), box = $("#history");
   let all;
   try { all = await histAll(); } catch { sec.hidden = true; return; }
-  sec.hidden = false;
-  if (!all.length) { box.innerHTML = `<div class="empty">Os livros que você converter ficam guardados aqui, neste navegador, para baixar de novo sem refazer a conversão.</div>`; return; }
+  sec.hidden = !all.length;
+  $("#shelfCount").textContent = all.length ? String(all.length) : "";
   box.innerHTML = "";
   for (const r of all) {
-    const el = document.createElement("div"); el.className = "hrow";
-    el.innerHTML = `<div style="min-width:0"><div class="name"></div><div class="meta">${esc(new Date(r.date).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }))} · ${kb(r.size)}</div></div>
-      <div class="actions"><button class="btn sm" data-h="dl">Baixar</button><a class="btn ghost sm" data-h="kd" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Kindle</a>
-      <button class="btn ghost sm" data-h="pv">Prévia</button><button class="btn ghost sm" data-h="rm">Remover</button></div>`;
-    el.querySelector(".name").textContent = r.title + (r.author ? " — " + r.author : "");
+    const el = document.createElement("div"); el.className = "book";
+    el.innerHTML = `<button class="cover" data-h="pv" aria-label="Prévia">${r.cover ? `<img alt="">` : `<span class="spine"></span>`}</button>
+      <button class="rm" data-h="rm" aria-label="Tirar da estante" title="Tirar da estante">×</button>
+      <div class="t"></div>
+      <div class="d">${esc(new Date(r.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }))}, ${kb(r.size)}</div>
+      <div class="acts"><button class="btn sm" data-h="dl">Baixar</button><a class="btn ghost sm" data-h="kd" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Kindle</a></div>`;
+    const name = r.title + (r.author ? " — " + r.author : "");
+    el.querySelector(".t").textContent = r.title; el.querySelector(".t").title = name;
+    if (r.cover) el.querySelector(".cover img").src = urlOf(r.cover); else el.querySelector(".spine").textContent = r.title;
     el.querySelector('[data-h="dl"]').onclick = () => offer(r.name, r.blob);
     el.querySelector('[data-h="kd"]').onclick = e => sendToKindle(e, { epub: r.blob, title: r.title }, r.name);
     el.querySelector('[data-h="pv"]').onclick = () => openPreview(r.blob, r.title);
     const rm = el.querySelector('[data-h="rm"]');
     rm.onclick = async () => {
       if (rm.dataset.confirm) { await histDel(r.id).catch(() => {}); renderHistory(); return; }
-      rm.dataset.confirm = "1"; rm.textContent = "Confirmar"; setTimeout(() => { if (rm.isConnected) { delete rm.dataset.confirm; rm.textContent = "Remover"; } }, 4000);
+      rm.dataset.confirm = "1"; rm.textContent = "Tirar?";
+      setTimeout(() => { if (rm.isConnected) { delete rm.dataset.confirm; rm.textContent = "×"; } }, 4000);
     };
     box.appendChild(el);
   }
 }
+
+/* ---------- tema, instalação e resumo das opções ---------- */
+const THEME_KEY = "conversor-epub:tema";
+const THEMES = { auto: "automático", light: "claro", dark: "escuro" };
+function applyTheme(t){
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  const b = $("#themeBtn"); b.title = "Tema: " + (THEMES[t] || THEMES.auto); b.setAttribute("aria-label", b.title);
+}
+let theme = "auto";
+try { theme = localStorage.getItem(THEME_KEY) || "auto"; } catch {}
+applyTheme(theme);
+$("#themeBtn").onclick = () => {
+  theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
+  applyTheme(theme); try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  toast("Tema " + THEMES[theme]);
+};
+
+let installEvt = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#installBtn").hidden = false; });
+window.addEventListener("appinstalled", () => { $("#installBtn").hidden = true; installEvt = null; });
+$("#installBtn").onclick = async () => { if (!installEvt) return; installEvt.prompt(); try { await installEvt.userChoice; } catch {} installEvt = null; $("#installBtn").hidden = true; };
+
+function updateOptSum(){
+  const chips = [];
+  if ($("#verify").checked) chips.push("Conferência");
+  const m = $("#mode"); if (m.value !== "auto") chips.push(m.options[m.selectedIndex].text);
+  if ($("#ocr").checked) chips.push("OCR");
+  if ($("#shownums").checked) chips.push("Nº de página");
+  const l = $("#lang"); if (l.value !== "pt-BR") chips.push(l.options[l.selectedIndex].text);
+  $("#optSum").innerHTML = chips.map(c => `<span class="chip">${esc(c)}</span>`).join("");
+}
+document.querySelectorAll(".side input, .side select").forEach(el => el.addEventListener("change", updateOptSum));
+if (window.matchMedia("(max-width: 1040px)").matches) $("#optPanel").open = false;
 
 /* ---------- opções lembradas neste navegador ---------- */
 const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh"];
@@ -2755,6 +2968,7 @@ loadOptions();
 OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });
 renderHistory();
 renderFixes();
+updateOptSum();
 
 /* ---------- app instalável (só no site; o artefato não aceita) ---------- */
 (async () => {

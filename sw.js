@@ -1,5 +1,5 @@
 // Conversor PDF para EPUB: funciona sem internet e recebe arquivos pelo "Compartilhar" do celular
-const CACHE = "conversor-epub-v2";
+const CACHE = "conversor-epub-v3";
 const SHARE = "conversor-epub-compartilhado";
 const CORE = [
   "./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
