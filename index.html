@@ -604,19 +604,31 @@ function streamSpace(gs, a, b){
 }
 
 // refaz os espaços de cada trecho de texto do pdf.js seguindo o PDF
-function respaceItems(items, gs){
-  let p = 0;
+// hint: marca as letras que o pdf.js separou por posição (sem caractere de espaço no PDF)
+function respaceItems(items, gs, hint){
+  let p = 0, prevItem = null, pendHint = false;
   for (const it of items) {
     it.firstIdx = -1; it.lastIdx = -1;
-    if (!it.str || !it.str.trim()) continue;
-    let out = "", prevIdx = -1, hadSpace = false;
-    for (const ch of it.str) {
+    if (it.str0 === undefined) it.str0 = it.str || "";
+    const str = it.str0;
+    if (!str || !str.trim()) { if (str) pendHint = true; continue; }
+    // trecho novo na mesma linha, afastado do anterior: também conta como separação
+    if (prevItem) {
+      const size = Math.hypot(it.transform[2], it.transform[3]) || it.height || 10;
+      const end = prevItem.transform[4] + (prevItem.width || 0);
+      if (Math.abs(it.transform[5] - prevItem.transform[5]) < size * 0.5 && it.transform[4] - end > size * 0.15) pendHint = true;
+      if (/\s$/.test(prevItem.str0)) pendHint = true;
+    }
+    let out = "", prevIdx = -1, hadSpace = pendHint && !!prevItem;
+    pendHint = false;
+    for (const ch of str) {
       if (!ch.trim()) { hadSpace = true; continue; }
       if (isMark(ch)) { out += ch; continue; }
       const k = keyOf(normLig(ch));
       let q = -1;
       for (let j = p, end = Math.min(gs.keys.length, p + 60); j < end; j++) if (gs.keys[j] === k) { q = j; break; }
       if (q >= 0) p = q + 1;
+      if (q >= 0 && hadSpace && hint) hint[q] = 1;
       if (out) {
         const sp = q >= 0 && prevIdx >= 0 && q > prevIdx ? streamSpace(gs, prevIdx, q) : hadSpace;
         if (sp) out += " ";
@@ -628,8 +640,39 @@ function respaceItems(items, gs){
       }
       prevIdx = q;
     }
-    it.str = out;
+    it.str = out; prevItem = it;
   }
+}
+
+// palavras grudadas ("Miratinhaherdadodopai"): alguns PDFs separam parte das palavras só pela posição, sem
+// caractere de espaço. Onde o pdf.js viu uma separação, ela entra se todos os pedaços forem palavras conhecidas
+// (ou nomes próprios), ou se o "palavrão" for longo demais para ser uma palavra só.
+function splitGlued(gs, hint, words){
+  let changed = 0;
+  const known = w => { const e = w.toLowerCase().replace(/^[\p{P}\p{S}\d]+|[\p{P}\p{S}\d]+$/gu, ""); return !e || (words && words.has(e)); };
+  const name = w => /^[\p{P}]*\p{Lu}\p{Ll}+[\p{P}]*$/u.test(w);
+  const flush = (a, b) => {
+    if (b - a < 4) return;
+    const cuts = []; for (let k = a + 1; k < b; k++) if (hint[k]) cuts.push(k);
+    if (!cuts.length) return;
+    const word = gs.chars.slice(a, b).join("");
+    if (words && known(word)) return;
+    const pieces = []; let s = a;
+    for (const c of [...cuts, b]) { pieces.push(gs.chars.slice(s, c).join("")); s = c; }
+    const letters = word.replace(/[^\p{L}]/gu, "").length;
+    const nKnown = pieces.filter(known).length;
+    const ok = (words && nKnown >= 2 && pieces.every(w => known(w) || name(w))) || letters >= 22;
+    if (!ok) return;
+    for (const c of cuts) gs.spaceBefore[c] = 1;
+    changed += cuts.length;
+  };
+  let a = 0;
+  for (let j = 1; j <= gs.chars.length; j++) {
+    const brk = j === gs.chars.length || gs.spaceBefore[j] || gs.y[j] == null || gs.y[j - 1] == null
+      || Math.abs(gs.y[j] - gs.y[j - 1]) > 0.5 * Math.max(gs.h[j] || 0, gs.h[j - 1] || 0);
+    if (brk) { flush(a, j); a = j; }
+  }
+  return changed;
 }
 
 // palavras da página tiradas direto do PDF (referência para a conferência)
@@ -778,6 +821,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const labelOf = p => ((pageLabels && pageLabels[p - 1] || "").trim() || String(p)).slice(0, 14);
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
+  if (opts.words === undefined && /^pt/i.test(lang || "")) opts.words = await loadWordList().catch(() => null);
   let cover = null;
   for (let p = 1; p <= pdf.numPages; p++) {
     onProgress(p, pdf.numPages);
@@ -802,7 +846,12 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (bad && bad.bad.size) it.str = [...it.str].map(c => bad.bad.get(c) || c).join("");
     }
     let pageRef;
-    if (gs.real) { respaceItems(tc.items, gs); pageRef = pageRefWords(tc.items, gs, p); }
+    if (gs.real) {
+      const hint = new Uint8Array(gs.keys.length);
+      respaceItems(tc.items, gs, hint);
+      if (splitGlued(gs, hint, opts.words)) respaceItems(tc.items, gs);
+      pageRef = pageRefWords(tc.items, gs, p);
+    }
     else pageRef = pageRefWords(tc.items, gs, p);   // sem espaços no PDF: usa a posição das letras
     const pl = [];
     for (const it of tc.items) {
