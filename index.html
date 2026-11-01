@@ -590,10 +590,12 @@ function pageImages(ol){
 const PG_A = "\uE000", PG_B = "\uE001";
 const PG_RE = /\uE000([^\uE001]*)\uE001/g;
 const pgMark = label => PG_A + label + PG_B;
-const stripPg = s => s.replace(PG_RE, "").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
+const stripPg = s => s.replace(PG_RE, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
+const BR = "\uE008";   // quebra de linha dentro de um título ("1" / "A descoberta que…")
+const NUM_HEAD = /^((cap[íi]tulo|parte|livro|volume|chapter|part|book)\s+)?([0-9]+[½¼¾]?|[ivxlcdm]+)\.?$/i;
 // itálico e negrito: \uE004/\uE005 liga/desliga itálico, \uE006/\uE007 liga/desliga negrito
 const IT_ON = "\uE004", IT_OFF = "\uE005", BD_ON = "\uE006", BD_OFF = "\uE007";
-const plainOf = s => s.replace(/[\uE004-\uE007]/g, "");
+const plainOf = s => s.replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "");
 // muda o estilo no fim do texto: fecha antes do espaço final, abre depois dele
 function styleSwitch(text, from, to){
   const m = /\s*$/.exec(text), head = text.slice(0, m.index), tail = m[0];
@@ -903,12 +905,14 @@ function splitGlued(gs, hint, words){
   let a = 0;
   for (let j = 1; j <= gs.chars.length; j++) {
     const brk = j === gs.chars.length || gs.spaceBefore[j] || gs.y[j] == null || gs.y[j - 1] == null
-      || Math.abs(gs.y[j] - gs.y[j - 1]) > 0.5 * Math.max(gs.h[j] || 0, gs.h[j - 1] || 0);
+      || Math.abs(gs.y[j] - gs.y[j - 1]) > lineTol(gs.h[j] || 1, gs.h[j - 1] || 1);
     if (brk) { flush(a, j); a = j; }
   }
   return changed;
 }
 
+// mesma linha? letras de tamanhos muito diferentes (número gigante do capítulo) precisam estar quase na mesma base
+const lineTol = (a, b) => { const big = Math.max(a, b), small = Math.min(a, b); return big / small > 1.8 ? small * 0.25 : big * 0.5; };
 // palavras da página tiradas direto do PDF (referência para a conferência)
 function pageRefWords(items, gs, p){
   const lines = [];
@@ -920,7 +924,7 @@ function pageRefWords(items, gs, p){
       // letra que o pdf.js não mostra na página (fora da área visível): não entra no EPUB nem na conferência
       if (gs.y[j] == null) { hidden++; continue; }
       // mudou de linha na página: também separa palavras
-      if (j > 0 && w && gs.y[j] != null && gs.y[j - 1] != null && Math.abs(gs.y[j] - gs.y[j - 1]) > 0.5 * Math.max(gs.h[j], gs.h[j - 1])) {
+      if (j > 0 && w && gs.y[j] != null && gs.y[j - 1] != null && Math.abs(gs.y[j] - gs.y[j - 1]) > lineTol(gs.h[j], gs.h[j - 1])) {
         line.push(w); w = ""; lines.push(line); line = [];
       }
       if (gs.spaceBefore[j] && w) { line.push(w); w = ""; }
@@ -954,7 +958,8 @@ function compareWords(ref, outWords){
   for (let i = 0; i < ref.length; i++) {
     let w = normW(ref[i].w), a2 = null; const p = ref[i].p;
     // hifenização no fim da linha: aceita "palavra" ou "pala-vra"
-    if (ref[i].eol && /\p{L}-$/u.test(w) && i + 1 < ref.length && /^\p{Ll}/u.test(ref[i + 1].w)) { const nx = normW(ref[i + 1].w); a2 = edgeW(w + nx); w = w.slice(0, -1) + nx; i++; }
+    if (ref[i].eol && /\p{L}-$/u.test(w) && i + 1 < ref.length && /^-\p{L}/u.test(ref[i + 1].w)) { w = w + normW(ref[i + 1].w).slice(1); i++; }
+    else if (ref[i].eol && /\p{L}-$/u.test(w) && i + 1 < ref.length && /^\p{Ll}/u.test(ref[i + 1].w)) { const nx = normW(ref[i + 1].w); a2 = edgeW(w + nx); w = w.slice(0, -1) + nx; i++; }
     const e = edgeW(w); if (!e) continue;
     A.push(e); alt.push(a2); P.push(p);
   }
@@ -965,6 +970,10 @@ function compareWords(ref, outWords){
   const push = (x, dx, y, dy) => {
     const a = A.slice(x, x + dx), b = B.slice(y, y + dy);
     if (!b.length && a.every(w => /^([0-9]+|[ivxlcdm]+)$/i.test(w))) { ignored += a.length; return; }
+    if (!a.length && b.length <= 2 && b.every(w => /^[0-9]+[½¼¾]?$/.test(w))) { ignored += b.length; return; }
+    // sumário do livro impresso: "Capítulo 97" que o PDF guarda grudado ("Capítulo97") e a página mostra separado
+    if (a.length && b.length > a.length && a.join("") === b.join("")
+        && b.slice(1).every((w, k) => (/\p{L}$/u.test(b[k]) && /^\d/.test(w)) || (/\d$/.test(b[k]) && /^\p{L}/u.test(w)))) { ignored += a.length; return; }   // número do capítulo (o PDF o trata como número de página)
     if (diffs.length < 500) diffs.push({ p: P[Math.min(x, P.length - 1)], pdf: a.slice(0, 25).join(" "), epub: b.slice(0, 25).join(" "), prev: y > 0 ? B[y - 1] : "" });
   };
   while (i < A.length && j < B.length) {
@@ -992,6 +1001,7 @@ function docWords(doc){
     const t = n.getAttributeNS(EPUB_NS, "type") || n.getAttribute("epub:type") || "";
     if (/\bpagebreak\b/.test(t) || n.getAttribute("role") === "doc-pagebreak" || /\bpgmark\b/.test(n.getAttribute("class") || "")) return;
     if (/\bfootnote\b/.test(t) || n.getAttribute("role") === "doc-footnote") return;
+    if (name === "br") { parts.push(" "); return; }
     const block = BLOCK_RE.test(name);
     if (block) parts.push(" ");
     for (const c of n.childNodes) walk(c);
@@ -1177,7 +1187,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       const blank = !it.str.trim();
       const size = Math.hypot(it.transform[2], it.transform[3]) || it.height || 10;
       const x = it.transform[4], y = it.transform[5];
-      let ln = pl.find(l => Math.abs(l.y - y) < Math.max(size, l.size) * 0.5);
+      // tamanhos muito diferentes (número gigante do capítulo x título): só junta se estiverem na mesma base
+      let ln = pl.find(l => Math.abs(l.y - y) < lineTol(size, l.size));
       if (!ln) { if (blank) continue; ln = { y, size, items: [] }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
       ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName) });
@@ -1354,7 +1365,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       blocks.push({ type: "img", blob: l.blob, w: l.w, h: l.h, full: l.kind === "pageimg" });
       cur = null; prev = null; continue;
     }
-    if (PAGE_NUM_RE.test(l.plain)) continue;
+    if (PAGE_NUM_RE.test(l.plain) && l.size < body * 1.3) continue;   // número grande é o número do capítulo, não da página
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
     const gg = geo[l.page] || { left: l.x0, right: l.x1 };
@@ -1370,8 +1381,10 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
         && (!cur || !prev || prev.isHead || prev.page !== l.page || terminal.test(prev.text))) level = 1;
     if (level && l.text.length < 160) {
       const last = blocks[blocks.length - 1];
-      if (last && last.type === "h" + level && prev && prev.page === l.page && prev.isHead && prev.y - l.y < l.size * 2)
-        { last.text += " " + mark + l.plain; last.last = l.page; }
+      // título em várias linhas; o número do capítulo em cima ("1", "IV", "Capítulo 3") fica na primeira linha
+      const numOnly = last && /^h[12]$/.test(last.type) && NUM_HEAD.test(stripPg(last.text)) && !last.text.includes(BR);
+      if (last && (last.type === "h" + level || numOnly) && prev && prev.page === l.page && prev.isHead && prev.y - l.y < Math.max(l.size, prev.size) * 2.2)
+        { last.text += (numOnly ? BR : " ") + mark + l.plain; last.last = l.page; }
       else blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page });
       cur = null; prev = { ...l, isHead: true }; continue;
     }
@@ -1386,7 +1399,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
           if (gap > lineGap * 2.4 && Math.abs(l.size - body) < body * 0.1 && Math.abs(prev.size - body) < body * 0.1) sceneGap = true;
         }
         else if (prev.x1 < g.right - body * 4 && terminal.test(prev.text)) start = true;
-        else if (l.x0 > g.left + body * 0.9 && l.x0 < g.left + body * 6) start = true;
+        // recuo de parágrafo: comparado com a linha de cima (num trecho recuado inteiro, como uma citação, as linhas seguem juntas)
+        else { const base = Math.max(g.left, prev.x0); if (l.x0 > base + body * 0.9 && l.x0 < base + body * 6) start = true; }
       } else if (terminal.test(prev.text) && l.x0 > g.left + body * 0.9) start = true;
     }
     if (!start) cur.last = l.page;
@@ -1394,12 +1408,15 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (sceneGap) blocks.push({ type: "scene", text: "", page: l.page, last: l.page });
       cur = { type: "p", text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur);
     } else {
-      const [ja, jb] = joinParts(cur.text, l.text), pa = plainOf(ja), pb = plainOf(jb);
-      if (/\p{L}-$/u.test(pa) && /^\p{Ll}/u.test(pb)) {
+      let [ja, jb] = joinParts(cur.text, l.text), pa = plainOf(ja), pb = plainOf(jb);
+      // palavra composta quebrada com o hífen repetido na linha seguinte ("terças-" / "-feiras")
+      const rep2 = /\p{L}-$/u.test(pa) && /^-\p{L}/u.test(pb);
+      if (rep2) { jb = jb.replace(/^((?:\uE000[^\uE001]*\uE001)?[\uE004-\uE007]*)-/, "$1"); pb = pb.slice(1); }
+      if (rep2 || (/\p{L}-$/u.test(pa) && /^\p{Ll}/u.test(pb))) {
         // palavra hifenizada no fim da linha: junta (o número de página entra depois da palavra)
         const head = (pa.match(/(\p{L}+)-$/u) || ["", ""])[1];
         const tail = (pb.match(/^\p{L}+/u) || [""])[0];
-        const base = keepHyphen(head, tail) ? ja : ja.replace(/-([\uE004-\uE007]*)$/, "$1");
+        const base = rep2 || keepHyphen(head, tail) ? ja : ja.replace(/-([\uE004-\uE007]*)$/, "$1");
         const sp = jb.search(/\s/);
         cur.text = base + (mark && sp > 0 ? jb.slice(0, sp) + " " + mark + jb.slice(sp + 1) : jb);
       } else cur.text = ja + " " + mark + jb;
@@ -1463,7 +1480,8 @@ async function blocksToDocx(blocks, title, author){
   };
   const runs = text => {
     let st = 0;
-    return text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE007])/).filter(Boolean).map(seg => {
+    return text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/).filter(Boolean).map(seg => {
+      if (seg === BR) return "<w:r><w:br/></w:r>";
       if (seg === IT_ON) { st |= 1; return ""; } if (seg === IT_OFF) { st &= ~1; return ""; }
       if (seg === BD_ON) { st |= 2; return ""; } if (seg === BD_OFF) { st &= ~2; return ""; }
       if (seg[0] === PG_A) return bookmark(seg.slice(1, -1));
@@ -1638,7 +1656,8 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
         const s = runStyle(n); if (s !== cs) { text = styleSwitch(text, cs, s); cs = s; }
         text += n.textContent;
       }
-      else if (n.localName === "tab" || n.localName === "br") text += " ";
+      else if (n.localName === "tab") text += " ";
+      else if (n.localName === "br") text += /^Heading/.test(style) ? BR : " ";
       else if (n.localName === "bookmarkStart") {
         const nm = n.getAttributeNS(W, "name") || n.getAttribute("w:name") || ""; let m;
         if ((m = /^note(\d+)_([0-9a-f]*)$/.exec(nm))) { text += "\uE002" + m[1] + "|" + hexDec(m[2]) + "\uE003"; skipSup = true; }
@@ -1663,7 +1682,7 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
   const chapters = [];
   let ch = null;
   const newCh = name => { ch = { title: name, items: [], weight: 0, notes: [] }; chapters.push(ch); };
-  const titleOf = t => stripPg(t.replace(NOTE_RE, ""));
+  const titleOf = t => stripPg(t.replace(NOTE_RE, "").replace(/\.?\s*\uE008\s*/g, ". "));
   for (const p of content) {
     if (splitStyle && p.style === splitStyle) { newCh(titleOf(p.text)); ch.items.push({ tag: "h1", text: p.text }); continue; }
     if (!ch) newCh(splitStyle ? "Início" : "Parte 1");
@@ -1740,8 +1759,9 @@ p.cena+p,hr.cena+p{text-indent:0}
       while (stack.length > k) out.push(`</${stack.pop()}>`);
       for (const t of need) if (!stack.includes(t)) { out.push(`<${t}>`); stack.push(t); }
     };
-    for (const seg of text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE007])/)) {
+    for (const seg of text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/)) {
       if (!seg) continue;
+      if (seg === BR) { out.push("<br/>"); continue; }
       if (seg === IT_ON) want |= 1; else if (seg === IT_OFF) want &= ~1; else if (seg === BD_ON) want |= 2; else if (seg === BD_OFF) want &= ~2;
       else { sync(); out.push(seg[0] === PG_A ? pgSpan(seg.slice(1, -1), fn, false) : seg[0] === "\uE002" ? noteRef(seg.slice(1, -1)) : esc(seg)); }
     }
@@ -2121,7 +2141,7 @@ const fileNameOf = job => job.kind === "epub"
   ? safeFile(job.title || baseName(job.file.name)) + " (com páginas).epub"
   : safeFile(job.title + (job.author ? " - " + job.author : "")) + ".epub";
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE007])/;
+const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/;
 // troca texto só fora dos marcadores (página, nota, itálico)
 function replaceInText(text, re, to){
   let n = 0;
@@ -2166,7 +2186,7 @@ function chapterHeads(job){
 function locateDiff(job, d){
   const toks = (d.epub || d.prev || "").split(" ").filter(Boolean);
   if (!toks.length) return null;
-  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE007])+";
+  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE008])+";
   const re = new RegExp(toks.map(escRe).join(SEP), "u");
   const B = job.src.blocks;
   const exact = b => b.page != null && d.p >= b.page && d.p <= (b.last ?? b.page);
