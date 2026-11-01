@@ -1,0 +1,42 @@
+# Novidades
+
+## 2.0.0 — 1 nov 2026
+
+- A leitura do PDF saiu da linha de execução da tela: a página não trava mais durante a conversão (livro de 268 páginas: de 6,6 s de travadas para 0,6 s) e converte uns 25% mais rápido.
+- Sumário em dois níveis: partes (“Parte II”, ou numeração romana acima de capítulos numerados) agrupam os capítulos.
+- Editar capítulos: marcar e desmarcar partes, transformar um parágrafo em capítulo e ir da prévia direto para a lista.
+- Capa a partir de qualquer página do PDF.
+- Selo “Pronto para o Kindle”: a estrutura de cada EPUB é conferida antes do download.
+- PDF com senha: dá para digitar a senha ali mesmo. Mensagens claras para arquivo danificado, PDF em branco e falta de memória. PDF escaneado com o OCR desligado oferece converter de novo com OCR.
+- Títulos de várias linhas com fonte menor que o número do capítulo ficam num título só.
+- Acessibilidade: foco preso na prévia e devolvido ao fechar, avisos para leitor de tela, contraste conferido nos dois temas.
+- Privacidade explicada na página e botão para apagar tudo o que fica guardado no navegador.
+- Versão no rodapé e aviso quando sai uma versão nova.
+- Imagem e descrição para o link aparecer bem no WhatsApp e nas redes.
+- Código dividido em módulos (`src/`), testes automáticos e publicação pelo GitHub Actions só quando os testes passam.
+
+## 1.4.0 — 31 out 2026
+
+- Títulos de capítulo: o número grande fica junto do título, e títulos em várias linhas viram um só.
+- Citações recuadas não se partem mais em um parágrafo por linha; “terças- / -feiras” vira “terças-feiras”.
+- Enviar ao Kindle: no computador, baixa o EPUB e abre a página da Amazon; no celular, se o compartilhamento falhar, baixa o arquivo.
+
+## 1.3.0 — 31 out 2026
+
+- Novo layout: opções ao lado, fila com capas e barra de progresso, estante com os últimos livros, tema claro e escuro.
+- Itálico e negrito, quebras de cena, letra capitular, OCR para páginas escaneadas, correções lembradas, série e volume, juntar volumes, app instalável.
+- Palavras desenhadas sem caractere de espaço são separadas.
+
+## 1.2.0 — 31 out 2026
+
+- Editar o livro (capa, título, autor, capítulos), corrigir trechos apontados pela conferência, prévia com o PDF ao lado, notas de rodapé clicáveis, quadrinhos e mangá, histórico.
+- Conferência palavra por palavra opcional.
+
+## 1.1.0 — 14 out 2026
+
+- Texto igual ao PDF e conferência palavra por palavra.
+- Ligaduras “fi” e “fl” sem texto recuperadas pelas palavras do livro ou pelo desenho da letra.
+
+## 1.0.0 — 9 out 2026
+
+- Primeira versão: PDF para EPUB no navegador.

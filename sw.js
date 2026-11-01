@@ -1,5 +1,6 @@
 // Conversor PDF para EPUB: funciona sem internet e recebe arquivos pelo "Compartilhar" do celular
-const CACHE = "conversor-epub-v3";
+const VERSION = "2.0.0";
+const CACHE = "conversor-epub-" + VERSION;
 const SHARE = "conversor-epub-compartilhado";
 const CORE = [
   "./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
@@ -31,6 +32,9 @@ async function receiveShare(req){
   }
   return Response.redirect("./?compartilhado=1", 303);
 }
+
+// a página pergunta a versão para saber se precisa avisar que há uma nova
+self.addEventListener("message", e => { if (e.data === "versao" && e.source) e.source.postMessage({ versao: VERSION }); });
 
 self.addEventListener("fetch", e => {
   const req = e.request, url = new URL(req.url);

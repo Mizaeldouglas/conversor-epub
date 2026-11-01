@@ -1,14 +1,60 @@
 # Conversor PDF para EPUB
 
-Página única que roda inteira no navegador (nenhum arquivo é enviado para servidor):
+Converte PDF em EPUB para ler no Kindle, com capítulos, sumário, notas clicáveis, números de página e o texto conferido palavra por palavra. Roda inteiro no navegador: **o arquivo não sai do seu computador**.
 
-- **PDF → DOCX → EPUB**: texto, títulos, imagens e páginas escaneadas, com a numeração de páginas do PDF.
-- **Texto igual ao PDF**: o espaço entre palavras só entra onde o PDF tem um caractere de espaço de verdade, evitando quebras como "tam bem".
-- **Ligaduras sem texto** ("fi", "fl" guardados como símbolo sem código): identificadas uma vez para o livro inteiro, pelas palavras em que aparecem ou pelo desenho da letra.
-- **Conferência palavra por palavra**: antes de liberar o download, o EPUB gerado é lido de volta e comparado com o texto do PDF; diferenças aparecem com a página e o trecho.
-- **EPUB → EPUB**: coloca números de página sem mexer no texto (também conferido).
-- **Enviar ao Kindle**: no celular abre o compartilhamento com o app Kindle; no computador baixa o EPUB e abre amazon.com.br/sendtokindle.
+**Use em: [mizaeldouglas.github.io/conversor-epub](https://mizaeldouglas.github.io/conversor-epub/)**
 
-Bibliotecas: [pdf.js](https://mozilla.github.io/pdf.js/) e [JSZip](https://stuk.github.io/jszip/), carregadas do cdnjs.
+![Fila com um livro convertido, conferido e pronto para o Kindle](docs/tela.png)
 
-Lista das 50 mil palavras mais usadas do português (usada só para identificar ligaduras): [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords), CC BY-SA 4.0.
+## O que ele faz
+
+- **Texto igual ao PDF.** O espaço entre palavras só entra onde o PDF tem um espaço de verdade, e palavras desenhadas sem espaço são separadas pelas palavras conhecidas. Itálico, negrito, capitular e ligaduras (“fi”, “fl”) voltam ao normal.
+- **Conferência palavra por palavra.** O EPUB pronto é lido de volta e comparado com o PDF. As diferenças aparecem com a página, e dá para abrir o PDF ao lado e corrigir.
+- **Capítulos e partes.** Títulos em fonte maior, “Capítulo 12”, número grande em cima do título e títulos em várias linhas viram capítulos. Partes (“Parte II”, ou numeração romana acima de capítulos numerados) agrupam os capítulos no sumário.
+- **Editar antes de baixar.** Renomeie, junte, separe e marque partes; transforme qualquer parágrafo em capítulo; troque a capa (imagem sua ou qualquer página do PDF); mude título, autor, série e sinopse; localize e substitua no livro todo.
+- **Selo de qualidade.** Cada EPUB tem a estrutura conferida (o essencial do EPUBCheck) antes do download.
+- **Mais:** notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
+
+| Prévia com o sumário | Capítulos e partes |
+| --- | --- |
+| ![Prévia do EPUB](docs/previa.png) | ![Lista de capítulos para editar](docs/capitulos.png) |
+
+## Privacidade
+
+A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
+
+## Limitações conhecidas
+
+- PDF com DRM ou EPUB comprado com proteção não abre.
+- Páginas com texto em várias colunas (créditos, índices) podem sair na ordem das colunas lidas de cima para baixo.
+- O OCR pode trocar letras; confira na prévia com o PDF ao lado.
+- O Kindle mostra posições, não páginas. Use “Número da página no texto” se quiser ver o número lá.
+
+## Desenvolvimento
+
+O código fica em `src/` e o `index.html` publicado é montado a partir dele:
+
+```
+src/index.html        página (HTML) com os marcadores do build
+src/style.css         estilos
+src/js/NN-*.js        módulos, na ordem do número (leitura do PDF, DOCX, EPUB, fila, prévia…)
+src/sw.js             service worker (app instalável e sem internet)
+src/data/             lista de palavras do português
+tools/build.mjs       monta index.html e sw.js na raiz
+tests/                testes de ponta a ponta (Playwright) e arquivos de teste
+```
+
+```bash
+npm install                                  # pdf.js e JSZip nas versões do site
+npm install --no-save playwright && npx playwright install chromium
+npm run build                                # gera index.html e sw.js
+npm test                                     # converte os arquivos de tests/fixtures e confere tudo
+```
+
+Os testes abrem o app num Chromium, convertem os PDFs de `tests/fixtures` e conferem o sumário, o texto, os erros, a acessibilidade e o teclado. Com `EPUBCHECK_JAR` apontando para o EPUBCheck, cada EPUB gerado também é validado. Os arquivos de teste são gerados por `tools/gerar-fixtures.py`, com texto escrito só para isso.
+
+A cada push, o GitHub Actions confere se o `index.html` está em dia com `src/`, roda os testes e o EPUBCheck e, se tudo passar, publica o site.
+
+## Licença
+
+Código sob a licença MIT (veja [LICENSE](LICENSE)). A lista de palavras do português vem de [hermitdave/FrequencyWords](https://github.com/hermitdave/FrequencyWords) (CC BY-SA 4.0). Bibliotecas: [pdf.js](https://mozilla.github.io/pdf.js/) (Apache 2.0), [JSZip](https://stuk.github.io/jszip/) (MIT) e [Tesseract.js](https://tesseract.projectnaptha.com/) (Apache 2.0).
