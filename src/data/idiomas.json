@@ -1542,5 +1542,25 @@
 "erro desconhecido": [
 "unknown error",
 "error desconocido"
+],
+"Ajustes": [
+"Settings",
+"Ajustes"
+],
+"Ajustes de conversão": [
+"Conversion settings",
+"Ajustes de conversión"
+],
+"Valem para os próximos arquivos que você soltar.": [
+"They apply to the next files you drop.",
+"Valen para los próximos archivos que sueltes."
+],
+"Opções deste livro": [
+"Options for this book",
+"Opciones de este libro"
+],
+"O PDF é lido de novo com estas opções; as correções feitas neste livro são descartadas.": [
+"The PDF is read again with these options; fixes made to this book are discarded.",
+"El PDF se lee otra vez con estas opciones; las correcciones hechas en este libro se descartan."
 ]
 }

@@ -1,5 +1,11 @@
 # Novidades
 
+## 3.3.0 — 12 nov 2026
+
+- O painel de opções saiu da lateral. A página fica só com a área de soltar, a fila e a estante; os ajustes abrem pelo botão “Ajustes”, no topo.
+- “Opções deste livro” em cada PDF da fila, para converter de novo como imagem, quadrinhos ou com OCR.
+- O tipo de PDF não fica mais lembrado de uma visita para a outra: cada visita começa em “Livro de texto”.
+
 ## 3.2.0 — 12 nov 2026
 
 - A opção “Idioma” do livro saiu: ela não traduzia nada e confundia. O idioma do livro agora é reconhecido pelo próprio texto.

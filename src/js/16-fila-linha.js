@@ -4,7 +4,6 @@ function editPanelHtml(job){
   const rich = job.kind === "pdf" && !job.fixed;
   const heads = rich ? chapterHeads(job) : [];
   const imgs = rich ? job.src.blocks.map((b, bi) => ({ b, bi })).filter(x => x.b.type === "img" && !x.b.full).slice(0, 40) : [];
-  const realPdf = job.kind === "pdf" && !job.fmt && !job.fromEpub && !job.merged && job.file instanceof Blob && job.opts;
   return `<details class="edit"${job.editOpen ? " open" : ""}><summary>Editar livro: ${rich ? "capa, dados do livro, capítulos e texto" : "dados do livro"}</summary>
     <div class="edit-body">
       <div class="edit-top${rich ? "" : " nocov"}">
@@ -43,13 +42,6 @@ function editPanelHtml(job){
         <ul>${imgs.map(x => `<li><img alt="" data-ai="${x.bi}"><input type="text" data-alt="${x.bi}" aria-label="Descrição da imagem" placeholder="O que a imagem mostra" autocomplete="off"></li>`).join("")}</ul></div>` : ""}
       ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor na Open Library e, se não achar, no Google Books. Só esses dois dados saem do aparelho; o arquivo não.</span>
         <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
-      ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
-        <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
-          <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
-          <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
-          <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
-          <button class="btn ghost sm" data-o="go">Converter de novo</button>
-          <span class="muted">As correções feitas neste livro são descartadas.</span></div></details>` : ""}
       ${job.kind === "epub" ? `<div class="reopen"><b>Capa, capítulos e texto</b><span class="muted">Para mexer nisso, o livro é remontado pelo Lombada: o texto, as imagens e as notas ficam, mas a aparência original (fontes e estilos do arquivo) é trocada pela do Lombada.</span><button class="btn ghost sm" data-a="reopen">Abrir para editar tudo</button></div>` : ""}
       <div class="edit-actions">${job.undo && job.undo.length ? `<button class="btn ghost sm" data-e="undo">Desfazer a última alteração</button>` : ""}<button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
     </div></details>`;
@@ -70,6 +62,18 @@ async function thumbBlob(blob){
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
     return await toJpeg(c, 0.8);
   } catch { return null; }
+}
+
+// opções com que este PDF foi convertido, para converter de novo com outras
+function reconvHtml(job){
+  if (!(job.kind === "pdf" && !job.fmt && !job.fromEpub && !job.merged && job.file instanceof Blob && job.opts) || job.busy || !(job.epub || job.error)) return "";
+  return `<details class="reconv"><summary>Opções deste livro</summary>
+        <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
+          <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
+          <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
+          <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
+          <button class="btn ghost sm" data-o="go">Converter de novo</button>
+          <span class="muted">O PDF é lido de novo com estas opções; as correções feitas neste livro são descartadas.</span></div></details>`;
 }
 
 function render(job){
@@ -155,6 +159,7 @@ function render(job){
       ${ocrHtml}
       ${ligHtml}
       ${editPanelHtml(job)}
+      ${reconvHtml(job)}
       ${!job.busy && job.imagePages && !job.ocrPages && !job.ocrError ? `<div class="verify neutral">${job.imagePages} página${job.imagePages > 1 ? "s são" : " é"} só imagem e ${job.imagePages > 1 ? "entraram" : "entrou"} como figura. Se o PDF for escaneado, o OCR transforma essas páginas em texto. <button class="linkbtn" data-a="ocr">Converter de novo com OCR</button></div>` : ""}
       ${job.error ? `<div class="errmsg" role="alert"></div>` : ""}
       ${job.needPassword ? `<form class="pwbox" data-a="pw"><label>Senha do PDF <input type="password" autocomplete="off" required></label><button class="btn sm">Abrir</button></form>` : ""}
@@ -187,6 +192,7 @@ function render(job){
   if (state && job.announced !== state) { job.announced = state; $("#sr").textContent = job.epub ? `${job.title}: EPUB pronto.` : `${job.title}: ${job.error}`; }
   bindFixes(job, row);
   bindEditPanel(job, row);
+  bindReconv(job, row);
   updateQueueButtons();
 }
 // durante a leitura só a barra e o texto mudam: não redesenha a linha (os botões não "pulam")

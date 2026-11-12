@@ -28,4 +28,5 @@ function updateOptSum(){
   $("#optSum").innerHTML = chips.map(c => `<span class="chip">${esc(c)}</span>`).join("");
 }
 document.querySelectorAll(".side input, .side select").forEach(el => el.addEventListener("change", updateOptSum));
-if (window.matchMedia("(max-width: 1040px)").matches) $("#optPanel").open = false;
+// "Ajustes" no topo abre o painel e leva até ele
+$("#settingsBtn").onclick = () => { const p = $("#optPanel"); p.open = true; p.scrollIntoView({ block: "start", behavior: "smooth" }); p.querySelector("summary").focus({ preventScroll: true }); };

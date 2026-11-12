@@ -28,6 +28,22 @@ function bindFixes(job, row){
   };
 }
 
+function bindReconv(job, row){
+  // converter de novo com outras opções
+  const rc = row.querySelector(".reconv");
+  if (rc) {
+    const o = job.opts;
+    rc.open = !!job.reconvOpen; rc.ontoggle = () => { job.reconvOpen = rc.open; };
+    for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) { if (el.type === "checkbox") el.checked = !!o[el.dataset.o]; else el.value = o[el.dataset.o]; }
+    rc.querySelector('button[data-o="go"]').onclick = () => {
+      const n = { ...o };
+      for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) n[el.dataset.o] = el.type === "checkbox" ? el.checked : el.value;
+      job.opts = n; job.draft = null; job.undo = []; job.reordered = false; job.userTexts = []; job.forceOcr = false; job.editOpen = false;
+      retryPdf(job);
+    };
+  }
+}
+
 function bindEditPanel(job, row){
   const box = row.querySelector("details.edit");
   if (!box) return;
@@ -141,19 +157,6 @@ function bindEditPanel(job, row){
   dr.alts ||= {};
   box.querySelectorAll("[data-ai]").forEach(im => { im.src = urlOf(job.src.blocks[+im.dataset.ai].blob); });
   box.querySelectorAll("[data-alt]").forEach(inp => { const bi = +inp.dataset.alt; inp.value = dr.alts[bi] ?? job.src.blocks[bi].alt ?? ""; inp.oninput = () => { dr.alts[bi] = inp.value; }; });
-  // converter de novo com outras opções
-  const rc = q(".reconv");
-  if (rc) {
-    const o = job.opts;
-    rc.open = !!job.reconvOpen; rc.ontoggle = () => { job.reconvOpen = rc.open; };
-    for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) { if (el.type === "checkbox") el.checked = !!o[el.dataset.o]; else el.value = o[el.dataset.o]; }
-    rc.querySelector('button[data-o="go"]').onclick = () => {
-      const n = { ...o };
-      for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) n[el.dataset.o] = el.type === "checkbox" ? el.checked : el.value;
-      job.opts = n; job.draft = null; job.undo = []; job.reordered = false; job.userTexts = []; job.forceOcr = false; job.editOpen = false;
-      retryPdf(job);
-    };
-  }
   // capa e sinopse da internet
   const lg = q('[data-l="go"]');
   if (lg) lg.onclick = async () => {
