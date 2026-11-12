@@ -6,6 +6,7 @@ const shot = async (name, viewport, fn) => {
   await app.page.evaluate(() => { try { localStorage.clear(); } catch {} document.documentElement.dataset.theme = "light"; });
   await app.page.check("#verify");
   await addFiles(app.page, ["capitulos.pdf"]); await waitJob(app.page, 0);
+  await app.page.evaluate(() => { document.querySelector("#optPanel").open = false; });   // como a página abre: ajustes fechados
   await app.page.evaluate(() => document.fonts.ready);
   await fn(app.page);
   await app.page.screenshot({ path: `docs/${name}.png` });
