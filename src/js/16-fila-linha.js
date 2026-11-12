@@ -3,12 +3,14 @@ function editPanelHtml(job){
   if (!job.epub || job.busy) return "";
   const rich = job.kind === "pdf" && !job.fixed;
   const heads = rich ? chapterHeads(job) : [];
+  const imgs = rich ? job.src.blocks.map((b, bi) => ({ b, bi })).filter(x => x.b.type === "img" && !x.b.full).slice(0, 40) : [];
+  const realPdf = job.kind === "pdf" && !job.fmt && !job.fromEpub && !job.merged && job.file instanceof Blob && job.opts;
   return `<details class="edit"${job.editOpen ? " open" : ""}><summary>Editar livro: ${rich ? "capa, dados do livro, capítulos e texto" : "dados do livro"}</summary>
     <div class="edit-body">
       <div class="edit-top${rich ? "" : " nocov"}">
         ${rich ? `<div class="coverbox"><div class="cv"></div>
           <label class="btn ghost sm filebtn">Trocar capa<input type="file" accept="image/*" data-e="coverfile" hidden></label>
-          ${job.src.cover ? `<button class="linkbtn" data-e="coverpdf">1ª página do PDF</button>` : ""}
+          ${job.src.cover ? `<button class="linkbtn" data-e="coverpdf">${job.fmt || job.fromEpub ? "Capa original" : "1ª página do PDF"}</button>` : ""}
           ${job.file instanceof Blob && !job.merged && job.pages > 1 ? `<form class="coverpg" data-e="coverpg"><label>Página <input type="number" min="1" max="${job.pages}" inputmode="numeric" required aria-label="Número da página do PDF para a capa"></label><button class="btn ghost sm">Usar</button></form>` : ""}
           <button class="linkbtn" data-e="coveroff">Sem capa</button></div>` : ""}
         <div class="edit-fields">
@@ -24,7 +26,8 @@ function editPanelHtml(job){
         ${heads.length ? `<ol class="chap-list">${heads.map(h => `<li data-bi="${h.bi}"${h.part ? ' class="is-part"' : ""}><input type="text" data-c="text" aria-label="Título do capítulo">
           <label class="mini"><input type="checkbox" data-c="split"> abre capítulo</label>
           <label class="mini"><input type="checkbox" data-c="part"> parte</label>
-          <button class="linkbtn" data-c="remove"></button></li>`).join("")}</ol>` : ""}
+          <button class="linkbtn" data-c="remove"></button>
+          <span class="mv"><button class="btn ghost sm" data-c="up" aria-label="Subir este capítulo" title="Subir">↑</button><button class="btn ghost sm" data-c="down" aria-label="Descer este capítulo" title="Descer">↓</button></span></li>`).join("")}</ol>` : ""}
         <div class="newchap"><label>Faltou um capítulo? Comece a digitar o parágrafo que deve virar título
           <input type="text" data-n="find" autocomplete="off" placeholder="Ex.: Epílogo"></label>
           <span class="muted" data-n="hint" aria-live="polite"></span>
@@ -36,7 +39,20 @@ function editPanelHtml(job){
           <label class="mini"><input type="checkbox" data-f="case"> diferenciar maiúsculas</label>
           <span class="muted fr-count" data-f="count"></span>
           <button class="btn ghost sm" data-f="go" disabled>Substituir tudo</button></div></div>` : ""}
-      <div class="edit-actions"><button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
+      ${imgs.length ? `<div class="imgalts"><b>Descrição das imagens (${imgs.length})</b><span class="muted">O leitor de tela lê esta descrição no lugar da imagem. Deixe em branco nas que são só enfeite.</span>
+        <ul>${imgs.map(x => `<li><img alt="" data-ai="${x.bi}"><input type="text" data-alt="${x.bi}" aria-label="Descrição da imagem" placeholder="O que a imagem mostra" autocomplete="off"></li>`).join("")}</ul></div>` : ""}
+      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor no Google Books e na Open Library. Só esses dois dados saem do aparelho; o arquivo não.</span>
+        <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
+      ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
+        <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
+          <label>Idioma <select data-o="lang"><option value="pt-BR">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
+          <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
+          <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
+          <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
+          <button class="btn ghost sm" data-o="go">Converter de novo</button>
+          <span class="muted">As correções feitas neste livro são descartadas.</span></div></details>` : ""}
+      ${job.kind === "epub" ? `<div class="reopen"><b>Capa, capítulos e texto</b><span class="muted">Para mexer nisso, o livro é remontado pelo Lombada: o texto, as imagens e as notas ficam, mas a aparência original (fontes e estilos do arquivo) é trocada pela do Lombada.</span><button class="btn ghost sm" data-a="reopen">Abrir para editar tudo</button></div>` : ""}
+      <div class="edit-actions">${job.undo && job.undo.length ? `<button class="btn ghost sm" data-e="undo">Desfazer a última alteração</button>` : ""}<button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
     </div></details>`;
 }
 
@@ -65,17 +81,19 @@ function render(job){
   }
   const steps = STAGES[job.kind].filter(s => s[0] !== "check" || job.verifyOn).map(([k, label]) => {
     const done = job.done.includes(k), work = job.stage === k && !job.error && !job.cancelled && job.busy;
-    return `<li class="${done ? "done" : work ? "work" : ""}"><span class="dot"></span>${label}</li>`;
+    return `<li class="${done ? "done" : work ? "work" : ""}"><span class="dot"></span>${k === "pdf" && (job.fmt || job.fromEpub) ? srcLabel(job) + " lido" : label}</li>`;
   }).join("");
   const v = job.verify;
   const src = job.kind === "pdf" ? "PDF" : "EPUB original";
-  const facts = [job.kind === "epub" ? "EPUB de " + kb(job.file.size) : job.merged ? job.merged + " PDFs juntos, " + kb(job.file.size) : "PDF de " + kb(job.file.size),
+  const facts = [job.kind === "epub" ? "EPUB de " + kb(job.file.size) : job.merged ? job.merged + " PDFs juntos, " + kb(job.file.size) : srcLabel(job) + " de " + kb(job.file.size),
     job.pages ? job.pages + (job.pages > 1 ? " páginas no PDF" : " página no PDF") : "",
     job.chapters ? job.chapters + " capítulo" + (job.chapters > 1 ? "s" : "") : "",
     job.images ? job.images + (job.images > 1 ? " imagens" : " imagem") : "",
     job.pageMarks ? job.pageMarks + (job.pageMarks > 1 ? " páginas numeradas" : " página numerada") + (job.keptPages ? " (originais)" : "") : "",
     job.notesN ? job.notesN + (job.notesN > 1 ? " notas clicáveis" : " nota clicável") : "",
     job.headersRemoved ? job.headersRemoved + " linhas de cabeçalho e rodapé tiradas" : "",
+    job.outlineUsed ? "capítulos pelo sumário do PDF" : "",
+    job.columnPages ? job.columnPages + (job.columnPages > 1 ? " páginas em colunas" : " página em colunas") : "",
     job.autoFixed ? job.autoFixed + (job.autoFixed > 1 ? " correções suas aplicadas" : " correção sua aplicada") : ""].filter(Boolean);
   const ligSrc = job.ligatures || (v && v.ligatures);
   const lig = ligSrc ? Object.entries(ligSrc).sort((a, b) => b[1] - a[1]) : [];
@@ -104,7 +122,7 @@ function render(job){
   const sealHtml = !job.epub || job.busy || !st ? ""
     : st.length ? `<div class="verify warn" role="status">O EPUB saiu com problema de estrutura e pode não abrir no Kindle: ${st.map(esc).join("; ")}. Tente gerar de novo.</div>`
     : `<div class="seal"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.1 8.4 7.5 10 4.4-1.6 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><b>Pronto para o Kindle.</b> EPUB 3 sem erros de estrutura${!v ? "; texto não conferido (ligue “Conferir palavra por palavra” para comparar com o original)" : !v.total ? "" : !realN ? ", com o texto igual ao original" : ""}.</span></div>`;
+        <span><b>Pronto para o Kindle.</b> EPUB 3 sem erros de estrutura${job.reordered ? "; texto não conferido porque a ordem dos capítulos mudou" : job.fmt || job.fromEpub ? "" : !v ? "; texto não conferido (ligue “Conferir palavra por palavra” para comparar com o original)" : !v.total ? "" : !realN ? ", com o texto igual ao original" : ""}.</span></div>`;
   const busy = job.busy && !job.epub && !job.cancelled;
   const pct = busy && job.pct != null ? Math.max(3, Math.round(job.pct * 100)) : null;
   const cov = coverOf(job);
@@ -122,7 +140,8 @@ function render(job){
         ${job.epub ? `<button class="btn" data-a="epub">Baixar EPUB</button>
         <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>
         <button class="btn ghost" data-a="pv">Prévia</button>
-        ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}` : ""}
+        ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}
+        <button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>` : ""}
       </div>
     </div>
     <div class="row-status">
@@ -149,10 +168,12 @@ function render(job){
   on('[data-a="epub"]', () => offer(fileNameOf(job), job.epub));
   on('[data-a="kindle"]', e => sendToKindle(e, job, fileNameOf(job)));
   on('[data-a="pv"]', () => openPreview(job.epub, job.title, job));
+  on('[data-a="kepub"]', async e => { const b = e.currentTarget; b.disabled = true; try { offer(fileNameOf(job).replace(/\.epub$/, ".kepub.epub"), await toKepub(job.epub)); } catch (err) { console.warn(err); toast("Não consegui montar o KEPUB deste livro."); } b.disabled = false; });
   on('[data-a="docx"]', () => offer(safeFile(job.title) + ".docx", job.docx));
   on('[data-a="cancel"]', () => cancelJob(job));
   on('[data-a="remove"]', () => removeJob(job));
   on('[data-a="ocr"]', () => { job.forceOcr = true; retryPdf(job); });
+  on('[data-a="reopen"]', () => { job.kind = "pdf"; job.fromEpub = true; job.stage = "pdf"; job.verify = null; job.epub = null; job.draft = null; job.editOpen = true; retryPdf(job); });
   const pw = row.querySelector('[data-a="pw"]');
   if (pw) {
     const inp = pw.querySelector("input");
@@ -192,6 +213,7 @@ function cancelJob(job){
   else { job.progress = "cancelando"; render(job); }
 }
 function removeJob(job){
+  queueDone(job);
   const i = jobs.indexOf(job); if (i >= 0) jobs.splice(i, 1);
   if (job.el) job.el.remove();
   $("#empty").hidden = jobs.length > 0;

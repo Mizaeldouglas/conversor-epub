@@ -2,12 +2,15 @@
 const PG_A = "\uE000", PG_B = "\uE001";
 const PG_RE = /\uE000([^\uE001]*)\uE001/g;
 const pgMark = label => PG_A + label + PG_B;
-const stripPg = s => s.replace(PG_RE, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
+// link: \uE009 endereço \uE00A texto \uE00B
+const LK_ON = "\uE009", LK_MID = "\uE00A", LK_OFF = "\uE00B";
+const LK_RE = /\uE009[^\uE00A]*\uE00A|\uE00B/g;
+const stripPg = s => s.replace(PG_RE, "").replace(LK_RE, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
 const BR = "\uE008";   // quebra de linha dentro de um título ("1" / "A descoberta que…")
 const NUM_HEAD = /^((cap[íi]tulo|parte|livro|volume|chapter|part|book)\s+)?([0-9]+[½¼¾]?|[ivxlcdm]+)\.?$/i;
 // itálico e negrito: \uE004/\uE005 liga/desliga itálico, \uE006/\uE007 liga/desliga negrito
 const IT_ON = "\uE004", IT_OFF = "\uE005", BD_ON = "\uE006", BD_OFF = "\uE007";
-const plainOf = s => s.replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "");
+const plainOf = s => s.replace(/\uE009[^\uE00A]*\uE00A|\uE00B/g, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "");
 // muda o estilo no fim do texto: fecha antes do espaço final, abre depois dele
 function styleSwitch(text, from, to){
   const m = /\s*$/.exec(text), head = text.slice(0, m.index), tail = m[0];

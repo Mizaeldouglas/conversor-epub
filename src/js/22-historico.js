@@ -1,17 +1,31 @@
 /* ---------- histórico: últimos livros guardados neste navegador ---------- */
-const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12;
+const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12, QUEUE_STORE = "fila";
+// fila guardada: se a página fechar no meio, os arquivos que faltavam voltam na próxima visita (uma vez só)
+const queueSave = job => { if (job.file instanceof Blob && job.file.size < 300e6) idbReq("readwrite", st => st.put({ id: job.histId, file: job.file, date: Date.now() }), QUEUE_STORE).catch(() => {}); };
+const queueDone = job => { idbReq("readwrite", st => st.delete(job.histId), QUEUE_STORE).catch(() => {}); };
+async function queueRestore(){
+  try {
+    const all = (await idbReq("readonly", st => st.getAll(), QUEUE_STORE)) || [];
+    if (!all.length) return;
+    await idbReq("readwrite", st => st.clear(), QUEUE_STORE);
+    const files = all.sort((a, b) => a.date - b.date).map(r => r.file).filter(f => f && f.name);
+    if (!files.length) return;
+    addFiles(files, true);
+    toast(files.length > 1 ? `Retomando ${files.length} arquivos que estavam na fila.` : "Retomando o arquivo que estava na fila.", 5000);
+  } catch (e) { console.warn("fila", e); }
+}
 let histDbP = null;
 function histDb(){
   return histDbP ||= new Promise((res, rej) => {
     try {
-      const r = indexedDB.open(HIST_DB, 1);
-      r.onupgradeneeded = () => r.result.createObjectStore(HIST_STORE, { keyPath: "id" });
+      const r = indexedDB.open(HIST_DB, 2);
+      r.onupgradeneeded = () => { for (const s of [HIST_STORE, QUEUE_STORE]) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: "id" }); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     } catch (e) { rej(e); }
   });
 }
-const idbReq = (mode, fn) => histDb().then(db => new Promise((res, rej) => {
-  const tx = db.transaction(HIST_STORE, mode), st = tx.objectStore(HIST_STORE), r = fn(st);
+const idbReq = (mode, fn, store = HIST_STORE) => histDb().then(db => new Promise((res, rej) => {
+  const tx = db.transaction(store, mode), st = tx.objectStore(store), r = fn(st);
   tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
 }));
 const histAll = () => idbReq("readonly", st => st.getAll()).then(a => (a || []).sort((x, y) => y.date - x.date));

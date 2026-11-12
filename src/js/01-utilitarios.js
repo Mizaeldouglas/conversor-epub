@@ -3,7 +3,7 @@ const esc = s => String(s)
   .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "")
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const kb = n => n < 1048576 ? (n/1024).toFixed(0)+" KB" : (n/1048576).toFixed(1)+" MB";
-const baseName = f => f.replace(/\.(pdf|epub)$/i,"");
+const baseName = f => f.replace(/\.(pdf|epub|docx|txt|x?html?|md|markdown|fb2|mobi|azw3?|prc|cbz)$/i,"");
 const safeFile = s => (s.replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g," ").trim() || "livro").slice(0,120);
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==="x"?r:(r&3|8)).toString(16)}));

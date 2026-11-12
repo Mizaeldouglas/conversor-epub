@@ -17,7 +17,7 @@ await shot("previa", { width: 1280, height: 860 }, async p => {
   await p.selectOption("#pvToc", "2"); await p.waitForTimeout(300);
 });
 await shot("capitulos", { width: 1280, height: 860 }, async p => {
-  await p.locator(".row details.edit summary").click();
+  await p.locator(".row details.edit > summary").click();
   await p.locator(".chap").scrollIntoViewIfNeeded(); await p.evaluate(() => scrollBy(0, -120));
 });
 await shot("celular", { width: 390, height: 844 }, async p => { await p.locator(".row").scrollIntoViewIfNeeded(); await p.evaluate(() => scrollBy(0, -80)); });

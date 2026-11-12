@@ -1,5 +1,5 @@
 /* ---------- opções lembradas neste navegador ---------- */
-const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh"];
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images"];
 const OPT_KEY = "conversor-epub:opcoes";
 function loadOptions(){
   try {
@@ -21,5 +21,6 @@ function saveOptions(){
 loadOptions();
 OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });
 renderHistory();
+queueRestore();
 renderFixes();
 updateOptSum();

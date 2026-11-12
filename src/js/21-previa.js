@@ -1,6 +1,8 @@
 /* ---------- prévia do EPUB na tela (com o PDF ao lado) ---------- */
 const pv = { z: null, docs: [], i: 0, urls: [], job: null, side: false, pdf: null, pdfP: null, pdfPage: 1, pdfTask: null };
 function closePreview(){
+  if (pv.dirty && pv.job) { pv.dirty = false; rebuild(pv.job); }   // correções guardadas e ainda não aplicadas
+  $("#pvApplyBtn").hidden = true; setEditing(false);
   $("#preview").hidden = true; document.body.classList.remove("noscroll");
   const back = pv.opener; pv.opener = null;
   if (back && back.isConnected) back.focus({ preventScroll: true });
@@ -42,10 +44,11 @@ async function openPreview(blob, title, job, opt = {}){
     $("#pvToc").innerHTML = docs.map((d, i) => `<option value="${i}">${esc(d.name)}</option>`).join("");   // a posição já aparece em "3 de 8"
     $("#pvSideBtn").hidden = !canSide(job);
     $("#pvEditBtn").hidden = !(job && job.kind === "pdf" && job.src && !job.fixed && !job.merged && job.epub && !job.busy);
+    $("#pvTextBtn").hidden = $("#pvEditBtn").hidden;
     if ($("#preview").hidden) pv.opener = document.activeElement;
     $("#preview").hidden = false; document.body.classList.add("noscroll");
     $("#pvClose").focus({ preventScroll: true });
-    let start = 0, label = null;
+    let start = Math.min(opt.doc || 0, docs.length - 1), label = null;
     if (opt.pdfPage && canSide(job)) {
       label = job.src.labels[opt.pdfPage - 1];
       const k = docs.findIndex(d => d.pbs.includes(label));
@@ -157,6 +160,8 @@ $("#pvPdfNext").onclick = () => showPdfPage(pv.pdfPage + 1);
 $("#preview").onclick = e => { if (e.target.id === "preview") closePreview(); };
 document.addEventListener("keydown", e => {
   if ($("#preview").hidden) return;
+  const ed = document.querySelector(".pv-edit");
+  if (e.key === "Escape" && ed) { ed._cancel(); return; }
   if (e.key === "Escape") closePreview();
   else if (e.key === "Tab") {   // o foco fica dentro da prévia enquanto ela está aberta
     const els = [...$("#preview").querySelectorAll('button, select, a[href], input, [tabindex]:not([tabindex="-1"])')].filter(el => !el.closest("[hidden]") && !el.disabled);
@@ -176,4 +181,65 @@ $("#pvEditBtn").onclick = () => {
   job.editOpen = true; render(job);
   const box = document.getElementById("chap-" + job.histId);
   if (box) { box.scrollIntoView({ block: "start", behavior: "smooth" }); const i = box.querySelector("input"); if (i) i.focus({ preventScroll: true }); }
+};
+
+
+// corrigir o texto direto na prévia: clicar num parágrafo abre o texto para editar
+const elPlain = el => { const c = el.cloneNode(true); c.querySelectorAll('[role="doc-pagebreak"], sup, .pv-edit').forEach(x => x.remove()); c.querySelectorAll("br").forEach(b => b.replaceWith(" ")); return c.textContent.replace(/\s+/g, " ").trim(); };
+function blockForEl(el){
+  const want = elPlain(el); if (!want) return -1;
+  const hits = [];
+  pv.job.src.blocks.forEach((b, i) => { if (typeof b.text === "string" && /^(p|h1|h2|li|verse)$/.test(b.type) && blockPlain(b).plain.replace(/\s+/g, " ").trim() === want) hits.push(i); });
+  if (hits.length <= 1) return hits.length ? hits[0] : -1;
+  // textos repetidos ("— Sim."): vale a ordem em que aparecem no livro
+  let k = 0;
+  outer: for (let d = 0; d <= pv.i; d++) {
+    const root = d === pv.i ? $("#pvBody") : pv.docs[d].doc;
+    for (const e of root.querySelectorAll("p, h1, h2, li")) { if (e === el) break outer; if (!e.closest("aside") && elPlain(e) === want) k++; }
+  }
+  return hits[Math.min(k, hits.length - 1)];
+}
+function setEditing(on){
+  pv.editing = !!on;
+  $("#pvBody").classList.toggle("pv-editing", pv.editing);
+  $("#pvTextBtn").setAttribute("aria-pressed", String(pv.editing));
+  $("#pvTextBtn").textContent = pv.editing ? "Parar de corrigir" : "Corrigir texto";
+}
+$("#pvTextBtn").onclick = () => { setEditing(!pv.editing); if (pv.editing) toast("Clique num parágrafo ou título para corrigir o texto."); };
+$("#pvBody").addEventListener("click", e => {
+  if (!pv.editing || !pv.job) return;
+  if (e.target.closest(".pv-edit")) return;
+  const el = e.target.closest("p, h1, h2, li");
+  if (!el || el.closest("aside") || !$("#pvBody").contains(el)) return;
+  e.stopPropagation(); openTextEdit(el);
+}, true);
+function openTextEdit(el){
+  const job = pv.job, bi = blockForEl(el);
+  if (bi < 0) { toast("Não encontrei este trecho no texto do livro para editar."); return; }
+  const old = document.querySelector(".pv-edit"); if (old) old._cancel();
+  const b = job.src.blocks[bi];
+  const box = document.createElement("div"); box.className = "pv-edit";
+  box.innerHTML = `<textarea aria-label="Texto do parágrafo"></textarea><div class="pv-edit-row"><button class="btn sm" data-x="ok">Guardar</button><button class="btn ghost sm" data-x="no">Cancelar</button><span class="muted">Em branco, o parágrafo é apagado.</span></div>`;
+  const ta = box.querySelector("textarea");
+  ta.value = blockPlain(b).plain.replace(/\s+/g, " ").trim(); ta.rows = Math.min(14, Math.max(2, Math.ceil(ta.value.length / 64)));
+  el.hidden = true; el.after(box); ta.focus();
+  box._cancel = () => { box.remove(); el.hidden = false; };
+  box.querySelector('[data-x="no"]').onclick = box._cancel;
+  box.querySelector('[data-x="ok"]').onclick = () => {
+    if (!pv.dirty) snap(job);
+    const changed = setBlockPlain(b, ta.value);
+    if (changed === null) { if (!pv.dirty) job.undo.pop(); return box._cancel(); }
+    if (changed) (job.userTexts ||= []).push(changed.split(/\s+/).map(edgeW).filter(Boolean).join(" "));
+    pv.dirty = true; $("#pvApplyBtn").hidden = false;
+    el.textContent = ta.value.replace(/\s+/g, " ").trim(); el.classList.add("pv-changed"); box._cancel();
+    if (!el.textContent) el.hidden = true;
+  };
+}
+// aplica as correções e reabre a prévia no mesmo lugar
+$("#pvApplyBtn").onclick = () => {
+  const job = pv.job, at = pv.i; if (!job) return;
+  pv.dirty = false; $("#pvApplyBtn").hidden = true;
+  toast("Gerando o EPUB de novo…");
+  rebuild(job);
+  chain = chain.then(() => { if (job.epub && !$("#preview").hidden && pv.job === job) return openPreview(job.epub, job.title, job, { doc: at }); });
 };

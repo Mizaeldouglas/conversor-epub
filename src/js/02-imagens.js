@@ -71,3 +71,19 @@ function pageImages(ol){
   }
   return { imgs: out, opCount: ol.fnArray.length };
 }
+
+
+// imagens menores no EPUB: "small" limita o tamanho, "gray" também tira a cor (telas de tinta eletrônica)
+async function shrinkJpeg(blob, mode){
+  try {
+    const bmp = await createImageBitmap(blob);
+    const s = Math.min(1, 1264 / Math.max(bmp.width, bmp.height) * (bmp.height > bmp.width ? 1.33 : 1));
+    const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    if (mode === "gray") x.filter = "grayscale(1)";
+    x.drawImage(bmp, 0, 0, c.width, c.height);
+    const out = await toJpeg(c, 0.72); c.width = c.height = 0;
+    if (!out || out.size >= blob.size && mode !== "gray") return null;
+    return new Uint8Array(await out.arrayBuffer());
+  } catch { return null; }
+}

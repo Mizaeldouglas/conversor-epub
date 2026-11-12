@@ -38,10 +38,10 @@ test("PDF escaneado sem OCR: oferece converter com OCR", async () => {
   assert.match(await app.page.locator(".row").nth(2).textContent(), /2 páginas são só imagem/);
 });
 
-test("arquivo que não é PDF nem EPUB é recusado com aviso", async () => {
-  await app.page.setInputFiles("#file", { name: "notas.txt", mimeType: "text/plain", buffer: Buffer.from("oi") });
+test("arquivo de formato desconhecido é recusado com aviso", async () => {
+  await app.page.setInputFiles("#file", { name: "notas.xyz", mimeType: "application/octet-stream", buffer: Buffer.from("oi") });
   await app.page.waitForSelector("#toast:not([hidden])");
-  assert.match(await app.page.textContent("#toast"), /não é PDF nem EPUB/);
+  assert.match(await app.page.textContent("#toast"), /foi ignorado/);
 });
 
 test("nenhum erro de JavaScript inesperado", () => {

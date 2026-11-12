@@ -8,7 +8,7 @@ const fileNameOf = job => job.kind === "epub"
   ? safeFile(job.title || baseName(job.file.name)) + " (com páginas).epub"
   : safeFile(job.title + (job.author ? " - " + job.author : "")) + ".epub";
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/;
+const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/;
 // troca texto só fora dos marcadores (página, nota, itálico)
 function replaceInText(text, re, to){
   let n = 0;
@@ -74,7 +74,7 @@ function findParagraph(job, text){
 function locateDiff(job, d){
   const toks = (d.epub || d.prev || "").split(" ").filter(Boolean);
   if (!toks.length) return null;
-  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE008])+";
+  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE008]|\\uE009[^\\uE00A]*\\uE00A|\\uE00B)+";
   const re = new RegExp(toks.map(escRe).join(SEP), "u");
   const B = job.src.blocks;
   const exact = b => b.page != null && d.p >= b.page && d.p <= (b.last ?? b.page);
@@ -89,4 +89,54 @@ function locateDiff(job, d){
                   : { bi, start: m.index + m[0].length, end: m.index + m[0].length, text: "", insert: true };
   }
   return null;
+}
+
+
+// texto de um bloco sem os marcadores, com o mapa de volta para o texto original
+const EDIT_MK = /\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|\uE009[^\uE00A]*\uE00A|[\uE004-\uE007\uE00B]/g;
+function blockPlain(b){
+  const raw = b.text, map = []; let plain = "", last = 0;
+  const take = to => { for (let i = last; i < to; i++) { map.push(i); plain += raw[i] === BR ? " " : raw[i]; } };
+  for (const m of raw.matchAll(EDIT_MK)) { take(m.index); last = m.index + m[0].length; }
+  take(raw.length); map.push(raw.length);
+  return { plain, map };
+}
+// troca só o trecho que mudou; páginas, notas, itálico e links fora dele ficam como estavam
+function setBlockPlain(b, neu){
+  const { plain, map } = blockPlain(b);
+  neu = neu.replace(/\s+/g, " ").trim();
+  if (neu === plain.trim() || neu === plain) return null;
+  let p = 0; while (p < plain.length && p < neu.length && plain[p] === neu[p]) p++;
+  let s = 0; while (s < plain.length - p && s < neu.length - p && plain[plain.length - 1 - s] === neu[neu.length - 1 - s]) s++;
+  const a = map[p], z = map[plain.length - s];
+  const kept = (b.text.slice(a, z).match(EDIT_MK) || []).join("");
+  b.text = b.text.slice(0, a) + neu.slice(p, neu.length - s) + kept + b.text.slice(z);
+  // palavras em volta da mudança, para a conferência saber que foi você
+  let i = p, j = neu.length - s;
+  while (i > 0 && !/\s/.test(neu[i - 1])) i--;
+  while (j < neu.length && !/\s/.test(neu[j])) j++;
+  return neu.slice(i, j).trim();
+}
+
+// desfazer: guarda o livro antes de cada alteração (até 10)
+function snap(job){
+  if (!job.src) return;
+  (job.undo ||= []).push({ blocks: job.src.blocks.map(b => ({ ...b, rows: b.rows ? b.rows.map(r => [...r]) : undefined })), ref: (job.src.ref || []).map(r => ({ ...r })),
+    title: job.title, author: job.author, meta: { ...(job.meta || {}) }, coverBlob: job.coverBlob, coverOn: job.coverOn, userTexts: [...(job.userTexts || [])], reordered: job.reordered });
+  if (job.undo.length > 10) job.undo.shift();
+}
+function undoLast(job){
+  const u = job.undo && job.undo.pop(); if (!u) return;
+  job.src.blocks = u.blocks; job.src.ref = u.ref; job.title = u.title; job.author = u.author; job.meta = u.meta;
+  job.coverBlob = u.coverBlob; job.coverOn = u.coverOn; job.userTexts = u.userTexts; job.reordered = u.reordered; job.draft = null;
+}
+// troca um capítulo de lugar com o vizinho (dir: -1 sobe, 1 desce)
+function moveChapter(job, bi, dir){
+  const B = job.src.blocks, heads = chapterHeads(job).filter(h => !h.demote).map(h => h.bi);
+  const k = heads.indexOf(bi), o = k + dir;
+  if (k < 0 || o < 0 || o >= heads.length) return false;
+  const a = Math.min(k, o), start = heads[a], mid = heads[a + 1], end = a + 2 < heads.length ? heads[a + 2] : B.length;
+  const first = B.slice(start, mid), second = B.slice(mid, end);
+  B.splice(start, end - start, ...second, ...first);
+  return true;
 }

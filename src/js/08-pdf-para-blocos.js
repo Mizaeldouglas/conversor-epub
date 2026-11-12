@@ -1,4 +1,97 @@
 /* ---------- etapa 1: PDF -> blocos (texto + imagens) ---------- */
+const CELL = "\uE00C";   // separa as células de uma linha de tabela (só durante a leitura)
+const BUL_RE = /^[•▪◦‣●○■□▸►✓✔➢➤]\s*\S/;
+
+// sumário interno do PDF (marcadores): título, página e nível
+async function readOutline(pdf){
+  const out = [];
+  try {
+    const walk = async (items, depth) => {
+      for (const it of items || []) {
+        try {
+          let dest = it.dest;
+          if (typeof dest === "string") dest = await pdf.getDestination(dest);
+          const page = dest && dest[0] != null ? (typeof dest[0] === "object" ? await pdf.getPageIndex(dest[0]) + 1 : dest[0] + 1) : 0;
+          const kids = !!(it.items && it.items.length);
+          if (page && it.title && it.title.trim()) out.push({ title: it.title.trim(), page, depth, kids });
+          if (kids && depth < 2) await walk(it.items, depth + 1);
+        } catch {}
+      }
+    };
+    await walk(await pdf.getOutline(), 0);
+  } catch {}
+  return out;
+}
+// usa o sumário do PDF para marcar os títulos: vale mais que o tamanho da fonte
+function applyOutline(blocks, outline){
+  if (outline.length < 2) return 0;
+  const norm = t => stripPg(stripNotes(t)).toLowerCase().normalize("NFD").replace(/[^\p{L}\p{N}]+/gu, "");
+  const hits = new Map();
+  for (const o of outline) {
+    const t = norm(o.title); if (t.length < 2) continue;
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      if (typeof b.text !== "string" || !/^(h1|h2|p)$/.test(b.type) || b.page == null || hits.has(i) || b.text.length > 200) continue;
+      if (o.page < b.page || o.page > (b.last ?? b.page)) continue;
+      const n = norm(b.text); if (!n) continue;
+      const close = Math.min(n.length, t.length) / Math.max(n.length, t.length) >= 0.5;
+      if (n === t || (close && (t.endsWith(n) || t.startsWith(n) || n.endsWith(t) || n.startsWith(t)))) { hits.set(i, o); break; }
+    }
+  }
+  if (hits.size < Math.max(2, outline.length * 0.5)) return 0;
+  const nested = [...hits.values()].some(o => o.depth === 0 && o.kids);
+  blocks.forEach((b, i) => {
+    const o = hits.get(i);
+    if (o) { b.type = o.depth === 0 || (nested && o.depth === 1) ? "h1" : "h2"; delete b.demote; b.part = nested && o.depth === 0 && o.kids; }
+    else if (b.type === "h1") b.type = "h2";
+  });
+  return hits.size;
+}
+// texto em duas colunas: acha o corredor vazio no meio da página
+function findGutter(items, pageW){
+  const its = items.filter(i => i.str && i.str.trim() && !i.dropCap);
+  if (its.length < 30) return null;
+  const BIN = 2, n = Math.ceil(pageW / BIN) + 1, cover = new Uint16Array(n), ys = new Set();
+  for (const i of its) {
+    const x = i.transform[4], w = i.width || 0;
+    for (let k = Math.max(0, Math.floor(x / BIN)), e = Math.min(n - 1, Math.floor((x + w) / BIN)); k <= e; k++) cover[k]++;
+    ys.add(Math.round(i.transform[5]));
+  }
+  const thr = Math.max(1, ys.size * 0.04);
+  let best = null, run = 0;
+  for (let k = Math.floor(n * 0.3); k <= Math.ceil(n * 0.7); k++) {
+    if (cover[k] <= thr) { run++; if (!best || run > best.len) best = { end: k, len: run }; } else run = 0;
+  }
+  if (!best || best.len * BIN < 8) return null;
+  const gx = (best.end - best.len / 2 + 0.5) * BIN;
+  const stat = side => {
+    const lines = new Map();
+    for (const i of its) { const c = i.transform[4] + (i.width || 0) / 2; if ((c < gx) !== side) continue; const k = Math.round(i.transform[5]); lines.set(k, (lines.get(k) || 0) + i.str.replace(/\s/g, "").length); }
+    const v = [...lines.values()], chars = v.reduce((a, b) => a + b, 0);
+    return { n: v.length, avg: chars / (v.length || 1), chars };
+  };
+  const a = stat(true), b = stat(false);
+  if (a.n < 6 || b.n < 6 || a.avg < 15 || b.avg < 15 || Math.min(a.chars, b.chars) < (a.chars + b.chars) * 0.25) return null;
+  return gx;
+}
+// linhas seguidas com células alinhadas viram uma tabela
+function findTables(pageItems, p, pageH){
+  const tol = 9;
+  for (let i = 0; i < pageItems.length; i++) {
+    const a = pageItems[i];
+    if (a.kind !== "line" || !a.cells) continue;
+    let j = i;
+    while (j + 1 < pageItems.length && pageItems[j + 1].kind === "line" && pageItems[j + 1].cells && pageItems[j + 1].col === a.col
+      && pageItems[j].y - pageItems[j + 1].y > 0 && pageItems[j].y - pageItems[j + 1].y < a.size * 3.2) j++;
+    if (j - i + 1 < 3) continue;
+    const run = pageItems.slice(i, j + 1), grid = [];
+    for (const l of run) for (const x of l.cellX) if (!grid.some(g => Math.abs(g - x) < tol)) grid.push(x);
+    grid.sort((x, y) => x - y);
+    if (grid.length < 2 || grid.length > 8 || run.some(l => l.size > a.size * 1.25)) { i = j; continue; }
+    const rows = run.map(l => { const r = grid.map(() => ""); l.cells.forEach((t, k) => { const g = grid.findIndex(g => Math.abs(g - l.cellX[k]) < tol); r[g] = r[g] ? r[g] + " " + t : t; }); return r; });
+    pageItems.splice(i, run.length, { page: p, kind: "table", y: a.y, col: a.col, rows, pageH });
+  }
+}
 async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const pdf = await pdfjsLib.getDocument({ data: buf, password: opts.password || undefined, isOffscreenCanvasSupported: false, fontExtraProperties: true }).promise;
   let metaTitle = "";
@@ -9,7 +102,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
   const fontStyle = new Map();
-  let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0;
+  let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0, columnPages = 0;
   if (opts.words === undefined && /^pt/i.test(lang || "")) opts.words = await loadWordList().catch(() => null);
   let cover = null;
   for (let p = 1; p <= pdf.numPages; p++) {
@@ -25,6 +118,9 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       page.cleanup(); continue;
     }
     const tc = await page.getTextContent({ disableNormalization: true });
+    let links = [];
+    try { links = (await page.getAnnotations()).filter(a => a.subtype === "Link" && a.url && /^(https?:|mailto:)/i.test(a.url) && a.rect).map(a => ({ r: a.rect, url: a.url })); } catch {}
+    const linkAt = (x, y) => { for (const l of links) if (x >= l.r[0] - 1 && x <= l.r[2] + 1 && y >= l.r[1] - 2 && y <= l.r[3] + 2) return l.url; return ""; };
     let ol = null, gs = { chars: [], keys: [], spaceBefore: [], real: false };
     try {
       ol = await page.getOperatorList();
@@ -76,22 +172,27 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       }
     }
     const pl = [];
+    const gutter = findGutter(tc.items, page.getViewport({ scale: 1 }).width);
     for (const it of tc.items) {
       if (!it.str || it.dropCap) continue;
       const blank = !it.str.trim();
       const size = Math.hypot(it.transform[2], it.transform[3]) || it.height || 10;
       const x = it.transform[4], y = it.transform[5];
       // tamanhos muito diferentes (número gigante do capítulo x título): só junta se estiverem na mesma base
-      let ln = pl.find(l => Math.abs(l.y - y) < lineTol(size, l.size));
-      if (!ln) { if (blank) continue; ln = { y, size, items: [] }; pl.push(ln); }
+      const iw = it.width || 0;
+      const col = gutter == null ? 0 : (x < gutter - 4 && x + iw > gutter + 4) ? -1 : x + iw / 2 < gutter ? 0 : 1;
+      let ln = pl.find(l => l.col === col && Math.abs(l.y - y) < lineTol(size, l.size));
+      if (!ln) { if (blank) continue; ln = { y, size, items: [], col }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
-      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName) });
+      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName),
+        lk: blank || !links.length ? "" : linkAt(x + iw / 2, y + size * 0.3) });
     }
     const pageItems = []; let pageChars = 0;
     const pageH = page.getViewport({ scale: 1 }).height;
     for (const ln of pl) {
       ln.items.sort((a, b) => a.x - b.x);
-      let text = "", end = null, chars = 0, sizeSum = 0, prevIt = null, curSt = 0;
+      let text = "", end = null, chars = 0, sizeSum = 0, prevIt = null, curSt = 0, curLk = "";
+      const cellX = [];
       // linha de base: o trecho de letra maior da linha (para achar números sobrescritos de nota)
       const base = ln.items.filter(i => !i.blank).reduce((a, b) => (!a || b.size > a.size ? b : a), null);
       for (const it of ln.items) {
@@ -102,22 +203,30 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
           // trechos desenhados fora de ordem (ex.: pontuação em outra fonte): vale o espaço real do PDF antes da palavra
           else sp = (gs.real && it.firstIdx >= 0 && !!gs.spaceBefore[it.firstIdx]) || (end !== null && it.x - end > it.size * (gs.real ? 0.6 : 0.25));
           if (sp) text += " ";
+          // vão bem largo entre trechos da mesma linha: outra célula (tabela)
+          if (end !== null && it.x - end > it.size * 2.2) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + CELL; curSt = 0; curLk = ""; cellX.push(it.x); }
         }
+        if (!cellX.length) cellX.push(it.x);
         const sup = opts.notes && base && it !== base && it.size < base.size * 0.8 && it.y - base.y > base.size * 0.15
           && /^\s*([0-9]{1,3}|[*†‡])\s*$/.test(it.str);
         const lead = /^\s*/.exec(it.str)[0];
         if (lead) text += lead;
+        if (it.lk !== curLk) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + (it.lk ? LK_ON + it.lk + LK_MID : ""); curSt = 0; curLk = it.lk; }
         const want = sup ? curSt : it.st;
         if (want !== curSt) { text = styleSwitch(text, curSt, want); curSt = want; }
         text += sup ? "\uE002" + it.str.trim() + "\uE003" : it.str.slice(lead.length); end = it.x + it.w; prevIt = it;
         const n = it.str.replace(/\s/g, "").length; chars += n; sizeSum += n * it.size;
       }
       if (curSt) text = styleSwitch(text, curSt, 0);
+      if (curLk) text += LK_OFF;
       text = text.replace(/\s+/g, " ").trim().replace(/\uE004(\s*)\uE005|\uE006(\s*)\uE007/g, "$1$2");
+      let cells = null;
+      if (text.includes(CELL)) { cells = text.split(CELL).map(t => t.trim()); if (cells.some(t => !plainOf(t).trim())) cells = null; text = text.replace(/\s*\uE00C\s*/g, " "); }
       if (!plainOf(text).trim()) continue;
       pageChars += chars;
       const firstReal = ln.items.find(i => !i.blank) || ln.items[0];
-      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH });
+      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
+        cells: cells && cells.length === cellX.length ? cells : null, cellX });
     }
     // capitular volta para o começo da primeira linha do parágrafo ("M" + "ira tinha" = "Mira tinha")
     for (const cap of caps) {
@@ -161,11 +270,21 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (r && r.w >= 40 && r.h >= 40) pageItems.push({ page: p, kind: "img", y: im.top, key: r.w + "x" + r.h + ":" + r.blob.size, frac: im.bw * im.bh / pageArea, ...r });
     }
     pageItems.sort((a, b) => b.y - a.y);
+    if (gutter != null) {   // lê a coluna da esquerda inteira antes da direita; linhas de página inteira separam os trechos
+      const full = pageItems.filter(i => i.kind !== "line" || i.col === -1), out = [];
+      const zone = (hi, lo) => { for (const c of [0, 1]) out.push(...pageItems.filter(i => i.kind === "line" && i.col === c && i.y < hi && i.y > lo)); };
+      let top = Infinity;
+      for (const f of full) { zone(top, f.y); out.push(f); top = f.y; }
+      zone(top, -Infinity);
+      pageItems.splice(0, pageItems.length, ...out); columnPages++;
+    }
+    findTables(pageItems, p, pageH);
     items.push(...pageItems);
     page.cleanup();
   }
   const numPages = pdf.numPages;
   const labels = Array.from({ length: pdf.numPages }, (_, i) => labelOf(i + 1));
+  const outline = mode === "auto" ? await readOutline(pdf) : [];
   await pdf.destroy();
   if (ocrW) ocrW.terminate().catch(() => {});
   if (!items.length) throw Object.assign(new Error("Não encontrei texto nem imagens neste PDF."), { name: "EmptyPdf" });
@@ -234,10 +353,10 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   if (removed.size) { filtered = filtered.filter(l => !removed.has(l)); lines = lines.filter(l => !removed.has(l)); }
 
   await tick();
-  const geo = {};
+  const geo = {}, gk = l => l.page + ":" + (l.col > 0 ? 1 : 0);
   for (const l of lines) {
     if (Math.abs(l.size - body) > body * 0.08) continue;
-    const g = (geo[l.page] ||= { lefts: [], rights: [], prevY: null, gaps: [] });
+    const g = (geo[gk(l)] ||= { lefts: [], rights: [], prevY: null, gaps: [] });
     g.lefts.push(Math.round(l.x0)); g.rights.push(l.x1);
     if (g.prevY !== null) { const d = g.prevY - l.y; if (d > 0 && d < body * 3) g.gaps.push(d); }
     g.prevY = l.y;
@@ -251,12 +370,55 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const keepHyphen = (head, tail) => hyphenWords.has((head + "-" + tail).toLowerCase())
     || /^(lhe|lhes)$/i.test(tail) || (/^(lo|la|los|las)$/i.test(tail) && /[áéêíóôú]$/i.test(head));
 
+  // títulos do sumário do PDF: a linha vira título mesmo na fonte do corpo
+  if (outline.length >= 2) {
+    const norm = t => stripNotes(t).toLowerCase().normalize("NFD").replace(/[^\p{L}\p{N}]+/gu, "");
+    const byPage = new Map();
+    for (const l of lines) { if (!byPage.has(l.page)) byPage.set(l.page, []); byPage.get(l.page).push(l); }
+    for (const o of outline) {
+      const t = norm(o.title), pls = byPage.get(o.page) || [];
+      if (t.length < 2) continue;
+      for (let i = 0; i < pls.length; i++) {
+        let acc = "", k = i;
+        while (k < pls.length && !pls[k].olLevel && norm(pls[k].plain) && t.startsWith(acc + norm(pls[k].plain))) { acc += norm(pls[k].plain); k++; if (acc === t) break; }
+        if (acc === t) { for (let j = i; j < k; j++) pls[j].olLevel = o.depth === 0 ? 1 : 2; break; }
+      }
+    }
+  }
+  // versos: três ou mais linhas curtas e recuadas, bem mais estreitas que o texto
+  {
+    let run = [], vid = 0;
+    const flush = () => {
+      if (run.length >= 3) {
+        // mais estreito do que uma citação recuada dos dois lados seria: as linhas acabam cedo de propósito
+        const g = geo[gk(run[0])], maxR = Math.max(...run.map(l => l.x1)), minL = Math.min(...run.map(l => l.x0));
+        // prosa quebra a linha onde acaba o espaço; verso quebra na pontuação ou abre cada linha com maiúscula
+        const frac = re => run.filter(l => re.test(l.plain.trim())).length / run.length;
+        const versey = frac(/[,;.!?:…—–]["”»')]?$/u) >= 0.6 || frac(/^["“«(]?\p{Lu}/u) >= 0.75;
+        if (g && versey && maxR < g.right - (minL - g.left) - body * 3 && run.every(l => l.x0 >= g.left + body * 1.2 && !l.olLevel && !/^[—–-]\s/.test(l.plain))) { vid++; for (const l of run) l.verse = vid; }
+      }
+      run = [];
+    };
+    for (const l of filtered) {
+      const ok = l.kind === "line" && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
+      const last = run[run.length - 1];
+      if (!ok || (last && (last.page !== l.page || last.col !== l.col || last.y - l.y <= 0 || last.y - l.y > lineGap * 1.5))) flush();
+      if (ok) run.push(l);
+    }
+    flush();
+  }
   await tick();
   const blocks = [];
   let cur = null, prev = null, lastPage = 0;
   const terminalRe = /[.!?:;»”"')\]]$/;
   const terminal = { test: t => terminalRe.test(plainOf(t.replace(/\uE002[^\uE003]*\uE003/g, "")).trimEnd()) };   // chamada de nota no fim não conta
   for (const l of filtered) {
+    if (l.kind === "table") {
+      const rows = l.rows.map(r => [...r]);
+      if (l.page !== lastPage) { rows[0][0] = pgMark(labelOf(l.page)) + rows[0][0]; lastPage = l.page; }
+      blocks.push({ type: "table", rows, page: l.page, last: l.page });
+      cur = null; prev = null; continue;
+    }
     if (l.kind !== "line") {
       if (l.page !== lastPage) { blocks.push({ type: "pg", label: labelOf(l.page) }); lastPage = l.page; }
       blocks.push({ type: "img", blob: l.blob, w: l.w, h: l.h, full: l.kind === "pageimg" });
@@ -265,14 +427,14 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     if (PAGE_NUM_RE.test(l.plain) && l.size < body * 1.3) continue;   // número grande é o número do capítulo, não da página
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
-    const gg = geo[l.page] || { left: l.x0, right: l.x1 };
+    const gg = geo[gk(l)] || { left: l.x0, right: l.x1 };
     // quebra de cena: linha só com sinais ("* * *", "#", "⁂")
     const sc = l.plain.trim();
     if (sc.length <= 20 && /^[\s*•·#~◆◇❖✦✧⁂§_=—–♦❦❧✶✱✳⁎-]+$/u.test(sc)) {
       blocks.push({ type: "scene", text: mark + sc.replace(/\s+/g, " "), page: l.page, last: l.page });
       cur = null; prev = null; continue;
     }
-    let level = l.size >= body * 1.35 ? 1 : l.size >= body * 1.15 ? 2 : 0;
+    let level = l.olLevel || (l.size >= body * 1.35 ? 1 : l.size >= body * 1.15 ? 2 : 0);
     // capítulo pelo texto ("Capítulo 12", "PARTE II", "Prólogo"), mesmo com a fonte do corpo
     if (!level && l.plain.length <= 70 && CHAP_RE.test(stripNotes(l.plain).trim()) && l.x1 < gg.right - body * 3
         && (!cur || !prev || prev.isHead || prev.page !== l.page || terminal.test(prev.text))) level = 1;
@@ -287,10 +449,20 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       else blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page });
       cur = null; prev = { ...l, isHead: true }; continue;
     }
-    const g = geo[l.page] || { left: l.x0, right: l.x1 };
-    let start = !cur || !prev, sceneGap = false;
-    if (!start) {
-      if (prev.page === l.page) {
+    const g = gg;
+    // versos: cada linha continua sendo uma linha
+    if (l.verse) {
+      if (cur && cur.verse === l.verse) { cur.text += BR + mark + l.text; cur.last = l.page; }
+      else { cur = { type: "verse", verse: l.verse, text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur); }
+      prev = { ...l, isHead: false }; continue;
+    }
+    const isBul = BUL_RE.test(l.plain);
+    let start = !cur || !prev || cur.type === "verse", sceneGap = false;
+    // item de lista: as linhas seguintes, recuadas, continuam o mesmo item
+    if (!start && cur.type === "li" && !isBul && prev.page === l.page && prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 1.55 && l.x0 > cur.x0 + body * 0.4) start = false;
+    else if (isBul || (cur && cur.type === "li")) start = true;
+    else if (!start) {
+      if (prev.page === l.page && prev.col === l.col) {
         const gap = prev.y - l.y;
         if (gap > lineGap * 1.55) {
           start = true;
@@ -305,7 +477,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     if (!start) cur.last = l.page;
     if (start) {
       if (sceneGap) blocks.push({ type: "scene", text: "", page: l.page, last: l.page });
-      cur = { type: "p", text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur);
+      cur = { type: isBul ? "li" : "p", text: mark + l.text, page: l.page, last: l.page, x0: l.x0 }; blocks.push(cur);
     } else {
       let [ja, jb] = joinParts(cur.text, l.text), pa = plainOf(ja), pb = plainOf(jb);
       // palavra composta quebrada com o hífen repetido na linha seguinte ("terças-" / "-feiras")
@@ -323,6 +495,16 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     prev = { ...l, isHead: false };
   }
   await tick();
+  // lista numerada: três ou mais parágrafos seguidos "1." "2." "3."
+  for (let i = 0; i < blocks.length; i++) {
+    const num = b => { const m = b && b.type === "p" && /^\(?(\d{1,2})[.)]\s+\S/.exec(stripPg(b.text)); return m ? +m[1] : null; };
+    const n0 = num(blocks[i]); if (n0 == null) continue;
+    let j = i; while (num(blocks[j + 1]) === n0 + (j + 1 - i)) j++;
+    if (j - i >= 2) for (let k = i; k <= j; k++) blocks[k].type = "li";
+    i = j;
+  }
+  for (const b of blocks) if (b.type === "li") b.text = b.text.replace(/^((?:\uE000[^\uE001]*\uE001)?[•▪◦‣●○■□▸►✓✔➢➤])(?=\S)/, "$1 ");
+  const outlineUsed = applyOutline(blocks, outline);
   // notas entram logo depois do parágrafo que as chama; chamadas sem nota voltam a ser texto comum
   if (notesList.length) {
     const byId = new Map(notesList.map(n => [n.id, n])), out = [];
@@ -359,6 +541,6 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   for (const b of blocks) if (typeof b.text === "string") b.text = applyLigatures(liga, b.text, "");
   const used = liga.used, unresolved = liga.unresolved;
   liga.used = {}; for (const r of ref) r.w = applyLigatures(liga, r.w, "\uFFFD");
-  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages,
+  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages, outlineUsed, columnPages,
     approx: textPages > 0 && realPages < textPages / 2 };
 }

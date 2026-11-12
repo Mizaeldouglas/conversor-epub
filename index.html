@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Lombada: PDF para EPUB</title>
-<meta name="description" content="Converta PDF em EPUB para ler no Kindle, com capítulos, sumário, páginas numeradas e o texto conferido palavra por palavra. Tudo no seu navegador: o arquivo não sai do seu computador.">
+<meta name="description" content="Converta PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capítulos, sumário, páginas numeradas e o texto conferido palavra por palavra. Tudo no seu navegador: o arquivo não sai do seu computador.">
 <meta name="theme-color" content="#2536c7">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Lombada">
@@ -233,11 +233,28 @@ details.edit[open] > summary::before{transform:rotate(45deg) translate(-2px,-2px
 .newchap .btn{justify-self:start}
 label.mini{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
 input[type=checkbox]:not(.sw){accent-color:var(--accent);width:15px;height:15px;margin:0}
-.findrep{display:grid;gap:10px;font-size:14px}
+.findrep,.reopen,.imgalts,.undo{display:grid;gap:10px;font-size:14px}
+.reopen,.imgalts{border-top:1px solid var(--line-soft);padding-top:18px}
+.reopen > b,.imgalts > b{font-weight:700;font-size:15px}
+.reopen .btn{justify-self:start}
 .fr-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .fr-row input[type=text]{flex:1 1 180px;width:auto}
 .fr-count{flex:1;text-align:right;font-size:13px}
 .edit-actions{display:flex;justify-content:flex-end;border-top:1px solid var(--line-soft);padding-top:16px}
+
+.chap-list .mv{display:inline-flex;gap:4px}
+.chap-list .mv .btn{padding:3px 8px}
+.imgalts ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;max-height:320px;overflow:auto}
+.imgalts li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center}
+.imgalts img{width:56px;height:56px;object-fit:cover;border-radius:6px;background:var(--sunk)}
+.lk-list{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:6px}
+.lk-list li{display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.reconv{border-top:1px solid var(--line-soft);padding-top:16px;font-size:14px}
+details.reconv > summary{cursor:pointer;font-weight:650;color:var(--accent);width:max-content;max-width:100%}
+.reconv-body{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-top:12px}
+.reconv-body label:not(.mini){display:flex;gap:8px;align-items:center;font-weight:600;font-size:13px}
+.reconv-body select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:14px}
+.edit-actions{gap:8px}
 
 /* estante */
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:28px 22px}
@@ -334,6 +351,14 @@ body.noscroll{overflow:hidden}
 .pv-page hr.cena{border:0;height:1.2em;margin:0}
 .pv-page .pv-hit{background:color-mix(in srgb,var(--mark) 60%,transparent);border-radius:3px;outline:2px solid var(--mark);outline-offset:1px}
 
+.pv-editing .pv-page :is(p,h1,h2,li):not(aside *){cursor:text;border-radius:4px}
+.pv-editing .pv-page :is(p,h1,h2,li):not(aside *):hover{background:color-mix(in srgb,var(--mark) 30%,transparent)}
+.pv-page .pv-changed{background:color-mix(in srgb,var(--mark) 45%,transparent)}
+.pv-edit{font:15px/1.5 var(--f-ui);margin:.6em 0;display:grid;gap:8px}
+.pv-edit textarea{width:100%;font:16px/1.6 var(--f-book);background:var(--surface);color:var(--ink);border:2px solid var(--accent);border-radius:8px;padding:10px 12px;resize:vertical}
+.pv-edit-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.pv-head{flex-wrap:wrap}
+
 /* telas menores */
 @media (max-width:1040px){
   .layout{grid-template-columns:minmax(0,1fr);gap:28px;padding-top:24px}
@@ -381,10 +406,10 @@ body.noscroll{overflow:hidden}
 </header>
 
 <div class="hero">
-  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos para converter">
     <div class="drop-copy">
       <h2>Seu PDF vira livro de Kindle</h2>
-      <p class="what">Solte aqui PDFs ou EPUBs, quantos quiser. O PDF sai como EPUB com capítulos, sumário e notas, e cada palavra é conferida com o original. O EPUB pronto ganha números de página.</p>
+      <p class="what">Solte aqui PDFs ou EPUBs, quantos quiser. O PDF sai como EPUB com capítulos, sumário e notas, e cada palavra é conferida com o original. O EPUB pronto ganha números de página. Também abre DOCX, TXT, HTML, Markdown, FB2, MOBI e CBZ.</p>
       <div class="drop-row">
         <span class="btn mark">Escolher arquivos</span>
         <span class="privacy"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Os arquivos não saem do seu aparelho</span>
@@ -411,7 +436,7 @@ body.noscroll{overflow:hidden}
         <circle cx="225" cy="214" r="3.5" fill="#3a4170"/>
       </g>
     </svg>
-    <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple hidden>
+    <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub,.docx,.txt,.html,.htm,.md,.markdown,.fb2,.mobi,.azw,.azw3,.prc,.cbz" multiple hidden>
   </div>
 </div>
 
@@ -459,8 +484,12 @@ body.noscroll{overflow:hidden}
         <details><summary>Capítulos, notas, cenas e números de página</summary><div class="ans">
           <p>Linhas em fonte maior, ou como “Capítulo 12”, “PARTE II” e “Prólogo”, abrem capítulo. Notas de rodapé viram links que abrem numa janelinha no Kindle. “* * *” e linhas em branco entre parágrafos viram quebra de cena.</p>
           <p>Os números de página seguem o padrão EPUB 3: Apple Books, Kobo e Thorium mostram “página 12 de 300”. O Kindle mostra posições, então use a opção de mostrar o número no texto se quiser vê-lo lá.</p></div></details>
+        <details><summary>Quais arquivos posso converter?</summary><div class="ans">
+          <p>PDF, DOCX (Word, Google Docs, LibreOffice), TXT, HTML, Markdown, FB2, MOBI e AZW3 sem proteção, e CBZ de quadrinhos. Todos viram EPUB com capítulos, sumário, notas, links, listas e tabelas, e podem ser editados do mesmo jeito.</p>
+          <p>No PDF, o sumário interno do arquivo (os marcadores) define os capítulos quando existe; texto em duas colunas é lido uma coluna de cada vez; versos mantêm as quebras de linha. A conferência palavra por palavra vale só para PDF e EPUB.</p></div></details>
         <details><summary>Editar o livro depois de converter</summary><div class="ans">
-          <p>Em “Editar livro” você troca a capa, acerta título e autor, coloca série, volume, gênero e sinopse, renomeia ou junta capítulos e localiza e substitui no livro todo. O nome do arquivo já vem limpo: “693_A_SAGA_DE_ZEPHYRUS_EBOOK” vira “A Saga de Zephyrus”.</p></div></details>
+          <p>Em “Editar livro” você troca a capa, acerta título e autor, coloca série, volume, gênero e sinopse, renomeia, junta ou muda a ordem dos capítulos, descreve as imagens e localiza e substitui no livro todo. Na prévia, “Corrigir texto” deixa clicar num parágrafo e reescrever. “Desfazer a última alteração” volta um passo.</p>
+          <p>Um EPUB pronto também pode ser aberto para editar tudo: o Lombada remonta o livro com o mesmo texto, imagens e notas. O nome do arquivo já vem limpo: “693_A_SAGA_DE_ZEPHYRUS_EBOOK” vira “A Saga de Zephyrus”.</p></div></details>
         <details><summary>PDF escaneado, quadrinhos e mangá</summary><div class="ans">
           <p>Com o OCR ligado, páginas que são só imagem viram texto. O reconhecimento roda no navegador e pode trocar letras: confira na prévia com o PDF ao lado. O OCR funciona no site e no app instalado.</p>
           <p>Nos modos quadrinhos e mangá, cada página vira uma tela inteira, como no PDF; no mangá, as páginas viram da direita para a esquerda.</p></div></details>
@@ -471,10 +500,13 @@ body.noscroll{overflow:hidden}
         <details id="privacidade"><summary>Privacidade: o que acontece com meus arquivos?</summary><div class="ans">
           <p>Nada sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
           <p>O navegador baixa apenas o próprio programa: as bibliotecas de leitura de PDF e ZIP (cdnjs), as fontes da página (Google Fonts) e, se você ligar o OCR, o leitor de texto (jsDelivr). Esses serviços veem o seu endereço de internet, como em qualquer site, mas não os seus arquivos.</p>
-          <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, as opções escolhidas e as correções que você pediu para lembrar.</p>
+          <p>Só uma função manda algo para fora, e só quando você clica nela: “Buscar dados deste livro” envia o título e o autor ao Google Books e à Open Library para trazer capa e sinopse.</p>
+          <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar.</p>
           <p><button class="btn ghost sm" id="wipeBtn">Apagar tudo o que está guardado neste navegador</button></p></div></details>
-        <details><summary>Um EPUB não abre</summary><div class="ans">
-          <p>EPUB com DRM (comprado em loja com proteção) não pode ser aberto. Funciona com EPUB sem proteção.</p></div></details>
+        <details><summary>Kobo e outros leitores</summary><div class="ans">
+          <p>O EPUB abre em Kobo, Apple Books e Thorium. Para o Kobo, o botão “KEPUB” baixa a versão que o aparelho lê mais rápido e com estatísticas de leitura. Em “Aparência do EPUB”, “Imagens” deixa o arquivo mais leve, com a opção de tons de cinza para telas de tinta eletrônica.</p></div></details>
+        <details><summary>Um arquivo não abre</summary><div class="ans">
+          <p>Livros com DRM (comprados em loja com proteção) não podem ser abertos, em nenhum formato. MOBI com compressão Huffman também não: converta para EPUB no Calibre e envie o EPUB.</p></div></details>
       </div>
     </section>
   </div>
@@ -529,6 +561,8 @@ body.noscroll{overflow:hidden}
           </div>
           <label class="field" for="lookIndent"><span>Parágrafos</span>
             <select id="lookIndent"><option value="indent" selected>Recuo na primeira linha</option><option value="space">Sem recuo, com espaço entre eles</option></select></label>
+          <label class="field" for="images"><span>Imagens</span>
+            <select id="images"><option value="orig" selected>Como no original</option><option value="small">Menores (arquivo mais leve)</option><option value="gray">Menores e em tons de cinza</option></select></label>
           <label class="sw-row" for="lookJustify"><span class="lbl">Texto justificado</span><input class="sw" id="lookJustify" type="checkbox" checked></label>
           <p class="hint">O Kindle pode trocar fonte e espaçamento pelas configurações dele; isto vale como padrão do livro.</p>
         </div>
@@ -558,7 +592,7 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">2.2.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">3.0.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
 </footer>
 
 <div class="updatebar" id="updateBar" hidden role="status">
@@ -571,6 +605,8 @@ body.noscroll{overflow:hidden}
   <div class="modal-box">
     <div class="pv-head">
       <b id="pvTitle">Prévia</b>
+      <button class="btn sm" id="pvApplyBtn" hidden>Gerar EPUB de novo</button>
+      <button class="btn ghost sm" id="pvTextBtn" aria-pressed="false" hidden>Corrigir texto</button>
       <button class="btn ghost sm" id="pvEditBtn" hidden>Editar capítulos</button>
       <button class="btn ghost sm" id="pvSideBtn" aria-pressed="false" hidden>PDF ao lado</button>
       <button class="btn ghost sm" id="pvClose" aria-label="Fechar prévia">Fechar</button>
@@ -608,7 +644,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const $ = s => document.querySelector(s);
 const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const jobs = [];
-const VERSION = "2.2.0";
+const VERSION = "3.0.0";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -621,7 +657,7 @@ const esc = s => String(s)
   .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "")
   .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const kb = n => n < 1048576 ? (n/1024).toFixed(0)+" KB" : (n/1048576).toFixed(1)+" MB";
-const baseName = f => f.replace(/\.(pdf|epub)$/i,"");
+const baseName = f => f.replace(/\.(pdf|epub|docx|txt|x?html?|md|markdown|fb2|mobi|azw3?|prc|cbz)$/i,"");
 const safeFile = s => (s.replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g," ").trim() || "livro").slice(0,120);
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID() :
   "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==="x"?r:(r&3|8)).toString(16)}));
@@ -721,16 +757,35 @@ function pageImages(ol){
   return { imgs: out, opCount: ol.fnArray.length };
 }
 
+
+// imagens menores no EPUB: "small" limita o tamanho, "gray" também tira a cor (telas de tinta eletrônica)
+async function shrinkJpeg(blob, mode){
+  try {
+    const bmp = await createImageBitmap(blob);
+    const s = Math.min(1, 1264 / Math.max(bmp.width, bmp.height) * (bmp.height > bmp.width ? 1.33 : 1));
+    const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(bmp.width * s)); c.height = Math.max(1, Math.round(bmp.height * s));
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height);
+    if (mode === "gray") x.filter = "grayscale(1)";
+    x.drawImage(bmp, 0, 0, c.width, c.height);
+    const out = await toJpeg(c, 0.72); c.width = c.height = 0;
+    if (!out || out.size >= blob.size && mode !== "gray") return null;
+    return new Uint8Array(await out.arrayBuffer());
+  } catch { return null; }
+}
+
 /* ---------- marcadores de página ---------- */
 const PG_A = "\uE000", PG_B = "\uE001";
 const PG_RE = /\uE000([^\uE001]*)\uE001/g;
 const pgMark = label => PG_A + label + PG_B;
-const stripPg = s => s.replace(PG_RE, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
+// link: \uE009 endereço \uE00A texto \uE00B
+const LK_ON = "\uE009", LK_MID = "\uE00A", LK_OFF = "\uE00B";
+const LK_RE = /\uE009[^\uE00A]*\uE00A|\uE00B/g;
+const stripPg = s => s.replace(PG_RE, "").replace(LK_RE, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "").replace(/\s+/g, " ").trim();
 const BR = "\uE008";   // quebra de linha dentro de um título ("1" / "A descoberta que…")
 const NUM_HEAD = /^((cap[íi]tulo|parte|livro|volume|chapter|part|book)\s+)?([0-9]+[½¼¾]?|[ivxlcdm]+)\.?$/i;
 // itálico e negrito: \uE004/\uE005 liga/desliga itálico, \uE006/\uE007 liga/desliga negrito
 const IT_ON = "\uE004", IT_OFF = "\uE005", BD_ON = "\uE006", BD_OFF = "\uE007";
-const plainOf = s => s.replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "");
+const plainOf = s => s.replace(/\uE009[^\uE00A]*\uE00A|\uE00B/g, "").replace(/\uE008/g, " ").replace(/[\uE004-\uE007]/g, "");
 // muda o estilo no fim do texto: fecha antes do espaço final, abre depois dele
 function styleSwitch(text, from, to){
   const m = /\s*$/.exec(text), head = text.slice(0, m.index), tail = m[0];
@@ -1278,6 +1333,99 @@ const abortErr = () => { const e = new Error("Conversão cancelada."); e.name = 
 const tick = () => new Promise(r => setTimeout(r, 0));
 
 /* ---------- etapa 1: PDF -> blocos (texto + imagens) ---------- */
+const CELL = "\uE00C";   // separa as células de uma linha de tabela (só durante a leitura)
+const BUL_RE = /^[•▪◦‣●○■□▸►✓✔➢➤]\s*\S/;
+
+// sumário interno do PDF (marcadores): título, página e nível
+async function readOutline(pdf){
+  const out = [];
+  try {
+    const walk = async (items, depth) => {
+      for (const it of items || []) {
+        try {
+          let dest = it.dest;
+          if (typeof dest === "string") dest = await pdf.getDestination(dest);
+          const page = dest && dest[0] != null ? (typeof dest[0] === "object" ? await pdf.getPageIndex(dest[0]) + 1 : dest[0] + 1) : 0;
+          const kids = !!(it.items && it.items.length);
+          if (page && it.title && it.title.trim()) out.push({ title: it.title.trim(), page, depth, kids });
+          if (kids && depth < 2) await walk(it.items, depth + 1);
+        } catch {}
+      }
+    };
+    await walk(await pdf.getOutline(), 0);
+  } catch {}
+  return out;
+}
+// usa o sumário do PDF para marcar os títulos: vale mais que o tamanho da fonte
+function applyOutline(blocks, outline){
+  if (outline.length < 2) return 0;
+  const norm = t => stripPg(stripNotes(t)).toLowerCase().normalize("NFD").replace(/[^\p{L}\p{N}]+/gu, "");
+  const hits = new Map();
+  for (const o of outline) {
+    const t = norm(o.title); if (t.length < 2) continue;
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i];
+      if (typeof b.text !== "string" || !/^(h1|h2|p)$/.test(b.type) || b.page == null || hits.has(i) || b.text.length > 200) continue;
+      if (o.page < b.page || o.page > (b.last ?? b.page)) continue;
+      const n = norm(b.text); if (!n) continue;
+      const close = Math.min(n.length, t.length) / Math.max(n.length, t.length) >= 0.5;
+      if (n === t || (close && (t.endsWith(n) || t.startsWith(n) || n.endsWith(t) || n.startsWith(t)))) { hits.set(i, o); break; }
+    }
+  }
+  if (hits.size < Math.max(2, outline.length * 0.5)) return 0;
+  const nested = [...hits.values()].some(o => o.depth === 0 && o.kids);
+  blocks.forEach((b, i) => {
+    const o = hits.get(i);
+    if (o) { b.type = o.depth === 0 || (nested && o.depth === 1) ? "h1" : "h2"; delete b.demote; b.part = nested && o.depth === 0 && o.kids; }
+    else if (b.type === "h1") b.type = "h2";
+  });
+  return hits.size;
+}
+// texto em duas colunas: acha o corredor vazio no meio da página
+function findGutter(items, pageW){
+  const its = items.filter(i => i.str && i.str.trim() && !i.dropCap);
+  if (its.length < 30) return null;
+  const BIN = 2, n = Math.ceil(pageW / BIN) + 1, cover = new Uint16Array(n), ys = new Set();
+  for (const i of its) {
+    const x = i.transform[4], w = i.width || 0;
+    for (let k = Math.max(0, Math.floor(x / BIN)), e = Math.min(n - 1, Math.floor((x + w) / BIN)); k <= e; k++) cover[k]++;
+    ys.add(Math.round(i.transform[5]));
+  }
+  const thr = Math.max(1, ys.size * 0.04);
+  let best = null, run = 0;
+  for (let k = Math.floor(n * 0.3); k <= Math.ceil(n * 0.7); k++) {
+    if (cover[k] <= thr) { run++; if (!best || run > best.len) best = { end: k, len: run }; } else run = 0;
+  }
+  if (!best || best.len * BIN < 8) return null;
+  const gx = (best.end - best.len / 2 + 0.5) * BIN;
+  const stat = side => {
+    const lines = new Map();
+    for (const i of its) { const c = i.transform[4] + (i.width || 0) / 2; if ((c < gx) !== side) continue; const k = Math.round(i.transform[5]); lines.set(k, (lines.get(k) || 0) + i.str.replace(/\s/g, "").length); }
+    const v = [...lines.values()], chars = v.reduce((a, b) => a + b, 0);
+    return { n: v.length, avg: chars / (v.length || 1), chars };
+  };
+  const a = stat(true), b = stat(false);
+  if (a.n < 6 || b.n < 6 || a.avg < 15 || b.avg < 15 || Math.min(a.chars, b.chars) < (a.chars + b.chars) * 0.25) return null;
+  return gx;
+}
+// linhas seguidas com células alinhadas viram uma tabela
+function findTables(pageItems, p, pageH){
+  const tol = 9;
+  for (let i = 0; i < pageItems.length; i++) {
+    const a = pageItems[i];
+    if (a.kind !== "line" || !a.cells) continue;
+    let j = i;
+    while (j + 1 < pageItems.length && pageItems[j + 1].kind === "line" && pageItems[j + 1].cells && pageItems[j + 1].col === a.col
+      && pageItems[j].y - pageItems[j + 1].y > 0 && pageItems[j].y - pageItems[j + 1].y < a.size * 3.2) j++;
+    if (j - i + 1 < 3) continue;
+    const run = pageItems.slice(i, j + 1), grid = [];
+    for (const l of run) for (const x of l.cellX) if (!grid.some(g => Math.abs(g - x) < tol)) grid.push(x);
+    grid.sort((x, y) => x - y);
+    if (grid.length < 2 || grid.length > 8 || run.some(l => l.size > a.size * 1.25)) { i = j; continue; }
+    const rows = run.map(l => { const r = grid.map(() => ""); l.cells.forEach((t, k) => { const g = grid.findIndex(g => Math.abs(g - l.cellX[k]) < tol); r[g] = r[g] ? r[g] + " " + t : t; }); return r; });
+    pageItems.splice(i, run.length, { page: p, kind: "table", y: a.y, col: a.col, rows, pageH });
+  }
+}
 async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const pdf = await pdfjsLib.getDocument({ data: buf, password: opts.password || undefined, isOffscreenCanvasSupported: false, fontExtraProperties: true }).promise;
   let metaTitle = "";
@@ -1288,7 +1436,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
   const fontStyle = new Map();
-  let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0;
+  let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0, columnPages = 0;
   if (opts.words === undefined && /^pt/i.test(lang || "")) opts.words = await loadWordList().catch(() => null);
   let cover = null;
   for (let p = 1; p <= pdf.numPages; p++) {
@@ -1304,6 +1452,9 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       page.cleanup(); continue;
     }
     const tc = await page.getTextContent({ disableNormalization: true });
+    let links = [];
+    try { links = (await page.getAnnotations()).filter(a => a.subtype === "Link" && a.url && /^(https?:|mailto:)/i.test(a.url) && a.rect).map(a => ({ r: a.rect, url: a.url })); } catch {}
+    const linkAt = (x, y) => { for (const l of links) if (x >= l.r[0] - 1 && x <= l.r[2] + 1 && y >= l.r[1] - 2 && y <= l.r[3] + 2) return l.url; return ""; };
     let ol = null, gs = { chars: [], keys: [], spaceBefore: [], real: false };
     try {
       ol = await page.getOperatorList();
@@ -1355,22 +1506,27 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       }
     }
     const pl = [];
+    const gutter = findGutter(tc.items, page.getViewport({ scale: 1 }).width);
     for (const it of tc.items) {
       if (!it.str || it.dropCap) continue;
       const blank = !it.str.trim();
       const size = Math.hypot(it.transform[2], it.transform[3]) || it.height || 10;
       const x = it.transform[4], y = it.transform[5];
       // tamanhos muito diferentes (número gigante do capítulo x título): só junta se estiverem na mesma base
-      let ln = pl.find(l => Math.abs(l.y - y) < lineTol(size, l.size));
-      if (!ln) { if (blank) continue; ln = { y, size, items: [] }; pl.push(ln); }
+      const iw = it.width || 0;
+      const col = gutter == null ? 0 : (x < gutter - 4 && x + iw > gutter + 4) ? -1 : x + iw / 2 < gutter ? 0 : 1;
+      let ln = pl.find(l => l.col === col && Math.abs(l.y - y) < lineTol(size, l.size));
+      if (!ln) { if (blank) continue; ln = { y, size, items: [], col }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
-      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName) });
+      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName),
+        lk: blank || !links.length ? "" : linkAt(x + iw / 2, y + size * 0.3) });
     }
     const pageItems = []; let pageChars = 0;
     const pageH = page.getViewport({ scale: 1 }).height;
     for (const ln of pl) {
       ln.items.sort((a, b) => a.x - b.x);
-      let text = "", end = null, chars = 0, sizeSum = 0, prevIt = null, curSt = 0;
+      let text = "", end = null, chars = 0, sizeSum = 0, prevIt = null, curSt = 0, curLk = "";
+      const cellX = [];
       // linha de base: o trecho de letra maior da linha (para achar números sobrescritos de nota)
       const base = ln.items.filter(i => !i.blank).reduce((a, b) => (!a || b.size > a.size ? b : a), null);
       for (const it of ln.items) {
@@ -1381,22 +1537,30 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
           // trechos desenhados fora de ordem (ex.: pontuação em outra fonte): vale o espaço real do PDF antes da palavra
           else sp = (gs.real && it.firstIdx >= 0 && !!gs.spaceBefore[it.firstIdx]) || (end !== null && it.x - end > it.size * (gs.real ? 0.6 : 0.25));
           if (sp) text += " ";
+          // vão bem largo entre trechos da mesma linha: outra célula (tabela)
+          if (end !== null && it.x - end > it.size * 2.2) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + CELL; curSt = 0; curLk = ""; cellX.push(it.x); }
         }
+        if (!cellX.length) cellX.push(it.x);
         const sup = opts.notes && base && it !== base && it.size < base.size * 0.8 && it.y - base.y > base.size * 0.15
           && /^\s*([0-9]{1,3}|[*†‡])\s*$/.test(it.str);
         const lead = /^\s*/.exec(it.str)[0];
         if (lead) text += lead;
+        if (it.lk !== curLk) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + (it.lk ? LK_ON + it.lk + LK_MID : ""); curSt = 0; curLk = it.lk; }
         const want = sup ? curSt : it.st;
         if (want !== curSt) { text = styleSwitch(text, curSt, want); curSt = want; }
         text += sup ? "\uE002" + it.str.trim() + "\uE003" : it.str.slice(lead.length); end = it.x + it.w; prevIt = it;
         const n = it.str.replace(/\s/g, "").length; chars += n; sizeSum += n * it.size;
       }
       if (curSt) text = styleSwitch(text, curSt, 0);
+      if (curLk) text += LK_OFF;
       text = text.replace(/\s+/g, " ").trim().replace(/\uE004(\s*)\uE005|\uE006(\s*)\uE007/g, "$1$2");
+      let cells = null;
+      if (text.includes(CELL)) { cells = text.split(CELL).map(t => t.trim()); if (cells.some(t => !plainOf(t).trim())) cells = null; text = text.replace(/\s*\uE00C\s*/g, " "); }
       if (!plainOf(text).trim()) continue;
       pageChars += chars;
       const firstReal = ln.items.find(i => !i.blank) || ln.items[0];
-      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH });
+      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
+        cells: cells && cells.length === cellX.length ? cells : null, cellX });
     }
     // capitular volta para o começo da primeira linha do parágrafo ("M" + "ira tinha" = "Mira tinha")
     for (const cap of caps) {
@@ -1440,11 +1604,21 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (r && r.w >= 40 && r.h >= 40) pageItems.push({ page: p, kind: "img", y: im.top, key: r.w + "x" + r.h + ":" + r.blob.size, frac: im.bw * im.bh / pageArea, ...r });
     }
     pageItems.sort((a, b) => b.y - a.y);
+    if (gutter != null) {   // lê a coluna da esquerda inteira antes da direita; linhas de página inteira separam os trechos
+      const full = pageItems.filter(i => i.kind !== "line" || i.col === -1), out = [];
+      const zone = (hi, lo) => { for (const c of [0, 1]) out.push(...pageItems.filter(i => i.kind === "line" && i.col === c && i.y < hi && i.y > lo)); };
+      let top = Infinity;
+      for (const f of full) { zone(top, f.y); out.push(f); top = f.y; }
+      zone(top, -Infinity);
+      pageItems.splice(0, pageItems.length, ...out); columnPages++;
+    }
+    findTables(pageItems, p, pageH);
     items.push(...pageItems);
     page.cleanup();
   }
   const numPages = pdf.numPages;
   const labels = Array.from({ length: pdf.numPages }, (_, i) => labelOf(i + 1));
+  const outline = mode === "auto" ? await readOutline(pdf) : [];
   await pdf.destroy();
   if (ocrW) ocrW.terminate().catch(() => {});
   if (!items.length) throw Object.assign(new Error("Não encontrei texto nem imagens neste PDF."), { name: "EmptyPdf" });
@@ -1513,10 +1687,10 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   if (removed.size) { filtered = filtered.filter(l => !removed.has(l)); lines = lines.filter(l => !removed.has(l)); }
 
   await tick();
-  const geo = {};
+  const geo = {}, gk = l => l.page + ":" + (l.col > 0 ? 1 : 0);
   for (const l of lines) {
     if (Math.abs(l.size - body) > body * 0.08) continue;
-    const g = (geo[l.page] ||= { lefts: [], rights: [], prevY: null, gaps: [] });
+    const g = (geo[gk(l)] ||= { lefts: [], rights: [], prevY: null, gaps: [] });
     g.lefts.push(Math.round(l.x0)); g.rights.push(l.x1);
     if (g.prevY !== null) { const d = g.prevY - l.y; if (d > 0 && d < body * 3) g.gaps.push(d); }
     g.prevY = l.y;
@@ -1530,12 +1704,55 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const keepHyphen = (head, tail) => hyphenWords.has((head + "-" + tail).toLowerCase())
     || /^(lhe|lhes)$/i.test(tail) || (/^(lo|la|los|las)$/i.test(tail) && /[áéêíóôú]$/i.test(head));
 
+  // títulos do sumário do PDF: a linha vira título mesmo na fonte do corpo
+  if (outline.length >= 2) {
+    const norm = t => stripNotes(t).toLowerCase().normalize("NFD").replace(/[^\p{L}\p{N}]+/gu, "");
+    const byPage = new Map();
+    for (const l of lines) { if (!byPage.has(l.page)) byPage.set(l.page, []); byPage.get(l.page).push(l); }
+    for (const o of outline) {
+      const t = norm(o.title), pls = byPage.get(o.page) || [];
+      if (t.length < 2) continue;
+      for (let i = 0; i < pls.length; i++) {
+        let acc = "", k = i;
+        while (k < pls.length && !pls[k].olLevel && norm(pls[k].plain) && t.startsWith(acc + norm(pls[k].plain))) { acc += norm(pls[k].plain); k++; if (acc === t) break; }
+        if (acc === t) { for (let j = i; j < k; j++) pls[j].olLevel = o.depth === 0 ? 1 : 2; break; }
+      }
+    }
+  }
+  // versos: três ou mais linhas curtas e recuadas, bem mais estreitas que o texto
+  {
+    let run = [], vid = 0;
+    const flush = () => {
+      if (run.length >= 3) {
+        // mais estreito do que uma citação recuada dos dois lados seria: as linhas acabam cedo de propósito
+        const g = geo[gk(run[0])], maxR = Math.max(...run.map(l => l.x1)), minL = Math.min(...run.map(l => l.x0));
+        // prosa quebra a linha onde acaba o espaço; verso quebra na pontuação ou abre cada linha com maiúscula
+        const frac = re => run.filter(l => re.test(l.plain.trim())).length / run.length;
+        const versey = frac(/[,;.!?:…—–]["”»')]?$/u) >= 0.6 || frac(/^["“«(]?\p{Lu}/u) >= 0.75;
+        if (g && versey && maxR < g.right - (minL - g.left) - body * 3 && run.every(l => l.x0 >= g.left + body * 1.2 && !l.olLevel && !/^[—–-]\s/.test(l.plain))) { vid++; for (const l of run) l.verse = vid; }
+      }
+      run = [];
+    };
+    for (const l of filtered) {
+      const ok = l.kind === "line" && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
+      const last = run[run.length - 1];
+      if (!ok || (last && (last.page !== l.page || last.col !== l.col || last.y - l.y <= 0 || last.y - l.y > lineGap * 1.5))) flush();
+      if (ok) run.push(l);
+    }
+    flush();
+  }
   await tick();
   const blocks = [];
   let cur = null, prev = null, lastPage = 0;
   const terminalRe = /[.!?:;»”"')\]]$/;
   const terminal = { test: t => terminalRe.test(plainOf(t.replace(/\uE002[^\uE003]*\uE003/g, "")).trimEnd()) };   // chamada de nota no fim não conta
   for (const l of filtered) {
+    if (l.kind === "table") {
+      const rows = l.rows.map(r => [...r]);
+      if (l.page !== lastPage) { rows[0][0] = pgMark(labelOf(l.page)) + rows[0][0]; lastPage = l.page; }
+      blocks.push({ type: "table", rows, page: l.page, last: l.page });
+      cur = null; prev = null; continue;
+    }
     if (l.kind !== "line") {
       if (l.page !== lastPage) { blocks.push({ type: "pg", label: labelOf(l.page) }); lastPage = l.page; }
       blocks.push({ type: "img", blob: l.blob, w: l.w, h: l.h, full: l.kind === "pageimg" });
@@ -1544,14 +1761,14 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     if (PAGE_NUM_RE.test(l.plain) && l.size < body * 1.3) continue;   // número grande é o número do capítulo, não da página
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
-    const gg = geo[l.page] || { left: l.x0, right: l.x1 };
+    const gg = geo[gk(l)] || { left: l.x0, right: l.x1 };
     // quebra de cena: linha só com sinais ("* * *", "#", "⁂")
     const sc = l.plain.trim();
     if (sc.length <= 20 && /^[\s*•·#~◆◇❖✦✧⁂§_=—–♦❦❧✶✱✳⁎-]+$/u.test(sc)) {
       blocks.push({ type: "scene", text: mark + sc.replace(/\s+/g, " "), page: l.page, last: l.page });
       cur = null; prev = null; continue;
     }
-    let level = l.size >= body * 1.35 ? 1 : l.size >= body * 1.15 ? 2 : 0;
+    let level = l.olLevel || (l.size >= body * 1.35 ? 1 : l.size >= body * 1.15 ? 2 : 0);
     // capítulo pelo texto ("Capítulo 12", "PARTE II", "Prólogo"), mesmo com a fonte do corpo
     if (!level && l.plain.length <= 70 && CHAP_RE.test(stripNotes(l.plain).trim()) && l.x1 < gg.right - body * 3
         && (!cur || !prev || prev.isHead || prev.page !== l.page || terminal.test(prev.text))) level = 1;
@@ -1566,10 +1783,20 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       else blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page });
       cur = null; prev = { ...l, isHead: true }; continue;
     }
-    const g = geo[l.page] || { left: l.x0, right: l.x1 };
-    let start = !cur || !prev, sceneGap = false;
-    if (!start) {
-      if (prev.page === l.page) {
+    const g = gg;
+    // versos: cada linha continua sendo uma linha
+    if (l.verse) {
+      if (cur && cur.verse === l.verse) { cur.text += BR + mark + l.text; cur.last = l.page; }
+      else { cur = { type: "verse", verse: l.verse, text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur); }
+      prev = { ...l, isHead: false }; continue;
+    }
+    const isBul = BUL_RE.test(l.plain);
+    let start = !cur || !prev || cur.type === "verse", sceneGap = false;
+    // item de lista: as linhas seguintes, recuadas, continuam o mesmo item
+    if (!start && cur.type === "li" && !isBul && prev.page === l.page && prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 1.55 && l.x0 > cur.x0 + body * 0.4) start = false;
+    else if (isBul || (cur && cur.type === "li")) start = true;
+    else if (!start) {
+      if (prev.page === l.page && prev.col === l.col) {
         const gap = prev.y - l.y;
         if (gap > lineGap * 1.55) {
           start = true;
@@ -1584,7 +1811,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     if (!start) cur.last = l.page;
     if (start) {
       if (sceneGap) blocks.push({ type: "scene", text: "", page: l.page, last: l.page });
-      cur = { type: "p", text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur);
+      cur = { type: isBul ? "li" : "p", text: mark + l.text, page: l.page, last: l.page, x0: l.x0 }; blocks.push(cur);
     } else {
       let [ja, jb] = joinParts(cur.text, l.text), pa = plainOf(ja), pb = plainOf(jb);
       // palavra composta quebrada com o hífen repetido na linha seguinte ("terças-" / "-feiras")
@@ -1602,6 +1829,16 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     prev = { ...l, isHead: false };
   }
   await tick();
+  // lista numerada: três ou mais parágrafos seguidos "1." "2." "3."
+  for (let i = 0; i < blocks.length; i++) {
+    const num = b => { const m = b && b.type === "p" && /^\(?(\d{1,2})[.)]\s+\S/.exec(stripPg(b.text)); return m ? +m[1] : null; };
+    const n0 = num(blocks[i]); if (n0 == null) continue;
+    let j = i; while (num(blocks[j + 1]) === n0 + (j + 1 - i)) j++;
+    if (j - i >= 2) for (let k = i; k <= j; k++) blocks[k].type = "li";
+    i = j;
+  }
+  for (const b of blocks) if (b.type === "li") b.text = b.text.replace(/^((?:\uE000[^\uE001]*\uE001)?[•▪◦‣●○■□▸►✓✔➢➤])(?=\S)/, "$1 ");
+  const outlineUsed = applyOutline(blocks, outline);
   // notas entram logo depois do parágrafo que as chama; chamadas sem nota voltam a ser texto comum
   if (notesList.length) {
     const byId = new Map(notesList.map(n => [n.id, n])), out = [];
@@ -1638,7 +1875,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   for (const b of blocks) if (typeof b.text === "string") b.text = applyLigatures(liga, b.text, "");
   const used = liga.used, unresolved = liga.unresolved;
   liga.used = {}; for (const r of ref) r.w = applyLigatures(liga, r.w, "\uFFFD");
-  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages,
+  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages, outlineUsed, columnPages,
     approx: textPages > 0 && realPages < textPages / 2 };
 }
 
@@ -1650,6 +1887,7 @@ const NS_WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDr
 async function blocksToDocx(blocks, title, author){
   const z = new JSZip();
   let bm = 0;
+  const rels = [`<Relationship Id="rIdStyles" Type="${NS_R}/styles" Target="styles.xml"/>`];
   const bookmark = label => { bm++; return `<w:bookmarkStart w:id="${bm}" w:name="pdfpg${bm}_${hexEnc(label)}"/><w:bookmarkEnd w:id="${bm}"/>`; };
   const sup = label => `<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t xml:space="preserve">${esc(label)}</w:t></w:r>`;
   // chamada de nota: marcador invisível (para o EPUB achar a nota) + número sobrescrito
@@ -1657,22 +1895,31 @@ async function blocksToDocx(blocks, title, author){
     const i = s.indexOf("|"); if (i < 0) return sup(s);
     bm++; return `<w:bookmarkStart w:id="${bm}" w:name="note${s.slice(0, i)}_${hexEnc(s.slice(i + 1))}"/><w:bookmarkEnd w:id="${bm}"/>` + sup(s.slice(i + 1));
   };
+  let lkN = 0;
   const runs = text => {
-    let st = 0;
-    return text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/).filter(Boolean).map(seg => {
+    let st = 0, lk = false;
+    const out = text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/).filter(Boolean).map(seg => {
       if (seg === BR) return "<w:r><w:br/></w:r>";
       if (seg === IT_ON) { st |= 1; return ""; } if (seg === IT_OFF) { st &= ~1; return ""; }
       if (seg === BD_ON) { st |= 2; return ""; } if (seg === BD_OFF) { st &= ~2; return ""; }
+      if (seg[0] === LK_ON) {
+        lkN++; rels.push(`<Relationship Id="rIdL${lkN}" Type="${NS_R}/hyperlink" Target="${esc(seg.slice(1, -1))}" TargetMode="External"/>`);
+        const pre = lk ? "</w:hyperlink>" : ""; lk = true; return pre + `<w:hyperlink r:id="rIdL${lkN}">`;
+      }
+      if (seg === LK_OFF) { if (!lk) return ""; lk = false; return "</w:hyperlink>"; }
       if (seg[0] === PG_A) return bookmark(seg.slice(1, -1));
       if (seg[0] === "\uE002") return noteRef(seg.slice(1, -1));
       const rp = (st & 2 ? "<w:b/>" : "") + (st & 1 ? "<w:i/>" : "");
       return `<w:r>${rp ? `<w:rPr>${rp}</w:rPr>` : ""}<w:t xml:space="preserve">${esc(seg)}</w:t></w:r>`;
     }).join("");
+    return out + (lk ? "</w:hyperlink>" : "");
   };
   const para = (style, text) =>
     `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs(text)}</w:p>`;
-  const styleOf = { h1: "Heading1", h2: "Heading2", p: "" };
-  const rels = [`<Relationship Id="rIdStyles" Type="${NS_R}/styles" Target="styles.xml"/>`];
+  const styleOf = { h1: "Heading1", h2: "Heading2", p: "", li: "Lista", verse: "Verso" };
+  const cell = t => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p>${runs(t)}</w:p></w:tc>`;
+  const bd = k => `<w:${k} w:val="single" w:sz="4" w:space="0" w:color="888888"/>`;
+  const table = rows => `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>${["top", "left", "bottom", "right", "insideH", "insideV"].map(bd).join("")}</w:tblBorders></w:tblPr>${rows.map(r => `<w:tr>${r.map(cell).join("")}</w:tr>`).join("")}</w:tbl><w:p/>`;
   const MAXW = 5760000, MAXH = 8200000; // EMU da área útil A4
   let n = 0, pendingPg = null;
   const parts = [para("Title", title)];
@@ -1684,6 +1931,7 @@ async function blocksToDocx(blocks, title, author){
       continue;
     }
     if (b.type === "scene") { parts.push(para("Cena", b.text)); continue; }
+    if (b.type === "table") { parts.push(table(b.rows)); continue; }
     if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : b.part && /^h[12]$/.test(b.type) ? "Parte" : styleOf[b.type], b.text)); continue; }
     n++;
     const file = `image${n}.jpg`;
@@ -1693,7 +1941,7 @@ async function blocksToDocx(blocks, title, author){
     const s = b.full ? Math.min(MAXW / cx, MAXH / cy) : Math.min(1, MAXW / cx, MAXH / cy);
     cx = Math.round(cx * s); cy = Math.round(cy * s);
     const name = (b.full ? "Pagina " : "Imagem ") + n;
-    parts.push(`<w:p><w:pPr>${b.full ? "<w:pageBreakBefore/>" : ""}<w:spacing w:before="120" w:after="120"/><w:jc w:val="center"/></w:pPr>${pendingPg !== null ? bookmark(pendingPg) : ""}<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${n}" name="${name}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${n}" name="${file}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdImg${n}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
+    parts.push(`<w:p><w:pPr>${b.full ? "<w:pageBreakBefore/>" : ""}<w:spacing w:before="120" w:after="120"/><w:jc w:val="center"/></w:pPr>${pendingPg !== null ? bookmark(pendingPg) : ""}<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${n}" name="${name}"${b.alt ? ` descr="${esc(b.alt)}"` : ""}/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${n}" name="${file}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdImg${n}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
     pendingPg = null;
   }
   const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -1708,6 +1956,8 @@ async function blocksToDocx(blocks, title, author){
 <w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="100"/><w:jc w:val="left"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Cena"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="NotaRodape"><w:name w:val="Nota de rodapé"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Lista"><w:name w:val="Item de lista"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="567" w:hanging="283"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Verso"><w:name w:val="Verso"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120"/><w:ind w:left="567"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>`;
   const now = new Date().toISOString().replace(/\.\d+Z$/, "Z");
@@ -1821,9 +2071,48 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     const m = /^pdfpg\d+_([0-9a-f]*)$/.exec(el.getAttributeNS(W, "name") || el.getAttribute("w:name") || "");
     return m ? hexDec(m[1]) : null;
   };
+  // endereço do link em volta de um trecho de texto
+  const linkOf = t => {
+    const h = t.parentNode && t.parentNode.parentNode;
+    if (!h || h.localName !== "hyperlink") return "";
+    const u = relMap[h.getAttributeNS(NS_R, "id") || h.getAttribute("r:id")] || "";
+    return /^(https?:|mailto:)/i.test(u) ? u : "";
+  };
+  // texto de um parágrafo, com os marcadores de estilo, página, nota e link
+  const paraText = (p, style) => {
+    let text = "", skipSup = false, noteBody = null, noteLabel = "", cs = 0, lk = "";
+    for (const n of p.getElementsByTagNameNS(W, "*")) {
+      if (n.localName === "t") {
+        if (skipSup) { skipSup = false; if (noteBody && !noteLabel) noteLabel = n.textContent; continue; }
+        const u = linkOf(n);
+        if (u !== lk) { if (cs) { text = styleSwitch(text, cs, 0); cs = 0; } text += (lk ? LK_OFF : "") + (u ? LK_ON + u + LK_MID : ""); lk = u; }
+        const s = runStyle(n); if (s !== cs) { text = styleSwitch(text, cs, s); cs = s; }
+        text += n.textContent;
+      }
+      else if (n.localName === "tab") text += " ";
+      else if (n.localName === "br") text += /^(Heading|Parte$|Verso$)/.test(style) ? BR : " ";
+      else if (n.localName === "bookmarkStart") {
+        const nm = n.getAttributeNS(W, "name") || n.getAttribute("w:name") || ""; let m;
+        if ((m = /^note(\d+)_([0-9a-f]*)$/.exec(nm))) { text += "\uE002" + m[1] + "|" + hexDec(m[2]) + "\uE003"; skipSup = true; }
+        else if ((m = /^notebody(\d+)$/.exec(nm))) { noteBody = +m[1]; skipSup = true; }
+        else { const l = pgLabel(n); if (l !== null) text += pgMark(l); }
+      }
+    }
+    if (cs) text = styleSwitch(text, cs, 0);
+    if (lk) text += LK_OFF;
+    return { text: text.trim(), noteBody, noteLabel };
+  };
   let pn = 0;
-  for (const p of xml.getElementsByTagNameNS(W, "p")) {
+  const bodyEl = xml.getElementsByTagNameNS(W, "body")[0];
+  for (const p of bodyEl ? [...bodyEl.children] : []) {
     if (++pn % 300 === 0) await tick();
+    if (p.localName === "tbl") {
+      const rows = [...p.getElementsByTagNameNS(W, "tr")].map(tr => [...tr.getElementsByTagNameNS(W, "tc")].map(tc =>
+        [...tc.getElementsByTagNameNS(W, "p")].map(cp => paraText(cp, "").text).filter(Boolean).join(" ")));
+      if (rows.length) paras.push({ style: "table", rows });
+      continue;
+    }
+    if (p.localName !== "p") continue;
     const blips = p.getElementsByTagNameNS(NS_A, "blip");
     if (blips.length) {
       for (const b of p.getElementsByTagNameNS(W, "bookmarkStart")) { const l = pgLabel(b); if (l !== null) paras.push({ style: "pg", label: l }); }
@@ -1833,33 +2122,18 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
         const target = relMap[rid]; if (!target) continue;
         const f = dz.file("word/" + target.replace(/^\//, "")); if (!f) continue;
         const href = "images/img" + String(images.length + 1).padStart(4, "0") + ".jpg";
-        z.file("OEBPS/" + href, await f.async("uint8array"));
+        let bytes = await f.async("uint8array");
+        if (extra.images && extra.images !== "orig") { const sm = await shrinkJpeg(new Blob([bytes], { type: "image/jpeg" }), extra.images); if (sm) bytes = sm; }
+        z.file("OEBPS/" + href, bytes);
         images.push({ id: "im" + (images.length + 1), href });
         const name = prs[i] ? prs[i].getAttribute("name") || "" : "";
-        paras.push({ style: "img", src: href, full: name.startsWith("Pagina") });
+        paras.push({ style: "img", src: href, full: name.startsWith("Pagina"), alt: prs[i] ? prs[i].getAttribute("descr") || "" : "" });
       }
       continue;
     }
     const ps = p.getElementsByTagNameNS(W, "pStyle")[0];
     const style = ps ? (ps.getAttributeNS(W, "val") || ps.getAttribute("w:val")) : "";
-    let text = "", skipSup = false, noteBody = null, noteLabel = "", cs = 0;
-    for (const n of p.getElementsByTagNameNS(W, "*")) {
-      if (n.localName === "t") {
-        if (skipSup) { skipSup = false; if (noteBody && !noteLabel) noteLabel = n.textContent; continue; }
-        const s = runStyle(n); if (s !== cs) { text = styleSwitch(text, cs, s); cs = s; }
-        text += n.textContent;
-      }
-      else if (n.localName === "tab") text += " ";
-      else if (n.localName === "br") text += /^(Heading|Parte$)/.test(style) ? BR : " ";
-      else if (n.localName === "bookmarkStart") {
-        const nm = n.getAttributeNS(W, "name") || n.getAttribute("w:name") || ""; let m;
-        if ((m = /^note(\d+)_([0-9a-f]*)$/.exec(nm))) { text += "\uE002" + m[1] + "|" + hexDec(m[2]) + "\uE003"; skipSup = true; }
-        else if ((m = /^notebody(\d+)$/.exec(nm))) { noteBody = +m[1]; skipSup = true; }
-        else { const l = pgLabel(n); if (l !== null) text += pgMark(l); }
-      }
-    }
-    if (cs) text = styleSwitch(text, cs, 0);
-    text = text.trim();
+    const { text, noteBody, noteLabel } = paraText(p, style);
     if (style === "Cena") { paras.push({ style: "scene", text }); continue; }
     if (style === "NotaRodape" && noteBody) { paras.push({ style: "note", id: noteBody, label: noteLabel, text }); continue; }
     if (!text) continue;
@@ -1885,11 +2159,21 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     if (p.style === "pg") { ch.items.push({ tag: "pg", label: p.label }); continue; }
     if (p.style === "scene") { ch.items.push({ tag: "scene", text: p.text }); continue; }
     if (!splitStyle && ch.weight >= 60) newCh("Parte " + (chapters.length + 1));
-    if (p.style === "img") { ch.items.push({ tag: "img", src: p.src, full: p.full }); ch.weight += 5; continue; }
+    if (p.style === "img") { ch.items.push({ tag: "img", src: p.src, full: p.full, alt: p.alt }); ch.weight += 5; continue; }
+    if (p.style === "table") { ch.items.push({ tag: "table", rows: p.rows }); ch.weight += p.rows.length; continue; }
+    if (p.style === "Lista" || p.style === "Verso") { ch.items.push({ tag: p.style === "Lista" ? "li" : "verse", text: p.text }); ch.weight += 1; continue; }
     const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : p.style === "Heading3" ? "h2" : "p";
     ch.items.push({ tag, text: p.text }); ch.weight += 1;
   }
   if (!chapters.length) newCh("Texto");
+  // cada nota fica no capítulo que a chama (em alguns formatos as notas vêm todas no fim do arquivo)
+  const allNotes = new Map();
+  for (const c of chapters) for (const n of c.notes) allNotes.set(String(n.id), n);
+  for (const c of chapters) {
+    const ids = [];
+    for (const it of c.items) for (const t of it.rows ? it.rows.flat() : [it.text || ""]) for (const m of t.matchAll(/\uE002(\d+)\|/g)) if (!ids.includes(m[1])) ids.push(m[1]);
+    c.notes = ids.map(id => allNotes.get(id)).filter(Boolean);
+  }
 
   // capa: primeira imagem, se for página inteira logo no início
   const firstImg = content.slice(0, 3).find(p => p.style === "img" && p.full);
@@ -1930,6 +2214,12 @@ p.nota{text-indent:0;text-align:left}
 p.cena{text-indent:0;text-align:center;margin:1em 0}
 hr.cena{border:0;height:0;margin:1.2em 0}
 p.cena+p,hr.cena+p{text-indent:0}
+ul.lista{list-style:none;margin:.6em 0;padding:0}
+ul.lista li{margin:0 0 .3em 1.6em;text-indent:-1em;text-align:left}
+p.verso{text-indent:0;text-align:left;margin:.8em 0 .8em 1.6em}
+table{border-collapse:collapse;margin:1em auto;font-size:.9em}
+td{border:1px solid #888;padding:.25em .5em;text-align:left;vertical-align:top}
+a{color:inherit}
 .parte h1{font-size:2em;text-align:center;margin-top:30%}
 .title{text-align:center;margin-top:30%}.title h1{font-size:2em;text-align:center}.title p{text-indent:0;text-align:center;font-style:italic}`);
 
@@ -1944,24 +2234,32 @@ p.cena+p,hr.cena+p{text-indent:0}
   const noteRef = s => {
     const i = s.indexOf("|"); if (i < 0) return esc(s);
     const id = s.slice(0, i);
+    if (!allNotes.has(id)) return `<sup>${esc(s.slice(i + 1))}</sup>`;
     return `<sup><a epub:type="noteref" role="doc-noteref" href="#fn${id}" id="fnref${id}">${esc(s.slice(i + 1))}</a></sup>`;
   };
   // texto com marcadores -> XHTML (itálico em <em>, negrito em <strong>, sempre bem aninhados)
   const rich = (text, fn) => {
-    const out = [], stack = []; let want = 0;
+    const out = [], stack = []; let want = 0, link = false;
     const sync = () => {
       const need = []; if (want & 2) need.push("strong"); if (want & 1) need.push("em");
       let k = 0; while (k < stack.length && need.includes(stack[k])) k++;
       while (stack.length > k) out.push(`</${stack.pop()}>`);
       for (const t of need) if (!stack.includes(t)) { out.push(`<${t}>`); stack.push(t); }
     };
-    for (const seg of text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/)) {
+    for (const seg of text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/)) {
       if (!seg) continue;
       if (seg === BR) { out.push("<br/>"); continue; }
+      if (seg[0] === LK_ON || seg === LK_OFF) {
+        while (stack.length) out.push(`</${stack.pop()}>`);
+        if (link) { out.push("</a>"); link = false; }
+        if (seg[0] === LK_ON) { out.push(`<a href="${esc(seg.slice(1, -1))}">`); link = true; }
+        continue;
+      }
       if (seg === IT_ON) want |= 1; else if (seg === IT_OFF) want &= ~1; else if (seg === BD_ON) want |= 2; else if (seg === BD_OFF) want &= ~2;
       else { sync(); out.push(seg[0] === PG_A ? pgSpan(seg.slice(1, -1), fn, false) : seg[0] === "\uE002" ? noteRef(seg.slice(1, -1)) : esc(seg)); }
     }
     while (stack.length) out.push(`</${stack.pop()}>`);
+    if (link) out.push("</a>");
     return out.join("");
   };
   if (coverPage) z.file("OEBPS/text/cover.xhtml", xhtml(title, `<div class="cover" epub:type="cover"><img src="../images/cover.jpg" alt="${esc(title)}"/></div>`));
@@ -1970,11 +2268,15 @@ p.cena+p,hr.cena+p{text-indent:0}
   chapters.forEach((c, i) => {
     const fn = `ch${String(i + 1).padStart(3, "0")}.xhtml`;
     files.push({ fn, title: c.title, part: c.part });
+    const altOf = it => esc(it.alt || "");
     const inner = c.items.map((it, k) =>
       it.tag === "pg" ? ((c.items[k + 1] || {}).full ? "" : pgSpan(it.label, fn, true))
       : it.tag === "img"
-        ? (it.full ? `<div class="pg">${(c.items[k - 1] || {}).tag === "pg" ? pgSpan(c.items[k - 1].label, fn, true) : ""}<img src="../${it.src}" alt=""/></div>` : `<figure><img src="../${it.src}" alt=""/></figure>`)
+        ? (it.full ? `<div class="pg">${(c.items[k - 1] || {}).tag === "pg" ? pgSpan(c.items[k - 1].label, fn, true) : ""}<img src="../${it.src}" alt="${altOf(it)}"/></div>` : `<figure><img src="../${it.src}" alt="${altOf(it)}"/></figure>`)
         : it.tag === "scene" ? (stripPg(it.text) ? `<p class="cena">${rich(it.text, fn)}</p>` : `${rich(it.text, fn)}<hr class="cena"/>`)
+        : it.tag === "table" ? `<table>${it.rows.map(r => `<tr>${r.map(t => `<td>${rich(t, fn)}</td>`).join("")}</tr>`).join("")}</table>`
+        : it.tag === "li" ? `${(c.items[k - 1] || {}).tag === "li" ? "" : '<ul class="lista">'}<li>${rich(it.text, fn)}</li>${(c.items[k + 1] || {}).tag === "li" ? "" : "</ul>"}`
+        : it.tag === "verse" ? `<p class="verso">${rich(it.text, fn)}</p>`
         : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
     const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
     z.file("OEBPS/text/" + fn, xhtml(c.title, `<section epub:type="${c.part ? "part" : "chapter"}"${c.part ? ' class="parte"' : ""}>${inner}</section>${notes ? "\n" + notes : ""}`));
@@ -2328,6 +2630,509 @@ async function fixEpub(file, opt, onProgress){
   return { blob, title, author, pages: pageCount, keptPages, verify: compareWords(before, after) };
 }
 
+/* ---------- outros formatos de entrada: DOCX, TXT, HTML, Markdown, FB2, MOBI, CBZ e EPUB aberto para edição ----------
+   Todos viram a mesma lista de blocos que sai do PDF; daí em diante o caminho é um só (DOCX -> EPUB, edição, prévia). */
+const FMT = {
+  docx: { re: /\.docx$/i, label: "DOCX" }, txt: { re: /\.txt$/i, label: "TXT" }, html: { re: /\.x?html?$/i, label: "HTML" },
+  md: { re: /\.(md|markdown)$/i, label: "Markdown" }, fb2: { re: /\.fb2$/i, label: "FB2" },
+  mobi: { re: /\.(mobi|azw3?|prc)$/i, label: "MOBI" }, cbz: { re: /\.cbz$/i, label: "CBZ" }
+};
+const fmtOf = name => Object.keys(FMT).find(k => FMT[k].re.test(name)) || null;
+const srcLabel = job => job.fmt ? FMT[job.fmt].label : job.fromEpub ? "EPUB" : "PDF";
+
+async function imgBlock(blob, alt){
+  try {
+    const bmp = await createImageBitmap(blob);
+    if (bmp.width < 8 || bmp.height < 8) return null;
+    const s = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.drawImage(bmp, 0, 0, c.width, c.height);
+    const out = await toJpeg(c, 0.85); const r = out ? { type: "img", blob: out, w: c.width, h: c.height, alt: alt || "" } : null;
+    c.width = c.height = 0; return r;
+  } catch { return null; }
+}
+const decodeText = buf => {
+  const u8 = new Uint8Array(buf);
+  if (u8[0] === 0xFF && u8[1] === 0xFE) return new TextDecoder("utf-16le").decode(u8);
+  if (u8[0] === 0xFE && u8[1] === 0xFF) return new TextDecoder("utf-16be").decode(u8);
+  try { return new TextDecoder("utf-8", { fatal: true }).decode(u8); } catch { return new TextDecoder("windows-1252").decode(u8); }
+};
+const SCENE_RE = /^[\s*•·#~◆◇❖✦✧⁂§_=—–♦❦❧✶✱✳⁎-]+$/u;
+
+// HTML (ou XHTML de um EPUB) -> blocos
+async function htmlToBlocks(root, getImg, st = { notes: new Map(), n: 0 }){
+  const blocks = []; let cur = null;
+  const clean = t => t.replace(/[ \t\r\n ]+/g, " ").replace(/\s*\s*/g, "").replace(/^[\s]+|[\s]+$/g, "");
+  const flush = () => {
+    if (!cur) return;
+    cur.text = clean(cur.text);
+    const plain = stripPg(stripNotes(cur.text));
+    if (!plain) { for (const m of cur.text.matchAll(PG_RE)) blocks.push({ type: "pg", label: m[1] }); }
+    else if (cur.type === "p" && plain.length <= 20 && SCENE_RE.test(plain)) blocks.push({ type: "scene", text: cur.text });
+    else blocks.push(cur);
+    cur = null;
+  };
+  const add = (t, type) => { if (!cur) cur = { type: type || "p", text: "" }; cur.text += t; };
+  const typeAttr = n => (n.getAttribute("epub:type") || n.getAttributeNS(EPUB_NS, "type") || "") + " " + (n.getAttribute("role") || "");
+  // chamadas de nota: o destino ganha um número
+  for (const a of root.querySelectorAll("a")) {
+    if (!/noteref/.test(typeAttr(a)) && !a.hasAttribute("data-noteref")) continue;
+    const id = (a.getAttribute("href") || "").split("#")[1];
+    if (id && !st.notes.has(id)) st.notes.set(id, { nid: ++st.n, label: a.textContent.trim().replace(/^\[|\]$/g, "") || String(st.n) });
+  }
+  const BLOCK = /^(p|div|section|article|main|header|footer|blockquote|li|ul|ol|dl|dt|dd|figure|figcaption|center|address|body|html|tr|td|th|caption)$/;
+  const walk = async (n, ctx) => {
+    if (n.nodeType === 3) {
+      if (ctx.pre) { add(n.data.replace(/\r?\n/g, ""), ctx.type); return; }
+      const t = n.data.replace(/[ \t\r\n]+/g, " ");
+      if (t.trim() || (cur && cur.text && !/\s$/.test(cur.text))) add(t, ctx.type);
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    const name = (n.localName || "").toLowerCase(), ty = typeAttr(n);
+    if (/^(script|style|head|title|nav|svg|math|template|noscript|iframe|form|button|input|select|textarea|object|audio|video)$/.test(name)) return;
+    if (/pagebreak/.test(ty)) { const l = n.getAttribute("aria-label") || n.getAttribute("title") || ""; if (l) add(pgMark(l.slice(0, 14)), ctx.type); return; }
+    if (name === "mbp:pagebreak") { flush(); return; }
+    if (n.getAttribute("id") && st.notes.has(n.getAttribute("id"))) {   // destino de uma chamada de nota
+      const nt = st.notes.get(n.getAttribute("id"));
+      flush(); cur = { type: "note", id: nt.nid, label: nt.label, text: "" };
+      const kids = [...n.childNodes];
+      await walkKids(kids, { type: "note", inline: true, skipLabel: nt.label });
+      if (cur) { cur.text = clean(cur.text).replace(/\s*↩\uFE0E?$/, "").replace(new RegExp("^\\[?" + escRe(nt.label) + "\\]?[.)\\s]*"), ""); if (cur.text) blocks.push(cur); cur = null; }
+      return;
+    }
+    if (name === "br") { add(ctx.verse ? "" : " ", ctx.type); return; }
+    if (name === "hr") { flush(); blocks.push({ type: "scene", text: "" }); return; }
+    if (name === "img" || name === "image") {
+      const src = n.getAttribute("src") || n.getAttribute("recindex") && "recindex:" + n.getAttribute("recindex") || n.getAttribute("xlink:href") || n.getAttribute("href") || "";
+      const blob = src && getImg ? await getImg(src).catch(() => null) : null;
+      const b = blob && await imgBlock(blob, n.getAttribute("alt") || "");
+      if (b) { flush(); blocks.push(b); }
+      return;
+    }
+    if (name === "table") {
+      flush();
+      const rows = [...n.querySelectorAll("tr")].map(tr => [...tr.children].filter(c => /^t[dh]$/i.test(c.localName)).map(c => c.textContent.replace(/\s+/g, " ").trim()));
+      if (rows.length && rows.some(r => r.some(Boolean))) blocks.push({ type: "table", rows: rows.filter(r => r.length) });
+      return;
+    }
+    const h = /^h([1-6])$/.exec(name);
+    if (h) { flush(); cur = { type: h[1] === "1" ? "h1" : "h2", text: "", lv: +h[1] }; await walkKids(n.childNodes, { type: cur.type, inline: true, verse: true }); flush(); return; }
+    if (name === "pre") { flush(); cur = { type: "verse", text: "" }; await walkKids(n.childNodes, { type: "verse", inline: true, pre: true, verse: true }); flush(); return; }
+    if (name === "li" && !ctx.inline) {
+      flush(); const ol = n.parentNode && /^ol$/i.test(n.parentNode.localName);
+      cur = { type: "li", text: ol ? ([...n.parentNode.children].filter(c => /^li$/i.test(c.localName)).indexOf(n) + 1) + ". " : "• " };
+      await walkKids(n.childNodes, { ...ctx, type: "li" }); flush(); return;
+    }
+    if (BLOCK.test(name) && !ctx.inline) {
+      flush();
+      const verse = /\b(verse|poem|stanza|verso|poema)\b/i.test(n.getAttribute("class") || "") || n.hasAttribute("data-verse");
+      await walkKids(n.childNodes, verse ? { ...ctx, type: "verse", verse: true } : ctx);
+      flush(); return;
+    }
+    // trechos dentro do parágrafo
+    const it = /^(em|i|cite|dfn|var)$/.test(name), bd = /^(strong|b)$/.test(name);
+    const href = name === "a" ? n.getAttribute("href") || "" : "";
+    if (name === "a" && (/noteref/.test(ty) || n.hasAttribute("data-noteref"))) {
+      const nt = st.notes.get(href.split("#")[1]);
+      if (nt) { add("" + nt.nid + "|" + nt.label + "", ctx.type); return; }
+    }
+    if (ctx.skipLabel && name === "a" && n.textContent.trim().replace(/^\[|\]$/g, "") === ctx.skipLabel) return;
+    const link = /^(https?:|mailto:)/i.test(href) && !ctx.link ? href : "";
+    if (it) add(IT_ON, ctx.type); if (bd) add(BD_ON, ctx.type); if (link) add(LK_ON + link + LK_MID, ctx.type);
+    await walkKids(n.childNodes, link ? { ...ctx, link: true } : ctx);
+    if (cur) { if (link) cur.text += LK_OFF; if (bd) cur.text += BD_OFF; if (it) cur.text += IT_OFF; }
+  };
+  const walkKids = async (kids, ctx) => { for (const c of [...kids]) await walk(c, ctx); };
+  await walk(root, { type: "p" });
+  flush();
+  // estilos abertos e fechados no mesmo bloco: tira pares vazios
+  for (const b of blocks) if (typeof b.text === "string") b.text = b.text.replace(/(\s*)|(\s*)/g, "$1$2");
+  return blocks;
+}
+
+// títulos: tira o título do livro repetido no texto; se os capítulos estão em h2, eles passam a abrir capítulo
+function normalizeHeads(blocks, title){
+  const txt = b => stripPg(b.text).toLowerCase();
+  const of = t => blocks.filter(b => b.type === t);
+  let found = "", h1 = of("h1");
+  let t = title || (h1.length >= 2 && txt(h1[0]) === txt(h1[1]) ? stripPg(h1[0].text) : "");
+  if (t) {
+    const same = h1.filter(b => txt(b) === t.toLowerCase());
+    if (same.length && (same.length < h1.length || of("h2").length)) { for (const b of same) blocks.splice(blocks.indexOf(b), 1); found = t; }
+  }
+  h1 = of("h1"); const h2 = of("h2");
+  if (h1.length === 1 && h2.length >= 2) {
+    const i = blocks.indexOf(h1[0]);
+    if (i <= 2 && !found) { found = stripPg(h1[0].text); blocks.splice(i, 1); } else h1[0].type = "h2";
+    h1 = [];
+  }
+  if (!h1.length && h2.length) { const top = Math.min(...of("h2").map(b => b.lv || 2)); for (const b of of("h2")) if ((b.lv || 2) === top) b.type = "h1"; }
+  return found;
+}
+
+function txtToBlocks(text){
+  text = text.replace(/\r\n?/g, "\n").replace(/^﻿/, "");
+  const hasBlank = /\n[ \t]*\n/.test(text);
+  // com linhas em branco, cada trecho é um parágrafo (as quebras no meio são da largura do arquivo); sem elas, cada linha é um parágrafo
+  const chunks = hasBlank ? text.split(/\n[ \t]*\n+/) : text.split("\n");
+  const blocks = [];
+  for (const c of chunks) {
+    const lines = c.split("\n").map(l => l.trim()).filter(Boolean);
+    if (!lines.length) continue;
+    const t = lines.join(" ");
+    if (t.length <= 20 && SCENE_RE.test(t)) blocks.push({ type: "scene", text: t });
+    else if (t.length <= 70 && lines.length <= 2 && CHAP_RE.test(lines[0])) blocks.push({ type: "h1", text: lines.join("") });
+    else blocks.push({ type: "p", text: t });
+  }
+  return blocks;
+}
+
+// Markdown básico -> HTML
+function mdToHtml(md){
+  const e = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inline = s => e(s)
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)[^)]*\)/g, (m, alt, src) => `<img alt="${alt}" src="${src}">`)
+    .replace(/\[([^\]]+)\]\(([^)\s]+)[^)]*\)/g, '<a href="$2">$1</a>')
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/(\*\*|__)(?=\S)(.+?)(?<=\S)\1/g, "<strong>$2</strong>")
+    .replace(/(?<![\p{L}\p{N}*_])(\*|_)(?=\S)(.+?)(?<=\S)\1(?![\p{L}\p{N}*_])/gu, "<em>$2</em>");
+  const out = []; let para = [], list = null, quote = [], code = null;
+  const flushP = () => { if (para.length) out.push("<p>" + inline(para.join(" ")) + "</p>"); para = []; };
+  const flushL = () => { if (list) out.push(`<${list.t}>` + list.items.map(i => "<li>" + inline(i) + "</li>").join("") + `</${list.t}>`); list = null; };
+  const flushQ = () => { if (quote.length) out.push("<blockquote><p>" + inline(quote.join(" ")) + "</p></blockquote>"); quote = []; };
+  const all = () => { flushP(); flushL(); flushQ(); };
+  for (const raw of md.replace(/\r\n?/g, "\n").split("\n")) {
+    if (code) { if (/^\s*```/.test(raw)) { out.push("<pre>" + e(code.join("\n")) + "</pre>"); code = null; } else code.push(raw); continue; }
+    const l = raw.trimEnd(); let m;
+    if (/^\s*```/.test(l)) { all(); code = []; }
+    else if (!l.trim()) all();
+    else if ((m = /^(#{1,6})\s+(.*?)\s*#*$/.exec(l))) { all(); out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`); }
+    else if (/^\s*([-*_])(\s*\1){2,}\s*$/.test(l)) { all(); out.push("<hr>"); }
+    else if (/^(=+|-+)\s*$/.test(l) && para.length) { const t = para.join(" "); para = []; all(); out.push(`<h${l[0] === "=" ? 1 : 2}>${inline(t)}</h${l[0] === "=" ? 1 : 2}>`); }
+    else if ((m = /^\s*>\s?(.*)$/.exec(l))) { flushP(); flushL(); quote.push(m[1]); }
+    else if ((m = /^\s*([-*+]|\d+[.)])\s+(.*)$/.exec(l))) { flushP(); flushQ(); const t = /\d/.test(m[1]) ? "ol" : "ul"; if (!list || list.t !== t) { flushL(); list = { t, items: [] }; } list.items.push(m[2]); }
+    else if (list && /^\s{2,}\S/.test(raw)) list.items[list.items.length - 1] += " " + l.trim();
+    else { flushL(); flushQ(); para.push(l.trim()); }
+  }
+  if (code) out.push("<pre>" + e(code.join("\n")) + "</pre>");
+  all();
+  return out.join("\n");
+}
+
+// FB2 -> HTML simples (depois htmlToBlocks)
+function fb2ToHtml(doc){
+  const out = document.implementation.createHTMLDocument("");
+  const el = (tag, parent, attrs) => { const e = out.createElement(tag); for (const k in attrs || {}) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+  const hrefOf = n => n.getAttribute("l:href") || n.getAttribute("xlink:href") || n.getAttributeNS("http://www.w3.org/1999/xlink", "href") || n.getAttribute("href") || "";
+  const conv = (n, parent, depth) => {
+    if (n.nodeType === 3) { parent.appendChild(out.createTextNode(n.data)); return; }
+    if (n.nodeType !== 1) return;
+    const kids = (p, d = depth) => { for (const c of n.childNodes) conv(c, p, d); };
+    switch (n.localName) {
+      case "section": kids(el("section", parent), depth + 1); break;
+      case "title": { const h = el(depth <= 1 ? "h1" : "h2", parent); [...n.children].forEach((p, i) => { if (i) h.appendChild(out.createElement("br")); for (const c of p.childNodes) conv(c, h, depth); }); break; }
+      case "subtitle": kids(el("strong", el("p", parent))); break;
+      case "p": case "text-author": kids(el("p", parent)); break;
+      case "emphasis": kids(el("em", parent)); break;
+      case "strong": kids(el("strong", parent)); break;
+      case "empty-line": break;
+      case "epigraph": case "cite": case "annotation": kids(el("blockquote", parent)); break;
+      case "poem": kids(parent); break;
+      case "stanza": { const d = el("div", parent, { "data-verse": "" }); [...n.children].forEach((v, i) => { if (i) d.appendChild(out.createElement("br")); for (const c of v.childNodes) conv(c, d, depth); }); break; }
+      case "image": el("img", parent, { src: hrefOf(n), alt: n.getAttribute("alt") || "" }); break;
+      case "a": { const a = el("a", parent, { href: hrefOf(n) }); if (n.getAttribute("type") === "note") a.setAttribute("data-noteref", ""); kids(a); break; }
+      case "table": case "tr": case "td": case "th": kids(el(n.localName, parent)); break;
+      default: kids(parent);
+    }
+  };
+  const bodies = [...doc.getElementsByTagNameNS("*", "body")];
+  for (const b of bodies) {
+    if (/^(notes|comments)$/i.test(b.getAttribute("name") || "")) {
+      for (const s of b.getElementsByTagNameNS("*", "section")) {
+        const a = el("aside", out.body, { "data-note": "", id: s.getAttribute("id") || "" });
+        for (const c of s.children) if (c.localName !== "title") conv(c, a, 9);
+      }
+    } else for (const c of b.childNodes) conv(c, out.body, 0);
+  }
+  return out;
+}
+
+// DOCX de qualquer origem (Word, Google Docs, LibreOffice) -> blocos
+async function docxToBlocks(file){
+  const z = await JSZip.loadAsync(file);
+  const read = async p => z.file(p) ? parseXml(await z.file(p).async("string")) : null;
+  const doc = await read("word/document.xml");
+  if (!doc) throw new Error("Este arquivo não é um DOCX do Word (falta word/document.xml).");
+  const wv = (n, a = "val") => n ? (n.getAttributeNS(W, a) || n.getAttribute("w:" + a)) : null;
+  const kid = (n, name) => n && [...n.children].find(c => c.localName === name);
+  const rels = {};
+  const relDoc = await read("word/_rels/document.xml.rels");
+  if (relDoc) for (const r of relDoc.getElementsByTagName("Relationship")) rels[r.getAttribute("Id")] = r.getAttribute("Target");
+  // estilos: nome e nível de título
+  const styles = {};
+  const sDoc = await read("word/styles.xml");
+  if (sDoc) for (const s of sDoc.getElementsByTagNameNS(W, "style")) {
+    const name = (wv(kid(s, "name")) || "").toLowerCase(), ppr = kid(s, "pPr"), ol = ppr && wv(kid(ppr, "outlineLvl"));
+    const m = /^(?:heading|t[íi]tulo|cabe[çc]alho|titre|überschrift)\s*(\d)$/.exec(name);
+    styles[wv(s, "styleId")] = { name, level: m ? +m[1] : ol != null && ol !== "" && +ol < 9 ? +ol + 1 : 0, based: wv(kid(s, "basedOn")) };
+  }
+  const levelOf = id => { for (let k = 0, s = styles[id]; s && k < 6; k++, s = styles[s.based]) if (s.level) return s.level; return 0; };
+  const numFmt = {};   // numId -> lista numerada?
+  const nDoc = await read("word/numbering.xml");
+  if (nDoc) {
+    const abs = {};
+    for (const a of nDoc.getElementsByTagNameNS(W, "abstractNum")) abs[wv(a, "abstractNumId")] = wv(a.getElementsByTagNameNS(W, "numFmt")[0]) || "bullet";
+    for (const n of nDoc.getElementsByTagNameNS(W, "num")) numFmt[wv(n, "numId")] = abs[wv(kid(n, "abstractNumId"))] !== "bullet";
+  }
+  const notes = new Map();
+  const fDoc = await read("word/footnotes.xml");
+  let noteN = 0; const counters = {};
+  const on = n => { if (!n) return false; const v = wv(n); return !v || !/^(0|false|off)$/i.test(v); };
+  const runsText = async (p, out) => {
+    let text = "", cs = 0, lk = "";
+    const visit = async (n, link) => {
+      for (const c of n.children) {
+        if (c.localName === "hyperlink") { const u = rels[c.getAttributeNS(NS_R, "id") || c.getAttribute("r:id")] || ""; await visit(c, /^(https?:|mailto:)/i.test(u) ? u : ""); continue; }
+        if (c.localName === "ins" || c.localName === "smartTag" || c.localName === "sdt" || c.localName === "sdtContent") { await visit(c, link); continue; }
+        if (c.localName !== "r") continue;
+        const rp = kid(c, "rPr"), va = rp && wv(kid(rp, "vertAlign"));
+        const s = (rp && on(kid(rp, "i")) ? 1 : 0) | (rp && on(kid(rp, "b")) ? 2 : 0);
+        for (const t of c.children) {
+          if (t.localName === "t") {
+            if (link !== lk) { text = styleSwitch(text, cs, 0) + (lk ? LK_OFF : "") + (link ? LK_ON + link + LK_MID : ""); cs = 0; lk = link; }
+            if (s !== cs) { text = styleSwitch(text, cs, s); cs = s; }
+            text += t.textContent;
+          }
+          else if (t.localName === "tab") text += " ";
+          else if (t.localName === "br") { if (wv(t, "type") !== "page") text += " "; }
+          else if (t.localName === "footnoteReference" && fDoc) {
+            const id = wv(t, "id"); const nid = ++noteN; notes.set(nid, id);
+            text = styleSwitch(text, cs, 0) + "" + nid + "|" + nid + ""; cs = 0;
+          }
+          else if (t.localName === "drawing" || t.localName === "pict") {
+            for (const b of t.getElementsByTagNameNS(NS_A, "blip")) {
+              const tg = rels[b.getAttributeNS(NS_R, "embed") || b.getAttribute("r:embed")], f = tg && z.file("word/" + tg.replace(/^\//, ""));
+              const dp = t.getElementsByTagNameNS(NS_WP, "docPr")[0];
+              if (f) { const ib = await imgBlock(await f.async("blob"), dp ? dp.getAttribute("descr") || "" : ""); if (ib) out.imgs.push(ib); }
+            }
+          }
+        }
+      }
+    };
+    await visit(p, "");
+    text = styleSwitch(text, cs, 0) + (lk ? LK_OFF : "");
+    return text.replace(/\s+/g, " ").trim().replace(/(\s*)|(\s*)/g, "$1$2");
+  };
+  const blocks = []; let title = "", n = 0;
+  const body = doc.getElementsByTagNameNS(W, "body")[0];
+  const each = async el => {
+    if (++n % 200 === 0) await tick();
+    if (el.localName === "sdt") { const c = kid(el, "sdtContent"); if (c) for (const k of c.children) await each(k); return; }
+    if (el.localName === "tbl") {
+      const rows = [];
+      for (const tr of el.getElementsByTagNameNS(W, "tr")) { const r = []; for (const tc of tr.getElementsByTagNameNS(W, "tc")) { const parts = []; for (const cp of tc.getElementsByTagNameNS(W, "p")) { const t = await runsText(cp, { imgs: [] }); if (t) parts.push(t); } r.push(parts.join(" ")); } if (r.length) rows.push(r); }
+      if (rows.length) blocks.push({ type: "table", rows });
+      return;
+    }
+    if (el.localName !== "p") return;
+    const ppr = kid(el, "pPr"), sid = ppr && wv(kid(ppr, "pStyle")), st = styles[sid] || {};
+    const out = { imgs: [] };
+    const text = await runsText(el, out);
+    const lvl = levelOf(sid) || (ppr && wv(kid(ppr, "outlineLvl")) != null ? +wv(kid(ppr, "outlineLvl")) + 1 : 0);
+    if (text) {
+      const plain = stripPg(stripNotes(text));
+      if (/^(title|t[íi]tulo)$/.test(st.name || "") && !title) title = plain;
+      else if (lvl && lvl <= 6 && plain.length < 200) blocks.push({ type: lvl === 1 ? "h1" : "h2", text: text.replace(/[-]/g, ""), lv: lvl });
+      else if (plain.length <= 20 && SCENE_RE.test(plain)) blocks.push({ type: "scene", text });
+      else {
+        const np = ppr && kid(ppr, "numPr"), numId = np && wv(kid(np, "numId"));
+        if (numId && numId !== "0") { const ord = numFmt[numId]; counters[numId] = (counters[numId] || 0) + 1; blocks.push({ type: "li", text: (ord ? counters[numId] + ". " : "• ") + text }); }
+        else blocks.push({ type: "p", text });
+      }
+      // notas chamadas neste parágrafo
+      for (const m of text.matchAll(/(\d+)\|/g)) {
+        const fn = [...fDoc.getElementsByTagNameNS(W, "footnote")].find(f => wv(f, "id") === notes.get(+m[1]));
+        const parts = []; if (fn) for (const fp of fn.getElementsByTagNameNS(W, "p")) { const t = await runsText(fp, { imgs: [] }); if (t) parts.push(t); }
+        if (parts.length) blocks.push({ type: "note", id: +m[1], label: m[1], text: parts.join(" ") });
+        else blocks[blocks.length - 1].text = blocks[blocks.length - 1].text.replace(m[0] + m[1] + "", "");
+      }
+    }
+    blocks.push(...out.imgs);
+  };
+  if (body) for (const el of [...body.children]) await each(el);
+  let author = "";
+  try { const core = await read("docProps/core.xml"); if (core) { title ||= (core.getElementsByTagName("dc:title")[0] || {}).textContent || ""; author = (core.getElementsByTagName("dc:creator")[0] || {}).textContent || ""; } } catch {}
+  return { blocks, title: title.trim(), author: author.trim() };
+}
+
+// MOBI / AZW3 sem proteção -> HTML + imagens
+function readMobi(buf){
+  const u8 = new Uint8Array(buf), dv = new DataView(buf);
+  const str = (o, n) => String.fromCharCode(...u8.subarray(o, o + n));
+  if (!/^(BOOKMOBI|TEXtREAd)$/.test(str(60, 8))) throw new Error("Este arquivo não é um MOBI ou AZW3 que eu consiga abrir.");
+  const nrec = dv.getUint16(76), offs = [];
+  for (let i = 0; i < nrec; i++) offs.push(dv.getUint32(78 + i * 8));
+  offs.push(u8.length);
+  const rec = i => u8.subarray(offs[i], offs[i + 1]);
+  const r0 = offs[0], comp = dv.getUint16(r0), textLen = dv.getUint32(r0 + 4), textRecs = dv.getUint16(r0 + 8), enc = dv.getUint16(r0 + 12);
+  if (enc) throw new Error("Este livro tem proteção DRM e não pode ser aberto.");
+  if (comp !== 1 && comp !== 2) throw new Error("Este MOBI usa uma compressão (Huffman) que o Lombada ainda não lê. Converta no Calibre para EPUB e envie o EPUB.");
+  const isMobi = str(r0 + 16, 4) === "MOBI";
+  const hl = isMobi ? dv.getUint32(r0 + 20) : 0;
+  const codepage = isMobi ? dv.getUint32(r0 + 28) : 1252;
+  let title = "", author = "", coverOff = -1, firstImg = isMobi && hl >= 0x70 ? dv.getUint32(r0 + 108) : textRecs + 1;
+  if (isMobi) { const to = dv.getUint32(r0 + 84), tl = dv.getUint32(r0 + 88); title = new TextDecoder(codepage === 65001 ? "utf-8" : "windows-1252").decode(u8.subarray(r0 + to, r0 + to + tl)); }
+  const extra = isMobi && hl >= 0xE4 ? dv.getUint16(r0 + 242) : 0;
+  if (isMobi && (dv.getUint32(r0 + 128) & 0x40)) {   // EXTH
+    let p = r0 + 16 + hl;
+    if (str(p, 4) === "EXTH") {
+      const cnt = dv.getUint32(p + 8); p += 12;
+      for (let i = 0; i < cnt && p + 8 <= u8.length; i++) {
+        const t = dv.getUint32(p), l = dv.getUint32(p + 4); if (l < 8) break;
+        const data = u8.subarray(p + 8, p + l);
+        if (t === 100 && !author) author = new TextDecoder("utf-8").decode(data);
+        else if (t === 503) title = new TextDecoder("utf-8").decode(data);
+        else if (t === 201 && l === 12) coverOff = dv.getUint32(p + 8);
+        p += l;
+      }
+    }
+  }
+  // tira os bytes extras do fim de cada registro de texto
+  const trim = r => {
+    let end = r.length;
+    for (let bit = 15; bit >= 1; bit--) if (extra & (1 << bit)) {
+      let v = 0; for (const b of r.subarray(Math.max(0, end - 4), end)) { if (b & 0x80) v = 0; v = (v << 7) | (b & 0x7F); }
+      end = Math.max(0, end - v);
+    }
+    if (extra & 1) end -= (r[end - 1] & 3) + 1;
+    return r.subarray(0, Math.max(0, end));
+  };
+  const lz = r => {
+    const out = [];
+    for (let i = 0; i < r.length;) {
+      const c = r[i++];
+      if (c >= 1 && c <= 8) { for (let k = 0; k < c && i < r.length; k++) out.push(r[i++]); }
+      else if (c < 0x80) out.push(c);
+      else if (c >= 0xC0) { out.push(32, c ^ 0x80); }
+      else if (i < r.length) { const v = ((c << 8) | r[i++]) & 0x3FFF, dist = v >> 3, len = (v & 7) + 3; for (let k = 0; k < len; k++) out.push(out[out.length - dist] ?? 32); }
+    }
+    return out;
+  };
+  const parts = []; let total = 0;
+  for (let i = 1; i <= textRecs && i < nrec; i++) { const r = trim(rec(i)); const d = comp === 2 ? Uint8Array.from(lz(r)) : r; parts.push(d); total += d.length; }
+  const all = new Uint8Array(total); let o = 0; for (const p of parts) { all.set(p, o); o += p.length; }
+  const html = new TextDecoder(codepage === 65001 ? "utf-8" : "windows-1252").decode(all.subarray(0, Math.min(total, textLen || total)));
+  const image = k => {   // k: número do registro de imagem, a partir de 1
+    const i = firstImg + k - 1; if (i <= 0 || i >= nrec) return null;
+    const r = rec(i), sig = str(offs[i], 4);
+    if (/^(FLIS|FCIS|SRCS|RESC|BOUN|FDST|DATP|AUDI|VIDE|FONT|CRES|CONT|kind|INDX)/.test(sig) || str(offs[i], 8) === "BOUNDARY") return null;
+    const type = r[0] === 0xFF && r[1] === 0xD8 ? "image/jpeg" : sig === "\x89PNG" ? "image/png" : sig.startsWith("GIF") ? "image/gif" : null;
+    return type ? new Blob([r], { type }) : null;
+  };
+  return { html, title: title.trim(), author: author.trim(), image, cover: coverOff >= 0 ? image(coverOff + 1) : null };
+}
+
+// EPUB sem proteção -> blocos (para editar capa, capítulos e texto; a aparência original é refeita)
+async function epubToBlocks(file){
+  const z = await JSZip.loadAsync(file);
+  if (z.file("META-INF/encryption.xml") && /\.x?html?/i.test(await z.file("META-INF/encryption.xml").async("string"))) throw new Error("Este EPUB tem proteção DRM e não pode ser aberto para edição.");
+  const cont = parseXml(await z.file("META-INF/container.xml").async("string"));
+  const opfPath = cont.getElementsByTagNameNS("*", "rootfile")[0].getAttribute("full-path"), dir = dirOf(opfPath);
+  const opf = parseXml(await z.file(opfPath).async("string"));
+  const dc = k => (opf.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", k)[0] || {}).textContent || "";
+  const man = new Map(); let coverHref = null, navHref = null;
+  const coverId = ([...opf.getElementsByTagNameNS("*", "meta")].find(m => m.getAttribute("name") === "cover") || { getAttribute: () => null }).getAttribute("content");
+  for (const it of opf.getElementsByTagNameNS("*", "item")) {
+    const href = resolvePath(dir, decodeURIComponent(it.getAttribute("href") || ""));
+    man.set(it.getAttribute("id"), { href, type: it.getAttribute("media-type") || "", props: it.getAttribute("properties") || "" });
+    if (/cover-image/.test(it.getAttribute("properties") || "") || it.getAttribute("id") === coverId) coverHref = href;
+    if (/\bnav\b/.test(it.getAttribute("properties") || "")) navHref = href;
+  }
+  // nomes do sumário, para os arquivos que não trazem título no texto
+  const tocName = new Map();
+  if (navHref && z.file(navHref)) {
+    const nav = new DOMParser().parseFromString(await z.file(navHref).async("string"), "application/xhtml+xml");
+    for (const a of nav.querySelectorAll("nav a[href]")) { const p = resolvePath(dirOf(navHref), decodeURIComponent(a.getAttribute("href").split("#")[0])); if (!tocName.has(p)) tocName.set(p, a.textContent.replace(/\s+/g, " ").trim()); }
+  }
+  const blocks = [], st = { notes: new Map(), n: 0 };
+  let cover = coverHref && z.file(coverHref) ? await z.file(coverHref).async("blob") : null;
+  for (const r of opf.getElementsByTagNameNS("*", "itemref")) {
+    const m = man.get(r.getAttribute("idref"));
+    if (!m || !/html/.test(m.type) || m.href === navHref || !z.file(m.href)) continue;
+    const s = await z.file(m.href).async("string");
+    let d = new DOMParser().parseFromString(s, "application/xhtml+xml");
+    if (hasParseError(d)) d = new DOMParser().parseFromString(s, "text/html");
+    const body = d.getElementsByTagNameNS("*", "body")[0] || d.documentElement;
+    const imgs = body.querySelectorAll("img, image");
+    // página que é só a capa
+    if (imgs.length === 1 && !body.textContent.trim() && (/cover|capa/i.test(m.href) || body.querySelector("[epub\\:type~='cover'], .cover"))) {
+      if (!cover) { const src = imgs[0].getAttribute("src") || imgs[0].getAttribute("xlink:href") || imgs[0].getAttribute("href") || ""; const f = z.file(resolvePath(dirOf(m.href), decodeURIComponent(src))); if (f) cover = await f.async("blob"); }
+      continue;
+    }
+    const getImg = async src => { if (/^data:/.test(src)) return (await fetch(src)).blob(); const f = z.file(resolvePath(dirOf(m.href), decodeURIComponent(src.split("#")[0]))); return f ? f.async("blob") : null; };
+    const part = await htmlToBlocks(body, getImg, st);
+    if (!part.length) continue;
+    if (!part.some(b => /^h[12]$/.test(b.type)) && tocName.get(m.href)) part.unshift({ type: "h1", text: tocName.get(m.href) });
+    blocks.push(...part);
+    await tick();
+  }
+  const cv = cover ? await imgBlock(cover) : null;
+  return { blocks, title: dc("title").trim(), author: dc("creator").trim(), lang: dc("language").trim(), cover: cv ? cv.blob : null,
+    meta: { description: dc("description").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), subject: [...opf.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", "subject")].map(e => e.textContent.trim()).join(", ") } };
+}
+
+// lê o arquivo e devolve { blocks, title, author, cover, lang, meta, fixed }
+async function importFile(file, fmt){
+  if (fmt === "docx") return docxToBlocks(file);
+  if (fmt === "epub") return epubToBlocks(file);
+  if (fmt === "txt") return { blocks: txtToBlocks(decodeText(await file.arrayBuffer())) };
+  if (fmt === "md" || fmt === "html") {
+    const src = decodeText(await file.arrayBuffer());
+    const doc = new DOMParser().parseFromString(fmt === "md" ? mdToHtml(src) : src, "text/html");
+    const getImg = async s => /^data:image\//.test(s) ? (await fetch(s)).blob() : null;
+    const meta = n => (doc.querySelector(`meta[name="${n}"]`) || { content: "" }).content || "";
+    return { blocks: await htmlToBlocks(doc.body, getImg), title: (doc.title || "").trim(), author: meta("author"), lang: doc.documentElement.lang || "" };
+  }
+  if (fmt === "fb2") {
+    const doc = parseXml(decodeText(await file.arrayBuffer()));
+    if (hasParseError(doc)) throw new Error("Este FB2 não é um XML válido.");
+    const bins = new Map();
+    for (const b of doc.getElementsByTagNameNS("*", "binary")) bins.set(b.getAttribute("id"), b);
+    const getImg = async s => { const b = bins.get(s.replace(/^#/, "")); return b ? (await fetch(`data:${b.getAttribute("content-type") || "image/jpeg"};base64,${b.textContent.replace(/\s+/g, "")}`)).blob() : null; };
+    const ti = doc.getElementsByTagNameNS("*", "title-info")[0];
+    const tx = (p, k) => { const e = p && p.getElementsByTagNameNS("*", k)[0]; return e ? e.textContent.replace(/\s+/g, " ").trim() : ""; };
+    const au = ti && ti.getElementsByTagNameNS("*", "author")[0];
+    const cvImg = ti && ti.getElementsByTagNameNS("*", "coverpage")[0] && ti.getElementsByTagNameNS("*", "coverpage")[0].getElementsByTagNameNS("*", "image")[0];
+    const cvBlob = cvImg ? await getImg(cvImg.getAttribute("l:href") || cvImg.getAttribute("xlink:href") || cvImg.getAttributeNS("http://www.w3.org/1999/xlink", "href") || "") : null;
+    const cv = cvBlob ? await imgBlock(cvBlob) : null;
+    return { blocks: await htmlToBlocks(fb2ToHtml(doc).body, getImg), title: tx(ti, "book-title"), author: [tx(au, "first-name"), tx(au, "middle-name"), tx(au, "last-name")].filter(Boolean).join(" "),
+      lang: tx(ti, "lang"), cover: cv ? cv.blob : null, meta: { description: tx(ti, "annotation"), subject: "" } };
+  }
+  if (fmt === "mobi") {
+    const m = readMobi(await file.arrayBuffer());
+    const doc = new DOMParser().parseFromString(m.html.replace(/<mbp:pagebreak\s*\/?>/gi, "<hr data-pb>"), "text/html");
+    for (const hr of doc.querySelectorAll("hr[data-pb]")) hr.remove();
+    const getImg = async s => { const k = /^recindex:(\d+)/.exec(s) || /kindle:embed:([0-9A-V]+)/i.exec(s); if (!k) return null; return m.image(/^recindex/.test(s) ? +k[1] : parseInt(k[1], 32)); };
+    const cv = m.cover ? await imgBlock(m.cover) : null;
+    return { blocks: await htmlToBlocks(doc.body, getImg), title: m.title, author: m.author, cover: cv ? cv.blob : null };
+  }
+  if (fmt === "cbz") {
+    const z = await JSZip.loadAsync(file);
+    const names = Object.keys(z.files).filter(n => !z.files[n].dir && /\.(jpe?g|png|gif|webp|bmp)$/i.test(n) && !/(^|\/)(__MACOSX|\.)/.test(n))
+      .sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true, sensitivity: "base" }));
+    if (!names.length) throw new Error("Não encontrei imagens dentro deste CBZ.");
+    const blocks = [];
+    for (let i = 0; i < names.length; i++) {
+      const b = await imgBlock(await z.file(names[i]).async("blob"));
+      if (b) { blocks.push({ type: "pg", label: String(blocks.length / 2 + 1) }, { ...b, full: true }); }
+      if (i % 5 === 0) await tick();
+    }
+    return { blocks, fixed: true };
+  }
+  throw new Error("Formato não reconhecido.");
+}
+
 /* ---------- fila ---------- */
 const STAGES = {
   pdf: [["pdf", "PDF lido", "pdf"], ["docx", "DOCX", "docx"], ["epub", "EPUB", "epub"], ["check", "Conferência", "epub"]],
@@ -2338,7 +3143,7 @@ const fileNameOf = job => job.kind === "epub"
   ? safeFile(job.title || baseName(job.file.name)) + " (com páginas).epub"
   : safeFile(job.title + (job.author ? " - " + job.author : "")) + ".epub";
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/;
+const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/;
 // troca texto só fora dos marcadores (página, nota, itálico)
 function replaceInText(text, re, to){
   let n = 0;
@@ -2404,7 +3209,7 @@ function findParagraph(job, text){
 function locateDiff(job, d){
   const toks = (d.epub || d.prev || "").split(" ").filter(Boolean);
   if (!toks.length) return null;
-  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE008])+";
+  const SEP = "(?:[\\s\\p{P}\\p{S}]|\\uE000[^\\uE001]*\\uE001|\\uE002[^\\uE003]*\\uE003|[\\uE004-\\uE008]|\\uE009[^\\uE00A]*\\uE00A|\\uE00B)+";
   const re = new RegExp(toks.map(escRe).join(SEP), "u");
   const B = job.src.blocks;
   const exact = b => b.page != null && d.p >= b.page && d.p <= (b.last ?? b.page);
@@ -2419,6 +3224,56 @@ function locateDiff(job, d){
                   : { bi, start: m.index + m[0].length, end: m.index + m[0].length, text: "", insert: true };
   }
   return null;
+}
+
+
+// texto de um bloco sem os marcadores, com o mapa de volta para o texto original
+const EDIT_MK = /\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|\uE009[^\uE00A]*\uE00A|[\uE004-\uE007\uE00B]/g;
+function blockPlain(b){
+  const raw = b.text, map = []; let plain = "", last = 0;
+  const take = to => { for (let i = last; i < to; i++) { map.push(i); plain += raw[i] === BR ? " " : raw[i]; } };
+  for (const m of raw.matchAll(EDIT_MK)) { take(m.index); last = m.index + m[0].length; }
+  take(raw.length); map.push(raw.length);
+  return { plain, map };
+}
+// troca só o trecho que mudou; páginas, notas, itálico e links fora dele ficam como estavam
+function setBlockPlain(b, neu){
+  const { plain, map } = blockPlain(b);
+  neu = neu.replace(/\s+/g, " ").trim();
+  if (neu === plain.trim() || neu === plain) return null;
+  let p = 0; while (p < plain.length && p < neu.length && plain[p] === neu[p]) p++;
+  let s = 0; while (s < plain.length - p && s < neu.length - p && plain[plain.length - 1 - s] === neu[neu.length - 1 - s]) s++;
+  const a = map[p], z = map[plain.length - s];
+  const kept = (b.text.slice(a, z).match(EDIT_MK) || []).join("");
+  b.text = b.text.slice(0, a) + neu.slice(p, neu.length - s) + kept + b.text.slice(z);
+  // palavras em volta da mudança, para a conferência saber que foi você
+  let i = p, j = neu.length - s;
+  while (i > 0 && !/\s/.test(neu[i - 1])) i--;
+  while (j < neu.length && !/\s/.test(neu[j])) j++;
+  return neu.slice(i, j).trim();
+}
+
+// desfazer: guarda o livro antes de cada alteração (até 10)
+function snap(job){
+  if (!job.src) return;
+  (job.undo ||= []).push({ blocks: job.src.blocks.map(b => ({ ...b, rows: b.rows ? b.rows.map(r => [...r]) : undefined })), ref: (job.src.ref || []).map(r => ({ ...r })),
+    title: job.title, author: job.author, meta: { ...(job.meta || {}) }, coverBlob: job.coverBlob, coverOn: job.coverOn, userTexts: [...(job.userTexts || [])], reordered: job.reordered });
+  if (job.undo.length > 10) job.undo.shift();
+}
+function undoLast(job){
+  const u = job.undo && job.undo.pop(); if (!u) return;
+  job.src.blocks = u.blocks; job.src.ref = u.ref; job.title = u.title; job.author = u.author; job.meta = u.meta;
+  job.coverBlob = u.coverBlob; job.coverOn = u.coverOn; job.userTexts = u.userTexts; job.reordered = u.reordered; job.draft = null;
+}
+// troca um capítulo de lugar com o vizinho (dir: -1 sobe, 1 desce)
+function moveChapter(job, bi, dir){
+  const B = job.src.blocks, heads = chapterHeads(job).filter(h => !h.demote).map(h => h.bi);
+  const k = heads.indexOf(bi), o = k + dir;
+  if (k < 0 || o < 0 || o >= heads.length) return false;
+  const a = Math.min(k, o), start = heads[a], mid = heads[a + 1], end = a + 2 < heads.length ? heads[a + 2] : B.length;
+  const first = B.slice(start, mid), second = B.slice(mid, end);
+  B.splice(start, end - start, ...second, ...first);
+  return true;
 }
 
 /* ---------- correções lembradas (valem para os próximos livros) ---------- */
@@ -2460,12 +3315,14 @@ function editPanelHtml(job){
   if (!job.epub || job.busy) return "";
   const rich = job.kind === "pdf" && !job.fixed;
   const heads = rich ? chapterHeads(job) : [];
+  const imgs = rich ? job.src.blocks.map((b, bi) => ({ b, bi })).filter(x => x.b.type === "img" && !x.b.full).slice(0, 40) : [];
+  const realPdf = job.kind === "pdf" && !job.fmt && !job.fromEpub && !job.merged && job.file instanceof Blob && job.opts;
   return `<details class="edit"${job.editOpen ? " open" : ""}><summary>Editar livro: ${rich ? "capa, dados do livro, capítulos e texto" : "dados do livro"}</summary>
     <div class="edit-body">
       <div class="edit-top${rich ? "" : " nocov"}">
         ${rich ? `<div class="coverbox"><div class="cv"></div>
           <label class="btn ghost sm filebtn">Trocar capa<input type="file" accept="image/*" data-e="coverfile" hidden></label>
-          ${job.src.cover ? `<button class="linkbtn" data-e="coverpdf">1ª página do PDF</button>` : ""}
+          ${job.src.cover ? `<button class="linkbtn" data-e="coverpdf">${job.fmt || job.fromEpub ? "Capa original" : "1ª página do PDF"}</button>` : ""}
           ${job.file instanceof Blob && !job.merged && job.pages > 1 ? `<form class="coverpg" data-e="coverpg"><label>Página <input type="number" min="1" max="${job.pages}" inputmode="numeric" required aria-label="Número da página do PDF para a capa"></label><button class="btn ghost sm">Usar</button></form>` : ""}
           <button class="linkbtn" data-e="coveroff">Sem capa</button></div>` : ""}
         <div class="edit-fields">
@@ -2481,7 +3338,8 @@ function editPanelHtml(job){
         ${heads.length ? `<ol class="chap-list">${heads.map(h => `<li data-bi="${h.bi}"${h.part ? ' class="is-part"' : ""}><input type="text" data-c="text" aria-label="Título do capítulo">
           <label class="mini"><input type="checkbox" data-c="split"> abre capítulo</label>
           <label class="mini"><input type="checkbox" data-c="part"> parte</label>
-          <button class="linkbtn" data-c="remove"></button></li>`).join("")}</ol>` : ""}
+          <button class="linkbtn" data-c="remove"></button>
+          <span class="mv"><button class="btn ghost sm" data-c="up" aria-label="Subir este capítulo" title="Subir">↑</button><button class="btn ghost sm" data-c="down" aria-label="Descer este capítulo" title="Descer">↓</button></span></li>`).join("")}</ol>` : ""}
         <div class="newchap"><label>Faltou um capítulo? Comece a digitar o parágrafo que deve virar título
           <input type="text" data-n="find" autocomplete="off" placeholder="Ex.: Epílogo"></label>
           <span class="muted" data-n="hint" aria-live="polite"></span>
@@ -2493,7 +3351,20 @@ function editPanelHtml(job){
           <label class="mini"><input type="checkbox" data-f="case"> diferenciar maiúsculas</label>
           <span class="muted fr-count" data-f="count"></span>
           <button class="btn ghost sm" data-f="go" disabled>Substituir tudo</button></div></div>` : ""}
-      <div class="edit-actions"><button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
+      ${imgs.length ? `<div class="imgalts"><b>Descrição das imagens (${imgs.length})</b><span class="muted">O leitor de tela lê esta descrição no lugar da imagem. Deixe em branco nas que são só enfeite.</span>
+        <ul>${imgs.map(x => `<li><img alt="" data-ai="${x.bi}"><input type="text" data-alt="${x.bi}" aria-label="Descrição da imagem" placeholder="O que a imagem mostra" autocomplete="off"></li>`).join("")}</ul></div>` : ""}
+      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor no Google Books e na Open Library. Só esses dois dados saem do aparelho; o arquivo não.</span>
+        <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
+      ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
+        <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
+          <label>Idioma <select data-o="lang"><option value="pt-BR">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
+          <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
+          <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
+          <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
+          <button class="btn ghost sm" data-o="go">Converter de novo</button>
+          <span class="muted">As correções feitas neste livro são descartadas.</span></div></details>` : ""}
+      ${job.kind === "epub" ? `<div class="reopen"><b>Capa, capítulos e texto</b><span class="muted">Para mexer nisso, o livro é remontado pelo Lombada: o texto, as imagens e as notas ficam, mas a aparência original (fontes e estilos do arquivo) é trocada pela do Lombada.</span><button class="btn ghost sm" data-a="reopen">Abrir para editar tudo</button></div>` : ""}
+      <div class="edit-actions">${job.undo && job.undo.length ? `<button class="btn ghost sm" data-e="undo">Desfazer a última alteração</button>` : ""}<button class="btn sm" data-e="apply">Gerar EPUB de novo</button></div>
     </div></details>`;
 }
 
@@ -2522,17 +3393,19 @@ function render(job){
   }
   const steps = STAGES[job.kind].filter(s => s[0] !== "check" || job.verifyOn).map(([k, label]) => {
     const done = job.done.includes(k), work = job.stage === k && !job.error && !job.cancelled && job.busy;
-    return `<li class="${done ? "done" : work ? "work" : ""}"><span class="dot"></span>${label}</li>`;
+    return `<li class="${done ? "done" : work ? "work" : ""}"><span class="dot"></span>${k === "pdf" && (job.fmt || job.fromEpub) ? srcLabel(job) + " lido" : label}</li>`;
   }).join("");
   const v = job.verify;
   const src = job.kind === "pdf" ? "PDF" : "EPUB original";
-  const facts = [job.kind === "epub" ? "EPUB de " + kb(job.file.size) : job.merged ? job.merged + " PDFs juntos, " + kb(job.file.size) : "PDF de " + kb(job.file.size),
+  const facts = [job.kind === "epub" ? "EPUB de " + kb(job.file.size) : job.merged ? job.merged + " PDFs juntos, " + kb(job.file.size) : srcLabel(job) + " de " + kb(job.file.size),
     job.pages ? job.pages + (job.pages > 1 ? " páginas no PDF" : " página no PDF") : "",
     job.chapters ? job.chapters + " capítulo" + (job.chapters > 1 ? "s" : "") : "",
     job.images ? job.images + (job.images > 1 ? " imagens" : " imagem") : "",
     job.pageMarks ? job.pageMarks + (job.pageMarks > 1 ? " páginas numeradas" : " página numerada") + (job.keptPages ? " (originais)" : "") : "",
     job.notesN ? job.notesN + (job.notesN > 1 ? " notas clicáveis" : " nota clicável") : "",
     job.headersRemoved ? job.headersRemoved + " linhas de cabeçalho e rodapé tiradas" : "",
+    job.outlineUsed ? "capítulos pelo sumário do PDF" : "",
+    job.columnPages ? job.columnPages + (job.columnPages > 1 ? " páginas em colunas" : " página em colunas") : "",
     job.autoFixed ? job.autoFixed + (job.autoFixed > 1 ? " correções suas aplicadas" : " correção sua aplicada") : ""].filter(Boolean);
   const ligSrc = job.ligatures || (v && v.ligatures);
   const lig = ligSrc ? Object.entries(ligSrc).sort((a, b) => b[1] - a[1]) : [];
@@ -2561,7 +3434,7 @@ function render(job){
   const sealHtml = !job.epub || job.busy || !st ? ""
     : st.length ? `<div class="verify warn" role="status">O EPUB saiu com problema de estrutura e pode não abrir no Kindle: ${st.map(esc).join("; ")}. Tente gerar de novo.</div>`
     : `<div class="seal"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 4.5 5.5v6c0 4.6 3.1 8.4 7.5 10 4.4-1.6 7.5-5.4 7.5-10v-6z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m8.5 12 2.4 2.4 4.6-4.8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span><b>Pronto para o Kindle.</b> EPUB 3 sem erros de estrutura${!v ? "; texto não conferido (ligue “Conferir palavra por palavra” para comparar com o original)" : !v.total ? "" : !realN ? ", com o texto igual ao original" : ""}.</span></div>`;
+        <span><b>Pronto para o Kindle.</b> EPUB 3 sem erros de estrutura${job.reordered ? "; texto não conferido porque a ordem dos capítulos mudou" : job.fmt || job.fromEpub ? "" : !v ? "; texto não conferido (ligue “Conferir palavra por palavra” para comparar com o original)" : !v.total ? "" : !realN ? ", com o texto igual ao original" : ""}.</span></div>`;
   const busy = job.busy && !job.epub && !job.cancelled;
   const pct = busy && job.pct != null ? Math.max(3, Math.round(job.pct * 100)) : null;
   const cov = coverOf(job);
@@ -2579,7 +3452,8 @@ function render(job){
         ${job.epub ? `<button class="btn" data-a="epub">Baixar EPUB</button>
         <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>
         <button class="btn ghost" data-a="pv">Prévia</button>
-        ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}` : ""}
+        ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}
+        <button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>` : ""}
       </div>
     </div>
     <div class="row-status">
@@ -2606,10 +3480,12 @@ function render(job){
   on('[data-a="epub"]', () => offer(fileNameOf(job), job.epub));
   on('[data-a="kindle"]', e => sendToKindle(e, job, fileNameOf(job)));
   on('[data-a="pv"]', () => openPreview(job.epub, job.title, job));
+  on('[data-a="kepub"]', async e => { const b = e.currentTarget; b.disabled = true; try { offer(fileNameOf(job).replace(/\.epub$/, ".kepub.epub"), await toKepub(job.epub)); } catch (err) { console.warn(err); toast("Não consegui montar o KEPUB deste livro."); } b.disabled = false; });
   on('[data-a="docx"]', () => offer(safeFile(job.title) + ".docx", job.docx));
   on('[data-a="cancel"]', () => cancelJob(job));
   on('[data-a="remove"]', () => removeJob(job));
   on('[data-a="ocr"]', () => { job.forceOcr = true; retryPdf(job); });
+  on('[data-a="reopen"]', () => { job.kind = "pdf"; job.fromEpub = true; job.stage = "pdf"; job.verify = null; job.epub = null; job.draft = null; job.editOpen = true; retryPdf(job); });
   const pw = row.querySelector('[data-a="pw"]');
   if (pw) {
     const inp = pw.querySelector("input");
@@ -2649,6 +3525,7 @@ function cancelJob(job){
   else { job.progress = "cancelando"; render(job); }
 }
 function removeJob(job){
+  queueDone(job);
   const i = jobs.indexOf(job); if (i >= 0) jobs.splice(i, 1);
   if (job.el) job.el.remove();
   $("#empty").hidden = jobs.length > 0;
@@ -2674,6 +3551,7 @@ function bindFixes(job, row){
   inp.onkeydown = e => { if (e.key === "Enter") row.querySelector('[data-fx="ok"]').click(); if (e.key === "Escape") row.querySelector('[data-fx="cancel"]').click(); };
   row.querySelector('[data-fx="cancel"]').onclick = () => { job.fixing = null; render(job); };
   row.querySelector('[data-fx="ok"]').onclick = () => {
+    snap(job);
     const loc = job.fixLoc, b = job.src.blocks[loc.bi], txt = (job.fixDraft || "").trim();
     const marks = (loc.text.match(/\uE000[^\uE001]*\uE001/g) || []).join("");
     const old = stripPg(stripNotes(loc.text));
@@ -2687,6 +3565,7 @@ function bindFixes(job, row){
 function bindEditPanel(job, row){
   const box = row.querySelector("details.edit");
   if (!box) return;
+  const rich = job.kind === "pdf" && !job.fixed;
   box.ontoggle = () => { job.editOpen = box.open; };
   const dr = job.draft ||= { heads: {} };
   const q = s => box.querySelector(s);
@@ -2736,6 +3615,12 @@ function bindEditPanel(job, row){
     t.oninput = () => { h.text = t.value; };
     sp.onchange = () => { h.split = sp.checked; };
     rm.onclick = () => { h.remove = !h.remove; rm.textContent = h.remove ? "Desfazer" : "Remover título"; li.classList.toggle("removed", h.remove); };
+    for (const [k, dir] of [["up", -1], ["down", 1]]) li.querySelector(`[data-c="${k}"]`).onclick = () => {
+      snap(job); applyDraft(job);
+      if (!moveChapter(job, bi, dir)) { job.undo.pop(); toast(dir < 0 ? "Este já é o primeiro capítulo." : "Este já é o último capítulo."); render(job); return; }
+      job.reordered = true; job.editOpen = true;
+      toast("Capítulo movido. Gerando o EPUB de novo."); rebuild(job);
+    };
   });
   // novo capítulo: um parágrafo vira título
   const nf = q('[data-n="find"]');
@@ -2745,11 +3630,12 @@ function bindEditPanel(job, row){
     nf.oninput = () => {
       hit = findParagraph(job, nf.value);
       const t = hit >= 0 ? stripPg(stripNotes(job.src.blocks[hit].text)) : "";
-      hint.textContent = nf.value.trim().length < 3 ? "" : hit < 0 ? "Nenhum parágrafo começa assim." : `Achei: “${t.length > 90 ? t.slice(0, 90) + "…" : t}” (p. ${job.src.blocks[hit].page})`;
+      hint.textContent = nf.value.trim().length < 3 ? "" : hit < 0 ? "Nenhum parágrafo começa assim." : `Achei: “${t.length > 90 ? t.slice(0, 90) + "…" : t}” ${job.src.blocks[hit].page ? `(p. ${job.src.blocks[hit].page})` : ""}`;
       go.disabled = hit < 0;
     };
     go.onclick = () => {
       if (hit < 0) return;
+      snap(job);
       const B = job.src.blocks, lv = B.some(b => b.type === "h1") ? "h1" : "h2";
       B[hit].type = lv; delete B[hit].demote;
       job.editOpen = true;
@@ -2774,14 +3660,58 @@ function bindEditPanel(job, row){
     f("go").onclick = () => {
       const find = f("find").value, to = f("rep").value;
       const re = wordRe(find, f("whole").checked, f("case").checked); let n = 0;
+      snap(job);
       for (const b of textBlocks(job)) { const [nt, k] = replaceInText(b.text, re, to); if (k) { b.text = nt; n += k; } }
-      if (!n) return;
+      if (!n) { job.undo.pop(); return; }
       if (to.trim()) (job.userTexts ||= []).push(to.split(/\s+/).map(edgeW).filter(Boolean).join(" "));
       toast(`${fmtN(n)} trecho${n > 1 ? "s" : ""} substituído${n > 1 ? "s" : ""}. Gerando o EPUB de novo.`);
       applyDraft(job); rebuild(job);
     };
   }
-  q('[data-e="apply"]').onclick = () => { applyDraft(job); rebuild(job); };
+  q('[data-e="apply"]').onclick = () => { snap(job); applyDraft(job); rebuild(job); };
+  const un = q('[data-e="undo"]');
+  if (un) un.onclick = () => { undoLast(job); job.editOpen = true; toast("Alteração desfeita. Gerando o EPUB de novo."); rebuild(job); };
+  // descrição das imagens
+  dr.alts ||= {};
+  box.querySelectorAll("[data-ai]").forEach(im => { im.src = urlOf(job.src.blocks[+im.dataset.ai].blob); });
+  box.querySelectorAll("[data-alt]").forEach(inp => { const bi = +inp.dataset.alt; inp.value = dr.alts[bi] ?? job.src.blocks[bi].alt ?? ""; inp.oninput = () => { dr.alts[bi] = inp.value; }; });
+  // converter de novo com outras opções
+  const rc = q(".reconv");
+  if (rc) {
+    const o = job.opts;
+    rc.open = !!job.reconvOpen; rc.ontoggle = () => { job.reconvOpen = rc.open; };
+    for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) { if (el.type === "checkbox") el.checked = !!o[el.dataset.o]; else el.value = o[el.dataset.o]; }
+    rc.querySelector('button[data-o="go"]').onclick = () => {
+      const n = { ...o };
+      for (const el of rc.querySelectorAll("select[data-o], input[data-o]")) n[el.dataset.o] = el.type === "checkbox" ? el.checked : el.value;
+      job.opts = n; job.draft = null; job.undo = []; job.reordered = false; job.userTexts = []; job.forceOcr = false; job.editOpen = false;
+      retryPdf(job);
+    };
+  }
+  // capa e sinopse da internet
+  const lg = q('[data-l="go"]');
+  if (lg) lg.onclick = async () => {
+    const out = q('[data-l="out"]'), title = (dr.title ?? job.title ?? "").trim(), author = (dr.author ?? job.author ?? "").trim();
+    if (title.length < 2) { out.textContent = "Preencha o título antes de buscar."; return; }
+    lg.disabled = true; out.textContent = "Buscando…";
+    try {
+      const list = await lookupBook(title, author);
+      if (!list.length) { out.textContent = "Não achei este livro. Confira o título e o autor."; return; }
+      out.innerHTML = `<ul class="lk-list">${list.map((r, i) => `<li><span><b></b> <span class="muted"></span></span><button class="btn ghost sm" data-use="${i}">Usar</button></li>`).join("")}</ul>`;
+      out.querySelectorAll("li").forEach((li, i) => { li.querySelector("b").textContent = list[i].title; li.querySelector(".muted").textContent = [list[i].author, list[i].year].filter(Boolean).join(", "); });
+      out.querySelectorAll("[data-use]").forEach(btn => btn.onclick = async () => {
+        const r = list[+btn.dataset.use]; btn.disabled = true; btn.textContent = "Buscando a capa…";
+        if (r.author && !author) dr.author = r.author;
+        if (r.description) dr.description = r.description;
+        if (r.subject) dr.subject = r.subject;
+        let got = false;
+        if (rich) try { const cv = await lookupCover(r.isbn); if (cv) { dr.cover = cv; dr.coverOn = true; got = true; } } catch {}
+        toast((r.description ? "Sinopse preenchida" : "Este resultado não traz sinopse") + (rich ? (got ? ", capa trocada." : ", sem capa disponível.") : ".") + " Confira e clique em “Gerar EPUB de novo”.", 6000);
+        job.editOpen = true; render(job);
+      });
+    } catch (e) { console.warn(e); out.textContent = "Não consegui buscar agora. Confira a internet e tente de novo."; }
+    finally { lg.disabled = false; }
+  };
 }
 
 function applyDraft(job){
@@ -2796,6 +3726,7 @@ function applyDraft(job){
   if (dr.coverOn !== undefined) job.coverOn = dr.coverOn;
   if (!job.src) return;
   const B = job.src.blocks, ref = job.src.ref;
+  for (const [k, v] of Object.entries(dr.alts || {})) if (B[+k] && B[+k].type === "img") B[+k].alt = v.trim();
   for (const [k, h] of Object.entries(dr.heads || {})) {
     const b = B[+k]; if (!b || !/^h[12]$/.test(b.type)) continue;
     const marks = (b.text.match(/\uE000[^\uE001]*\uE001/g) || []).join("");
@@ -2811,6 +3742,51 @@ function applyDraft(job){
 function rebuild(job){
   job.busy = true; job.progress = "na fila"; job.cancelled = false; job.ctrl = new AbortController(); job.started = false; render(job);
   chain = chain.then(() => { job.started = true; return job.kind === "pdf" ? buildPdf(job) : runEpub(job); });
+}
+
+
+// dados do livro na internet (só quando a pessoa pede): Google Books para autor e sinopse, Open Library para a capa
+async function lookupBook(title, author){
+  const q = `intitle:${title}` + (author ? ` inauthor:${author}` : "");
+  const r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=5&printType=books&q=" + encodeURIComponent(q));
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return ((await r.json()).items || []).map(it => {
+    const v = it.volumeInfo || {}, ids = v.industryIdentifiers || [], isbn = ids.find(i => i.type === "ISBN_13") || ids.find(i => i.type === "ISBN_10");
+    return { title: v.title || "", author: (v.authors || []).join(", "), year: (v.publishedDate || "").slice(0, 4), description: (v.description || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      subject: (v.categories || []).join(", "), isbn: isbn ? isbn.identifier : "" };
+  });
+}
+async function lookupCover(isbn){
+  if (!isbn) return null;
+  const r = await fetch(`https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg?default=false`);
+  if (!r.ok) return null;
+  const b = await r.blob();
+  return /^image\//.test(b.type) && b.size > 2000 ? imageToJpeg(b) : null;
+}
+
+// KEPUB (Kobo): o mesmo EPUB com cada trecho de texto marcado, para o Kobo guardar a posição e as estatísticas de leitura
+async function toKepub(blob){
+  const zin = await JSZip.loadAsync(blob), z = new JSZip();
+  z.file("mimetype", "application/epub+zip", { compression: "STORE" });
+  for (const name of Object.keys(zin.files)) {
+    const f = zin.files[name];
+    if (f.dir || name === "mimetype") continue;
+    if (!/^OEBPS\/text\/.*\.xhtml$/.test(name)) { z.file(name, await f.async("uint8array")); continue; }
+    const doc = parseXml(await f.async("string")), body = doc.getElementsByTagNameNS(XHTML_NS, "body")[0];
+    let p = 0, sgm = 0;
+    const walk = n => {
+      for (const c of [...n.childNodes]) {
+        if (c.nodeType === 1) { if (/^(p|h[1-6]|li|td|div|figure)$/.test(c.localName)) { p++; sgm = 0; } walk(c); }
+        else if (c.nodeType === 3 && c.data.trim()) {
+          const sp = doc.createElementNS(XHTML_NS, "span"); sp.setAttribute("class", "koboSpan"); sp.setAttribute("id", `kobo.${Math.max(1, p)}.${++sgm}`);
+          c.replaceWith(sp); sp.appendChild(c);
+        }
+      }
+    };
+    if (body) walk(body);
+    z.file(name, serializeXml(doc, true));
+  }
+  return z.generateAsync({ type: "blob", mimeType: "application/epub+zip", compression: "DEFLATE" });
 }
 
 /* ---------- enviar ao Kindle ---------- */
@@ -2844,21 +3820,26 @@ async function sendToKindle(e, job, name){
 
 /* ---------- conversão: fila de trabalhos ---------- */
 let chain = Promise.resolve();
-function addFiles(list){
+function addFiles(list, restored){
   for (const file of list) {
     const kind = /\.epub$/i.test(file.name) || file.type === "application/epub+zip" ? "epub"
       : /\.pdf$/i.test(file.name) || file.type === "application/pdf" ? "pdf" : null;
-    if (!kind) { toast(file.name + " não é PDF nem EPUB e foi ignorado."); continue; }
-    const job = { file, kind, title: kind === "pdf" ? cleanTitle(baseName(file.name)) : baseName(file.name), done: [], stage: kind === "pdf" ? "pdf" : "read",
-      progress: "na fila", verifyOn: $("#verify").checked, histId: uuid(), busy: true, ctrl: new AbortController(), started: false };
+    const fmt = kind ? null : fmtOf(file.name);
+    if (!kind && !fmt) { toast(file.name + " não é de um formato que o Lombada abre e foi ignorado."); continue; }
+    const job = { file, kind: kind || "pdf", fmt, title: kind !== "epub" ? cleanTitle(baseName(file.name)) : baseName(file.name), done: [], stage: kind !== "epub" ? "pdf" : "read",
+      progress: "na fila", verifyOn: $("#verify").checked, histId: uuid(), busy: true, ctrl: new AbortController(), started: false, opts: readOpts() };
     jobs.push(job); render(job);
-    chain = chain.then(() => { job.started = true; return kind === "pdf" ? runPdf(job) : runEpub(job); });
+    if (!restored) queueSave(job);
+    chain = chain.then(() => { job.started = true; return job.kind === "pdf" ? runPdf(job) : runEpub(job); });
   }
 }
 
+// opções lidas quando o arquivo entra na fila; cada livro guarda as suas e pode ser convertido de novo com outras
+const readOpts = () => ({ lang: $("#lang").value, mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
+  ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value });
 const lookOf = () => ({ font: $("#lookFont").value, justify: $("#lookJustify").checked, indent: $("#lookIndent").value, lh: $("#lookLh").value });
 function stopIfCancelled(job){ if (job.ctrl && job.ctrl.signal.aborted) throw abortErr(); }
-function markCancelled(job){ job.busy = false; job.cancelled = true; job.progress = ""; job.stage = null; render(job); }
+function markCancelled(job){ queueDone(job); job.busy = false; job.cancelled = true; job.progress = ""; job.stage = null; render(job); }
 
 async function runEpub(job){
   if (job.ctrl && job.ctrl.signal.aborted) return markCancelled(job);
@@ -2883,7 +3864,7 @@ async function runEpub(job){
     for (const k of ["read", "pages", "epub", "check"]) if (!job.done.includes(k)) job.done.push(k);
     job.structure = await checkEpubStructure(res.blob);
     job.epub = res.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job);
+    saveHistory(job); queueDone(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -2919,10 +3900,44 @@ function retryPdf(job){
   chain = chain.then(() => { job.started = true; return runPdf(job); });
 }
 
+// DOCX, TXT, HTML, Markdown, FB2, MOBI, CBZ (e EPUB aberto para edição): lê para blocos e segue o caminho do PDF
+async function runImport(job){
+  const o = job.opts ||= readOpts();
+  job.lang = o.lang; job.mode = o.mode; job.showNums = o.showNums; job.look = o.look; job.images = o.images;
+  if (job.coverOn === undefined) job.coverOn = o.cover;
+  if (!job.author) job.author = o.author;
+  job.busy = true; job.verifyOn = false; job.verify = null; job.epub = null; job.error = null;
+  try {
+    job.progress = "lendo o arquivo"; render(job); await tick();
+    const res = await importFile(job.file, job.fromEpub ? "epub" : job.fmt);
+    stopIfCancelled(job);
+    if (!res.blocks.length) throw Object.assign(new Error("vazio"), { name: "EmptyDoc" });
+    job.fixed = !!res.fixed;
+    if (job.fixed) job.mode = job.mode === "manga" ? "manga" : "comic"; else { const t = normalizeHeads(res.blocks, res.title); res.title ||= t; }
+    job.src = { blocks: res.blocks, ref: [], labels: null, numPages: 0, cover: res.cover ? { blob: res.cover } : null };
+    if (res.title) job.title = res.title;
+    if (res.author && !job.author) job.author = res.author;
+    if (res.lang) job.lang = /^pt/i.test(res.lang) ? "pt-BR" : res.lang.slice(0, 2).toLowerCase() || job.lang;
+    if (res.meta) job.meta = { ...res.meta, ...(job.meta || {}) };
+    if (res.cover) { job.coverBlob = res.cover; job.coverOn = true; } else job.coverBlob = null;
+    if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
+    await buildPdf(job);
+  } catch (e) {
+    if (e && e.name === "AbortError") return markCancelled(job);
+    console.warn(e);
+    job.busy = false; queueDone(job);
+    job.error = e && e.name === "EmptyDoc" ? "Este arquivo não tem texto nem imagens que dê para aproveitar."
+      : `Não consegui ler este arquivo ${srcLabel(job)}: ${(e && e.message) || "erro desconhecido"}`;
+    render(job);
+  }
+}
+
 async function runPdf(job){
   if (job.ctrl && job.ctrl.signal.aborted) return markCancelled(job);
-  job.lang = $("#lang").value; job.mode = $("#mode").value; job.fixed = job.mode === "comic" || job.mode === "manga";
-  job.showNums = $("#shownums").checked; job.coverOn = $("#cover").checked; job.author = $("#author").value.trim(); job.look = lookOf();
+  if (job.fmt || job.fromEpub) return runImport(job);
+  const o = job.opts ||= readOpts();
+  job.lang = o.lang; job.mode = o.mode; job.fixed = job.mode === "comic" || job.mode === "manga";
+  job.showNums = o.showNums; job.coverOn = o.cover; job.author = job.author || o.author; job.look = o.look; job.images = o.images;
   job.busy = true;
   try {
     const buf = await job.file.arrayBuffer();
@@ -2930,9 +3945,9 @@ async function runPdf(job){
     const res = await pdfToBlocks(buf, job.fixed ? "pages" : job.mode, (p, total, what) => {
       job.progress = what ? `${what}: página ${p} de ${total}` : `lendo página ${p} de ${total}`; job.pct = p / total;
       const now = Date.now(); if (now - lastPaint > 250 || p === total || what) { lastPaint = now; paintProgress(job); }
-    }, job.lang, { headers: $("#headers").checked, notes: $("#notes").checked, cover: !job.fixed, ocr: ($("#ocr").checked || job.forceOcr) && !job.fixed, signal: job.ctrl.signal, password: job.password });
+    }, job.lang, { headers: o.headers, notes: o.notes, cover: !job.fixed, ocr: (o.ocr || job.forceOcr) && !job.fixed, signal: job.ctrl.signal, password: job.password });
     job.src = res; job.pages = res.numPages; job.ligatures = res.ligatures; job.headersRemoved = res.headersRemoved;
-    job.ocrPages = res.ocrPages; job.ocrError = res.ocrError; job.imagePages = job.fixed ? 0 : res.imagePages;
+    job.ocrPages = res.ocrPages; job.ocrError = res.ocrError; job.imagePages = job.fixed ? 0 : res.imagePages; job.outlineUsed = res.outlineUsed; job.columnPages = res.columnPages;
     const meta = res.metaTitle;
     if (meta && meta.length > 2 && !/^(untitled|microsoft word|document|\(anonymous\)|sem t[íi]tulo)/i.test(meta)) job.title = cleanTitle(meta);
     job.coverBlob = res.cover ? res.cover.blob : null;
@@ -2940,7 +3955,7 @@ async function runPdf(job){
     await buildPdf(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
-    job.busy = false;
+    job.busy = false; queueDone(job);
     job.error = pdfErrorText(e, job);
     render(job);
   }
@@ -2953,16 +3968,16 @@ async function buildPdf(job){
   try {
     stopIfCancelled(job);
     job.stage = "docx"; job.progress = "montando DOCX"; render(job);
-    if (!job.fixed && !src.partsMarked) { markParts(src.blocks); src.partsMarked = true; }
+    if (!job.fixed && !src.partsMarked) { if (!src.outlineUsed) markParts(src.blocks); src.partsMarked = true; }
     job.docx = await blocksToDocx(src.blocks, job.title, job.author);
     stopIfCancelled(job);
     job.done.push("docx"); job.stage = "epub"; job.progress = "montando EPUB"; render(job);
     const ep = job.fixed
       ? await buildFixedEpub(src.blocks, { title: job.title, author: job.author, lang: job.lang, rtl: job.mode === "manga", meta: job.meta })
-      : await docxToEpub(job.docx, job.author, job.lang, job.showNums, { cover: job.coverOn ? job.coverBlob : null, meta: job.meta, look: job.look });
+      : await docxToEpub(job.docx, job.author, job.lang, job.showNums, { cover: job.coverOn ? job.coverBlob : null, meta: job.meta, look: job.look, images: job.images });
     job.chapters = ep.chapters; job.images = ep.images; job.pageMarks = ep.pages; job.notesN = ep.notes || 0;
     job.done.push("epub");
-    if (job.verifyOn && !job.fixed) {
+    if (job.verifyOn && !job.fixed && !job.reordered) {
       stopIfCancelled(job);
       job.stage = "check"; job.progress = "conferindo palavra por palavra"; render(job);
       await tick();
@@ -2973,7 +3988,7 @@ async function buildPdf(job){
     stopIfCancelled(job);
     job.structure = await checkEpubStructure(ep.blob);
     job.epub = ep.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job);
+    saveHistory(job); queueDone(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -3043,6 +4058,8 @@ $("#allZip").onclick = async () => {
 /* ---------- prévia do EPUB na tela (com o PDF ao lado) ---------- */
 const pv = { z: null, docs: [], i: 0, urls: [], job: null, side: false, pdf: null, pdfP: null, pdfPage: 1, pdfTask: null };
 function closePreview(){
+  if (pv.dirty && pv.job) { pv.dirty = false; rebuild(pv.job); }   // correções guardadas e ainda não aplicadas
+  $("#pvApplyBtn").hidden = true; setEditing(false);
   $("#preview").hidden = true; document.body.classList.remove("noscroll");
   const back = pv.opener; pv.opener = null;
   if (back && back.isConnected) back.focus({ preventScroll: true });
@@ -3084,10 +4101,11 @@ async function openPreview(blob, title, job, opt = {}){
     $("#pvToc").innerHTML = docs.map((d, i) => `<option value="${i}">${esc(d.name)}</option>`).join("");   // a posição já aparece em "3 de 8"
     $("#pvSideBtn").hidden = !canSide(job);
     $("#pvEditBtn").hidden = !(job && job.kind === "pdf" && job.src && !job.fixed && !job.merged && job.epub && !job.busy);
+    $("#pvTextBtn").hidden = $("#pvEditBtn").hidden;
     if ($("#preview").hidden) pv.opener = document.activeElement;
     $("#preview").hidden = false; document.body.classList.add("noscroll");
     $("#pvClose").focus({ preventScroll: true });
-    let start = 0, label = null;
+    let start = Math.min(opt.doc || 0, docs.length - 1), label = null;
     if (opt.pdfPage && canSide(job)) {
       label = job.src.labels[opt.pdfPage - 1];
       const k = docs.findIndex(d => d.pbs.includes(label));
@@ -3199,6 +4217,8 @@ $("#pvPdfNext").onclick = () => showPdfPage(pv.pdfPage + 1);
 $("#preview").onclick = e => { if (e.target.id === "preview") closePreview(); };
 document.addEventListener("keydown", e => {
   if ($("#preview").hidden) return;
+  const ed = document.querySelector(".pv-edit");
+  if (e.key === "Escape" && ed) { ed._cancel(); return; }
   if (e.key === "Escape") closePreview();
   else if (e.key === "Tab") {   // o foco fica dentro da prévia enquanto ela está aberta
     const els = [...$("#preview").querySelectorAll('button, select, a[href], input, [tabindex]:not([tabindex="-1"])')].filter(el => !el.closest("[hidden]") && !el.disabled);
@@ -3220,20 +4240,95 @@ $("#pvEditBtn").onclick = () => {
   if (box) { box.scrollIntoView({ block: "start", behavior: "smooth" }); const i = box.querySelector("input"); if (i) i.focus({ preventScroll: true }); }
 };
 
+
+// corrigir o texto direto na prévia: clicar num parágrafo abre o texto para editar
+const elPlain = el => { const c = el.cloneNode(true); c.querySelectorAll('[role="doc-pagebreak"], sup, .pv-edit').forEach(x => x.remove()); c.querySelectorAll("br").forEach(b => b.replaceWith(" ")); return c.textContent.replace(/\s+/g, " ").trim(); };
+function blockForEl(el){
+  const want = elPlain(el); if (!want) return -1;
+  const hits = [];
+  pv.job.src.blocks.forEach((b, i) => { if (typeof b.text === "string" && /^(p|h1|h2|li|verse)$/.test(b.type) && blockPlain(b).plain.replace(/\s+/g, " ").trim() === want) hits.push(i); });
+  if (hits.length <= 1) return hits.length ? hits[0] : -1;
+  // textos repetidos ("— Sim."): vale a ordem em que aparecem no livro
+  let k = 0;
+  outer: for (let d = 0; d <= pv.i; d++) {
+    const root = d === pv.i ? $("#pvBody") : pv.docs[d].doc;
+    for (const e of root.querySelectorAll("p, h1, h2, li")) { if (e === el) break outer; if (!e.closest("aside") && elPlain(e) === want) k++; }
+  }
+  return hits[Math.min(k, hits.length - 1)];
+}
+function setEditing(on){
+  pv.editing = !!on;
+  $("#pvBody").classList.toggle("pv-editing", pv.editing);
+  $("#pvTextBtn").setAttribute("aria-pressed", String(pv.editing));
+  $("#pvTextBtn").textContent = pv.editing ? "Parar de corrigir" : "Corrigir texto";
+}
+$("#pvTextBtn").onclick = () => { setEditing(!pv.editing); if (pv.editing) toast("Clique num parágrafo ou título para corrigir o texto."); };
+$("#pvBody").addEventListener("click", e => {
+  if (!pv.editing || !pv.job) return;
+  if (e.target.closest(".pv-edit")) return;
+  const el = e.target.closest("p, h1, h2, li");
+  if (!el || el.closest("aside") || !$("#pvBody").contains(el)) return;
+  e.stopPropagation(); openTextEdit(el);
+}, true);
+function openTextEdit(el){
+  const job = pv.job, bi = blockForEl(el);
+  if (bi < 0) { toast("Não encontrei este trecho no texto do livro para editar."); return; }
+  const old = document.querySelector(".pv-edit"); if (old) old._cancel();
+  const b = job.src.blocks[bi];
+  const box = document.createElement("div"); box.className = "pv-edit";
+  box.innerHTML = `<textarea aria-label="Texto do parágrafo"></textarea><div class="pv-edit-row"><button class="btn sm" data-x="ok">Guardar</button><button class="btn ghost sm" data-x="no">Cancelar</button><span class="muted">Em branco, o parágrafo é apagado.</span></div>`;
+  const ta = box.querySelector("textarea");
+  ta.value = blockPlain(b).plain.replace(/\s+/g, " ").trim(); ta.rows = Math.min(14, Math.max(2, Math.ceil(ta.value.length / 64)));
+  el.hidden = true; el.after(box); ta.focus();
+  box._cancel = () => { box.remove(); el.hidden = false; };
+  box.querySelector('[data-x="no"]').onclick = box._cancel;
+  box.querySelector('[data-x="ok"]').onclick = () => {
+    if (!pv.dirty) snap(job);
+    const changed = setBlockPlain(b, ta.value);
+    if (changed === null) { if (!pv.dirty) job.undo.pop(); return box._cancel(); }
+    if (changed) (job.userTexts ||= []).push(changed.split(/\s+/).map(edgeW).filter(Boolean).join(" "));
+    pv.dirty = true; $("#pvApplyBtn").hidden = false;
+    el.textContent = ta.value.replace(/\s+/g, " ").trim(); el.classList.add("pv-changed"); box._cancel();
+    if (!el.textContent) el.hidden = true;
+  };
+}
+// aplica as correções e reabre a prévia no mesmo lugar
+$("#pvApplyBtn").onclick = () => {
+  const job = pv.job, at = pv.i; if (!job) return;
+  pv.dirty = false; $("#pvApplyBtn").hidden = true;
+  toast("Gerando o EPUB de novo…");
+  rebuild(job);
+  chain = chain.then(() => { if (job.epub && !$("#preview").hidden && pv.job === job) return openPreview(job.epub, job.title, job, { doc: at }); });
+};
+
 /* ---------- histórico: últimos livros guardados neste navegador ---------- */
-const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12;
+const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12, QUEUE_STORE = "fila";
+// fila guardada: se a página fechar no meio, os arquivos que faltavam voltam na próxima visita (uma vez só)
+const queueSave = job => { if (job.file instanceof Blob && job.file.size < 300e6) idbReq("readwrite", st => st.put({ id: job.histId, file: job.file, date: Date.now() }), QUEUE_STORE).catch(() => {}); };
+const queueDone = job => { idbReq("readwrite", st => st.delete(job.histId), QUEUE_STORE).catch(() => {}); };
+async function queueRestore(){
+  try {
+    const all = (await idbReq("readonly", st => st.getAll(), QUEUE_STORE)) || [];
+    if (!all.length) return;
+    await idbReq("readwrite", st => st.clear(), QUEUE_STORE);
+    const files = all.sort((a, b) => a.date - b.date).map(r => r.file).filter(f => f && f.name);
+    if (!files.length) return;
+    addFiles(files, true);
+    toast(files.length > 1 ? `Retomando ${files.length} arquivos que estavam na fila.` : "Retomando o arquivo que estava na fila.", 5000);
+  } catch (e) { console.warn("fila", e); }
+}
 let histDbP = null;
 function histDb(){
   return histDbP ||= new Promise((res, rej) => {
     try {
-      const r = indexedDB.open(HIST_DB, 1);
-      r.onupgradeneeded = () => r.result.createObjectStore(HIST_STORE, { keyPath: "id" });
+      const r = indexedDB.open(HIST_DB, 2);
+      r.onupgradeneeded = () => { for (const s of [HIST_STORE, QUEUE_STORE]) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: "id" }); };
       r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     } catch (e) { rej(e); }
   });
 }
-const idbReq = (mode, fn) => histDb().then(db => new Promise((res, rej) => {
-  const tx = db.transaction(HIST_STORE, mode), st = tx.objectStore(HIST_STORE), r = fn(st);
+const idbReq = (mode, fn, store = HIST_STORE) => histDb().then(db => new Promise((res, rej) => {
+  const tx = db.transaction(store, mode), st = tx.objectStore(store), r = fn(st);
   tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
 }));
 const histAll = () => idbReq("readonly", st => st.getAll()).then(a => (a || []).sort((x, y) => y.date - x.date));
@@ -3312,7 +4407,7 @@ document.querySelectorAll(".side input, .side select").forEach(el => el.addEvent
 if (window.matchMedia("(max-width: 1040px)").matches) $("#optPanel").open = false;
 
 /* ---------- opções lembradas neste navegador ---------- */
-const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh"];
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images"];
 const OPT_KEY = "conversor-epub:opcoes";
 function loadOptions(){
   try {
@@ -3334,6 +4429,7 @@ function saveOptions(){
 loadOptions();
 OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });
 renderHistory();
+queueRestore();
 renderFixes();
 updateOptSum();
 
@@ -3390,7 +4486,7 @@ $("#wipeBtn").onclick = async () => {
   const b = $("#wipeBtn");
   if (!b.dataset.sure) { b.dataset.sure = "1"; b.textContent = "Confirmar: apagar estante, opções e correções"; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador"; } }, 5000); return; }
   try { for (const k of Object.keys(localStorage)) if (k.startsWith("conversor-epub:")) localStorage.removeItem(k); } catch {}
-  try { (await histAll()).forEach(r => histDel(r.id)); } catch {}
+  try { (await histAll()).forEach(r => histDel(r.id)); await idbReq("readwrite", st => st.clear(), QUEUE_STORE); } catch {}
   try { if ("caches" in window) await caches.delete("conversor-epub-compartilhado"); } catch {}
   delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador";
   renderHistory(); renderFixes();

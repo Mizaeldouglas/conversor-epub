@@ -1,5 +1,19 @@
 # Novidades
 
+## 3.0.0 — 12 nov 2026
+
+- Novos formatos de entrada: DOCX, TXT, HTML, Markdown, FB2, MOBI/AZW3 sem proteção e CBZ. Todos seguem o mesmo caminho do PDF e podem ser editados.
+- PDF: o sumário interno do arquivo define capítulos e partes; texto em duas colunas é lido na ordem certa; tabelas, listas, links e versos são mantidos.
+- Corrigir o texto direto na prévia, clicando no parágrafo.
+- Mudar a ordem dos capítulos e desfazer a última alteração.
+- EPUB pronto pode ser aberto para editar capa, capítulos e texto.
+- Buscar capa e sinopse na internet (Google Books e Open Library), só quando você pede.
+- Descrição (texto alternativo) para as imagens.
+- Imagens menores ou em tons de cinza, e download em KEPUB para o Kobo.
+- Cada livro guarda as opções com que foi convertido e pode ser convertido de novo com outras.
+- Se a página fechar com arquivos na fila, eles voltam na visita seguinte.
+- Cada nota de rodapé fica no capítulo que a chama.
+
 ## 2.2.0 — 12 nov 2026
 
 - O app agora se chama Lombada. O endereço do site continua o mesmo.

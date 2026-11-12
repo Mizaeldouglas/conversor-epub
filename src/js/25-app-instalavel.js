@@ -51,7 +51,7 @@ $("#wipeBtn").onclick = async () => {
   const b = $("#wipeBtn");
   if (!b.dataset.sure) { b.dataset.sure = "1"; b.textContent = "Confirmar: apagar estante, opções e correções"; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador"; } }, 5000); return; }
   try { for (const k of Object.keys(localStorage)) if (k.startsWith("conversor-epub:")) localStorage.removeItem(k); } catch {}
-  try { (await histAll()).forEach(r => histDel(r.id)); } catch {}
+  try { (await histAll()).forEach(r => histDel(r.id)); await idbReq("readwrite", st => st.clear(), QUEUE_STORE); } catch {}
   try { if ("caches" in window) await caches.delete("conversor-epub-compartilhado"); } catch {}
   delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador";
   renderHistory(); renderFixes();

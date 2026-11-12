@@ -6,6 +6,7 @@ const NS_WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDr
 async function blocksToDocx(blocks, title, author){
   const z = new JSZip();
   let bm = 0;
+  const rels = [`<Relationship Id="rIdStyles" Type="${NS_R}/styles" Target="styles.xml"/>`];
   const bookmark = label => { bm++; return `<w:bookmarkStart w:id="${bm}" w:name="pdfpg${bm}_${hexEnc(label)}"/><w:bookmarkEnd w:id="${bm}"/>`; };
   const sup = label => `<w:r><w:rPr><w:vertAlign w:val="superscript"/></w:rPr><w:t xml:space="preserve">${esc(label)}</w:t></w:r>`;
   // chamada de nota: marcador invisível (para o EPUB achar a nota) + número sobrescrito
@@ -13,22 +14,31 @@ async function blocksToDocx(blocks, title, author){
     const i = s.indexOf("|"); if (i < 0) return sup(s);
     bm++; return `<w:bookmarkStart w:id="${bm}" w:name="note${s.slice(0, i)}_${hexEnc(s.slice(i + 1))}"/><w:bookmarkEnd w:id="${bm}"/>` + sup(s.slice(i + 1));
   };
+  let lkN = 0;
   const runs = text => {
-    let st = 0;
-    return text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008])/).filter(Boolean).map(seg => {
+    let st = 0, lk = false;
+    const out = text.split(/(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/).filter(Boolean).map(seg => {
       if (seg === BR) return "<w:r><w:br/></w:r>";
       if (seg === IT_ON) { st |= 1; return ""; } if (seg === IT_OFF) { st &= ~1; return ""; }
       if (seg === BD_ON) { st |= 2; return ""; } if (seg === BD_OFF) { st &= ~2; return ""; }
+      if (seg[0] === LK_ON) {
+        lkN++; rels.push(`<Relationship Id="rIdL${lkN}" Type="${NS_R}/hyperlink" Target="${esc(seg.slice(1, -1))}" TargetMode="External"/>`);
+        const pre = lk ? "</w:hyperlink>" : ""; lk = true; return pre + `<w:hyperlink r:id="rIdL${lkN}">`;
+      }
+      if (seg === LK_OFF) { if (!lk) return ""; lk = false; return "</w:hyperlink>"; }
       if (seg[0] === PG_A) return bookmark(seg.slice(1, -1));
       if (seg[0] === "\uE002") return noteRef(seg.slice(1, -1));
       const rp = (st & 2 ? "<w:b/>" : "") + (st & 1 ? "<w:i/>" : "");
       return `<w:r>${rp ? `<w:rPr>${rp}</w:rPr>` : ""}<w:t xml:space="preserve">${esc(seg)}</w:t></w:r>`;
     }).join("");
+    return out + (lk ? "</w:hyperlink>" : "");
   };
   const para = (style, text) =>
     `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs(text)}</w:p>`;
-  const styleOf = { h1: "Heading1", h2: "Heading2", p: "" };
-  const rels = [`<Relationship Id="rIdStyles" Type="${NS_R}/styles" Target="styles.xml"/>`];
+  const styleOf = { h1: "Heading1", h2: "Heading2", p: "", li: "Lista", verse: "Verso" };
+  const cell = t => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p>${runs(t)}</w:p></w:tc>`;
+  const bd = k => `<w:${k} w:val="single" w:sz="4" w:space="0" w:color="888888"/>`;
+  const table = rows => `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>${["top", "left", "bottom", "right", "insideH", "insideV"].map(bd).join("")}</w:tblBorders></w:tblPr>${rows.map(r => `<w:tr>${r.map(cell).join("")}</w:tr>`).join("")}</w:tbl><w:p/>`;
   const MAXW = 5760000, MAXH = 8200000; // EMU da área útil A4
   let n = 0, pendingPg = null;
   const parts = [para("Title", title)];
@@ -40,6 +50,7 @@ async function blocksToDocx(blocks, title, author){
       continue;
     }
     if (b.type === "scene") { parts.push(para("Cena", b.text)); continue; }
+    if (b.type === "table") { parts.push(table(b.rows)); continue; }
     if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : b.part && /^h[12]$/.test(b.type) ? "Parte" : styleOf[b.type], b.text)); continue; }
     n++;
     const file = `image${n}.jpg`;
@@ -49,7 +60,7 @@ async function blocksToDocx(blocks, title, author){
     const s = b.full ? Math.min(MAXW / cx, MAXH / cy) : Math.min(1, MAXW / cx, MAXH / cy);
     cx = Math.round(cx * s); cy = Math.round(cy * s);
     const name = (b.full ? "Pagina " : "Imagem ") + n;
-    parts.push(`<w:p><w:pPr>${b.full ? "<w:pageBreakBefore/>" : ""}<w:spacing w:before="120" w:after="120"/><w:jc w:val="center"/></w:pPr>${pendingPg !== null ? bookmark(pendingPg) : ""}<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${n}" name="${name}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${n}" name="${file}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdImg${n}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
+    parts.push(`<w:p><w:pPr>${b.full ? "<w:pageBreakBefore/>" : ""}<w:spacing w:before="120" w:after="120"/><w:jc w:val="center"/></w:pPr>${pendingPg !== null ? bookmark(pendingPg) : ""}<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${n}" name="${name}"${b.alt ? ` descr="${esc(b.alt)}"` : ""}/><wp:cNvGraphicFramePr><a:graphicFrameLocks noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${n}" name="${file}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="rIdImg${n}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
     pendingPg = null;
   }
   const doc = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -64,6 +75,8 @@ async function blocksToDocx(blocks, title, author){
 <w:style w:type="paragraph" w:styleId="Heading3"><w:name w:val="heading 3"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="200" w:after="100"/><w:jc w:val="left"/><w:outlineLvl w:val="2"/></w:pPr><w:rPr><w:b/><w:sz w:val="26"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Cena"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="NotaRodape"><w:name w:val="Nota de rodapé"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Lista"><w:name w:val="Item de lista"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="567" w:hanging="283"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Verso"><w:name w:val="Verso"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120"/><w:ind w:left="567"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>`;
   const now = new Date().toISOString().replace(/\.\d+Z$/, "Z");

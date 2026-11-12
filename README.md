@@ -1,6 +1,6 @@
 # Lombada: PDF para EPUB
 
-Converte PDF em EPUB para ler no Kindle, com capítulos, sumário, notas clicáveis, números de página e o texto conferido palavra por palavra. Roda inteiro no navegador: **o arquivo não sai do seu computador**.
+Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capítulos, sumário, notas clicáveis, números de página e o texto conferido palavra por palavra. Roda inteiro no navegador: **o arquivo não sai do seu computador**.
 
 **Use em: [mizaeldouglas.github.io/conversor-epub](https://mizaeldouglas.github.io/conversor-epub/)**
 
@@ -13,7 +13,10 @@ Converte PDF em EPUB para ler no Kindle, com capítulos, sumário, notas clicáv
 - **Capítulos e partes.** Títulos em fonte maior, “Capítulo 12”, número grande em cima do título e títulos em várias linhas viram capítulos. Partes (“Parte II”, ou numeração romana acima de capítulos numerados) agrupam os capítulos no sumário.
 - **Editar antes de baixar.** Renomeie, junte, separe e marque partes; transforme qualquer parágrafo em capítulo; troque a capa (imagem sua ou qualquer página do PDF); mude título, autor, série e sinopse; localize e substitua no livro todo.
 - **Selo de qualidade.** Cada EPUB tem a estrutura conferida (o essencial do EPUBCheck) antes do download.
-- **Mais:** notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
+- **Vários formatos.** Além de PDF e EPUB, abre DOCX, TXT, HTML, Markdown, FB2, MOBI/AZW3 sem proteção e CBZ.
+- **PDFs difíceis.** Usa o sumário interno do PDF, lê duas colunas na ordem certa e mantém tabelas, listas, links e versos.
+- **Correção na prévia.** Clique num parágrafo para reescrever; mude a ordem dos capítulos; desfaça a última alteração.
+- **Mais:** KEPUB para Kobo, imagens menores ou em tons de cinza, descrição das imagens, capa e sinopse da internet, notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
 
 | Prévia com o sumário | Capítulos e partes |
 | --- | --- |
@@ -21,11 +24,14 @@ Converte PDF em EPUB para ler no Kindle, com capítulos, sumário, notas clicáv
 
 ## Privacidade
 
-A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
+A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. A única função que manda algo para fora é “Buscar dados deste livro”, que envia o título e o autor ao Google Books e à Open Library quando você clica. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
 
 ## Limitações conhecidas
 
-- PDF com DRM ou EPUB comprado com proteção não abre.
+- Livros com DRM não abrem, em nenhum formato. MOBI com compressão Huffman e CBR também não.
+- MOBI e AZW3 foram testados com arquivos gerados para os testes; arquivos de loja podem ter variações.
+- Links internos do PDF (de uma página para outra) não são mantidos; os links para sites, sim.
+- A interface está só em português.
 - Páginas com texto em várias colunas (créditos, índices) podem sair na ordem das colunas lidas de cima para baixo.
 - O OCR pode trocar letras; confira na prévia com o PDF ao lado.
 - O Kindle mostra posições, não páginas. Use “Número da página no texto” se quiser ver o número lá.

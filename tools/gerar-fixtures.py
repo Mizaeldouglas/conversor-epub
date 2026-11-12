@@ -194,5 +194,61 @@ def epub():
         for k, v in files.items(): z.writestr(k, v, compress_type=zipfile.ZIP_DEFLATED)
 
 
-for f in (estilos, grudado, capitulos, gibi, escaneado, erros, epub): f()
+# 8) recursos.pdf: sumário interno (com títulos em fonte comum), duas colunas, tabela, listas, link e versos
+def recursos():
+    c = canvas.Canvas(os.path.join(OUT, "recursos.pdf"), pagesize=A5); c.setTitle("O Almanaque do Porto")
+    frase = "O porto acordava cedo e o cheiro de corda molhada subia pelas ruas até a praça do mercado. "
+    n = [0]
+    def page_end():
+        n[0] += 1; folio(c, n[0]); c.showPage()
+    def titulo(t, key, level, closed=0):
+        c.setFont("Times-Roman", 11); c.drawString(M, H - 70, t)   # mesma fonte do corpo: só o sumário do PDF diz que é título
+        c.bookmarkPage(key); c.addOutlineEntry(t, key, level, closed)
+        return H - 100
+    # parte e capítulos
+    y = titulo("Livro Primeiro", "p1", 0); paragraph(c, y, frase * 3); page_end()
+    y = titulo("A chegada dos barcos", "c1", 1)
+    y = paragraph(c, y, frase * 2)
+    y = paragraph(c, y - 4, "O regulamento completo está em")
+    c.setFont("Times-Roman", 11); c.drawString(M + 18, y, "www.exemplo.org/porto"); c.linkURL("https://www.exemplo.org/porto", (M + 16, y - 3, M + 130, y + 10)); y -= 15
+    y = paragraph(c, y - 4, frase * 2)
+    # lista com marcadores e lista numerada
+    for it in ["corda de cânhamo, três braças", "lanterna de azeite com pavio novo e vidro limpo, guardada sempre na caixa seca do convés", "sal grosso"]:
+        ls = lines_of(c, it, "Times-Roman", 11, W - 2 * M - 30)
+        for i, ln in enumerate(ls):
+            c.setFont("Times-Roman", 11)
+            if i == 0: c.drawString(M + 10, y, "\u2022")
+            c.drawString(M + 24, y, ln); y -= 15
+    y -= 6
+    for i, it in enumerate(["Amarrar a proa.", "Recolher a vela.", "Avisar o guarda."]):
+        c.setFont("Times-Roman", 11); c.drawString(M, y, f"{i + 1}. {it}"); y -= 22
+    page_end()
+    # tabela
+    y = titulo("A tabela das marés", "c2", 1)
+    y = paragraph(c, y, frase * 2) - 8
+    for row in [("Dia", "Maré alta", "Maré baixa"), ("Segunda", "06h10", "12h25"), ("Terça", "06h55", "13h05"), ("Quarta", "07h40", "13h50")]:
+        c.setFont("Times-Roman", 11)
+        for k, t in enumerate(row): c.drawString(M + k * 105, y, t)
+        y -= 17
+    y = paragraph(c, y - 8, frase * 2)
+    # versos
+    y -= 8
+    for v in ["Quem parte leva o vento,", "quem fica guarda o cais,", "e a maré, sem pensamento,", "devolve o que não é mais."]:
+        c.setFont("Times-Roman", 11); c.drawString(M + 40, y, v); y -= 15
+    paragraph(c, y - 8, frase * 2); page_end()
+    # duas colunas
+    y0 = titulo("Livro Segundo", "p2", 0); paragraph(c, y0, frase * 2); page_end()
+    titulo("O que dizem os velhos", "c3", 1)
+    colw = (W - 2 * M - 18) / 2
+    esq = "Dizem os velhos que o farol já foi mais alto e que o mar, naquele tempo, respeitava a pedra. " * 5
+    dir_ = "As crianças não acreditam, mas sobem a escada toda tarde para ver se a história ainda cabe na vista. " * 5
+    for k, txt in enumerate((esq, dir_)):
+        y = H - 100
+        for ln in lines_of(c, txt, "Times-Roman", 10, colw):
+            c.setFont("Times-Roman", 10); c.drawString(M + k * (colw + 18), y, ln); y -= 13
+    page_end()
+    c.save()
+
+
+for f in (estilos, grudado, capitulos, gibi, escaneado, erros, epub, recursos): f()
 print("fixtures em", os.path.abspath(OUT))
