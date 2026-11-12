@@ -88,7 +88,8 @@ test("descrição de imagem e imagens em tons de cinza", async () => {
 test("fila guardada: arquivo que ficou na fila volta ao reabrir a página", async () => {
   const bytes = [...readFileSync(join(FIX, "conto.txt"))];
   await app.page.evaluate(bytes => new Promise((res, rej) => {
-    const r = indexedDB.open("conversor-epub", 2);
+    const r = indexedDB.open("conversor-epub-fila");
+    r.onupgradeneeded = () => r.result.createObjectStore("fila", { keyPath: "id" });
     r.onsuccess = () => { const tx = r.result.transaction("fila", "readwrite"); tx.objectStore("fila").put({ id: "x1", file: new File([new Uint8Array(bytes)], "conto.txt"), date: 1 }); tx.oncomplete = res; tx.onerror = rej; };
     r.onerror = rej;
   }), bytes);
@@ -101,3 +102,21 @@ test("fila guardada: arquivo que ficou na fila volta ao reabrir a página", asyn
 });
 
 test("nenhum erro de JavaScript", () => assert.deepEqual(app.errors, []));
+
+test("estante: abre o banco já existente, de qualquer versão, sem travar", async () => {
+  const other = await openApp(browser, server);
+  // banco como as versões 3.0.0 e 3.0.1 deixaram (versão 2), com um livro na estante
+  await other.page.evaluate(() => new Promise((res, rej) => {
+    indexedDB.databases().then(async () => {
+      const del = indexedDB.deleteDatabase("conversor-epub"); del.onsuccess = del.onerror = del.onblocked = () => {
+        const r = indexedDB.open("conversor-epub", 2);
+        r.onupgradeneeded = () => { r.result.createObjectStore("livros", { keyPath: "id" }); r.result.createObjectStore("fila", { keyPath: "id" }); };
+        r.onsuccess = () => { const tx = r.result.transaction("livros", "readwrite"); tx.objectStore("livros").put({ id: "a", title: "Livro Antigo", author: "", name: "a.epub", date: 1, size: 10, blob: new Blob(["x"]), cover: null }); tx.oncomplete = () => { r.result.close(); res(); }; };
+        r.onerror = () => rej(r.error);
+      };
+    });
+  }));
+  await other.page.reload();
+  await other.page.waitForFunction(() => [...document.querySelectorAll("#history .book .t")].some(e => e.textContent === "Livro Antigo"), null, { timeout: 8000 });
+  await other.ctx.close();
+});

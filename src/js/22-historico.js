@@ -1,5 +1,5 @@
 /* ---------- histórico: últimos livros guardados neste navegador ---------- */
-const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12, QUEUE_STORE = "fila";
+const HIST_DB = "conversor-epub", HIST_STORE = "livros", HIST_MAX = 12, QUEUE_STORE = "fila", QUEUE_DB = "conversor-epub-fila";
 // fila guardada: se a página fechar no meio, os arquivos que faltavam voltam na próxima visita (uma vez só)
 const queueSave = job => { if (job.file instanceof Blob && job.file.size < 300e6) idbReq("readwrite", st => st.put({ id: job.histId, file: job.file, date: Date.now() }), QUEUE_STORE).catch(() => {}); };
 const queueDone = job => { idbReq("readwrite", st => st.delete(job.histId), QUEUE_STORE).catch(() => {}); };
@@ -14,17 +14,19 @@ async function queueRestore(){
     toast(files.length > 1 ? `Retomando ${files.length} arquivos que estavam na fila.` : "Retomando o arquivo que estava na fila.", 5000);
   } catch (e) { console.warn("fila", e); }
 }
-let histDbP = null;
-function histDb(){
-  return histDbP ||= new Promise((res, rej) => {
+// cada banco tem uma gaveta só e nunca muda de versão: assim uma aba antiga aberta não trava a aba nova
+const dbP = {};
+function openDb(name, store){
+  return dbP[name] ||= new Promise((res, rej) => {
     try {
-      const r = indexedDB.open(HIST_DB, 2);
-      r.onupgradeneeded = () => { for (const s of [HIST_STORE, QUEUE_STORE]) if (!r.result.objectStoreNames.contains(s)) r.result.createObjectStore(s, { keyPath: "id" }); };
-      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+      const r = indexedDB.open(name);
+      r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(store)) r.result.createObjectStore(store, { keyPath: "id" }); };
+      r.onsuccess = () => { r.result.onversionchange = () => { r.result.close(); delete dbP[name]; }; res(r.result); };
+      r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("banco ocupado por outra aba"));
     } catch (e) { rej(e); }
   });
 }
-const idbReq = (mode, fn, store = HIST_STORE) => histDb().then(db => new Promise((res, rej) => {
+const idbReq = (mode, fn, store = HIST_STORE) => openDb(store === QUEUE_STORE ? QUEUE_DB : HIST_DB, store).then(db => new Promise((res, rej) => {
   const tx = db.transaction(store, mode), st = tx.objectStore(store), r = fn(st);
   tx.oncomplete = () => res(r && r.result); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error);
 }));

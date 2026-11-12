@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.0.2 — 12 nov 2026
+
+- Corrigido: com uma aba antiga do Lombada aberta, a estante não aparecia na aba nova.
+
 ## 3.0.1 — 12 nov 2026
 
 - Capa e sinopse da internet: a busca passa a usar primeiro a Open Library, que responde sempre; o Google Books fica como reserva.
