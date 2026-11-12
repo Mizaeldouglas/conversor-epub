@@ -128,7 +128,7 @@ function render(job){
     <div class="row-status">
       ${busy ? `<div class="bar${pct == null ? " indet" : ""}" role="progressbar" aria-label="Andamento"${pct != null ? ` aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"` : ""}><span${pct != null ? ` style="width:${pct}%"` : ""}></span></div>
         <div class="progress-txt">${esc(job.progress || "")}</div>` : ""}
-      <ol class="steps" aria-label="Etapas">${steps}</ol>
+      ${job.epub && !job.busy ? "" : `<ol class="steps" aria-label="Etapas">${steps}</ol>`}
     </div>
     <div class="row-extra">
       ${sealHtml}

@@ -1,5 +1,13 @@
 # Novidades
 
+## 2.1.0 — 12 nov 2026
+
+- Visual novo: a área de soltar virou a capa de um livro, em azul, com o amarelo de marca-texto nas ações e nas palavras conferidas.
+- Fila mais limpa: capa maior, um selo só para “Pronto para o Kindle” e as etapas aparecem apenas enquanto o livro é convertido.
+- Fila vazia mostra o caminho em três passos.
+- Livros sem capa aparecem na estante como capa de tecido com o título.
+- Tema escuro redesenhado, ícone e imagem de compartilhamento novos.
+
 ## 2.0.0 — 1 nov 2026
 
 - A leitura do PDF saiu da linha de execução da tela: a página não trava mais durante a conversão (livro de 268 páginas: de 6,6 s de travadas para 0,6 s) e converte uns 25% mais rápido.

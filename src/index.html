@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Conversor PDF para EPUB</title>
 <meta name="description" content="Converta PDF em EPUB para ler no Kindle, com capítulos, sumário, páginas numeradas e o texto conferido palavra por palavra. Tudo no seu navegador: o arquivo não sai do seu computador.">
-<meta name="theme-color" content="#1d5c57">
+<meta name="theme-color" content="#2536c7">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Conversor PDF para EPUB">
 <meta property="og:title" content="Conversor PDF para EPUB">
@@ -20,7 +20,7 @@
 <link rel="icon" href="data:image/svg+xml,@@FAVICON@@">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap">
 <style>
 /* @@CSS@@ */
 </style>
@@ -28,11 +28,8 @@
 <body>
 <header class="top">
   <div class="brand">
-    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="4" width="26" height="32" rx="3" fill="var(--accent)"/><rect x="11" y="8" width="18" height="21" rx="1.5" fill="var(--paper)"/><path d="M14 13h12M14 17h12M14 21h8" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round"/><circle cx="20" cy="32.3" r="1.4" fill="var(--paper)"/></svg>
-    <div>
-      <h1>Conversor PDF para EPUB</h1>
-      <p>Livros para o Kindle, com capítulos, páginas e o texto igual ao original. Tudo acontece no seu navegador.</p>
-    </div>
+    <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="3" width="28" height="34" rx="5" fill="var(--cover)"/><rect x="6" y="3" width="6" height="34" rx="3" fill="var(--cover-deep)"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="var(--mark)"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
+    <h1>Conversor PDF para EPUB</h1>
   </div>
   <div class="top-actions">
     <button class="btn ghost sm" id="installBtn" hidden>Instalar app</button>
@@ -43,25 +40,43 @@
   </div>
 </header>
 
+<div class="hero">
+  <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
+    <div class="drop-copy">
+      <h2>Seu PDF vira livro de Kindle</h2>
+      <p class="what">Solte aqui PDFs ou EPUBs, quantos quiser. O PDF sai como EPUB com capítulos, sumário e notas, e cada palavra é conferida com o original. O EPUB pronto ganha números de página.</p>
+      <div class="drop-row">
+        <span class="btn mark">Escolher arquivos</span>
+        <span class="privacy"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Os arquivos não saem do seu aparelho</span>
+      </div>
+    </div>
+    <svg class="drop-art" viewBox="0 0 310 236" aria-hidden="true">
+      <g class="sheet">
+        <path d="M14 30a6 6 0 0 1 6-6h92l26 26v150a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#fff"/>
+        <path d="M112 24v20a6 6 0 0 0 6 6h20z" fill="#c7cdf2"/>
+        <rect x="30" y="76" width="56" height="13" rx="3" fill="#ffd84a"/>
+        <path d="M30 62h66M34 82h48M94 82h28M30 102h92M30 122h92M30 142h70M30 162h92" stroke="#aab1dd" stroke-width="5" stroke-linecap="round"/>
+        <path d="M34 82h48" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <path d="M68 186h16" stroke="#aab1dd" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <g class="reader">
+        <rect x="150" y="8" width="150" height="220" rx="18" fill="#131833"/>
+        <rect x="162" y="22" width="126" height="178" rx="5" fill="#f6f5ee"/>
+        <text x="176" y="62" font-family="Literata,Georgia,serif" font-size="30" font-weight="700" fill="#131833">1</text>
+        <path d="M176 78h70" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <rect x="186" y="96" width="60" height="13" rx="3" fill="#ffd84a"/>
+        <path d="M188 102h56" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <path d="M254 102h20M176 122h98M176 142h98M176 162h62" stroke="#b4b8cc" stroke-width="5" stroke-linecap="round"/>
+        <path d="M208 186h34" stroke="#c9ccda" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="225" cy="214" r="3.5" fill="#3a4170"/>
+      </g>
+    </svg>
+    <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple hidden>
+  </div>
+</div>
+
 <main class="layout">
   <div class="main-col">
-    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos PDF ou EPUB">
-      <svg class="drop-art" viewBox="0 0 92 112" aria-hidden="true">
-        <rect x="18" y="6" width="62" height="84" rx="4" fill="var(--surface)" stroke="var(--line)" stroke-width="1.5"/>
-        <rect x="10" y="16" width="62" height="84" rx="4" fill="var(--surface)" stroke="var(--accent)" stroke-width="1.5"/>
-        <path d="M20 30h30M20 38h42M20 46h42M20 54h36M20 62h42M20 70h28" stroke="var(--line)" stroke-width="2.4" stroke-linecap="round"/>
-        <circle cx="66" cy="90" r="16" fill="var(--accent)"/>
-        <path d="M66 82v14M59.5 89.5 66 96l6.5-6.5" stroke="var(--accent-ink)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <h2>Solte aqui seus PDFs ou EPUBs</h2>
-      <p class="what"><b>PDF</b> vira EPUB com capítulos, notas e números de página. <b>EPUB</b> pronto ganha números de página sem mexer no texto. Pode mandar vários de uma vez.</p>
-      <div class="drop-row">
-        <span class="btn">Escolher arquivos</span>
-        <span class="privacy"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Os arquivos não saem do seu aparelho</span>
-      </div>
-      <input id="file" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" multiple hidden>
-    </div>
-
     <section aria-labelledby="filaT">
       <div class="sec-head">
         <h2 id="filaT">Fila <span class="count" id="queueCount"></span></h2>
@@ -72,14 +87,20 @@
         </div>
       </div>
       <div class="list" id="list">
-        <div class="empty" id="empty">Os arquivos que você soltar aparecem aqui, com o andamento de cada etapa.</div>
+        <div class="empty" id="empty">
+          <ol class="path" aria-label="Como vai ser">
+            <li><span class="n">1</span><b>Solte o arquivo</b><span>O livro aparece aqui, com o andamento de cada etapa.</span></li>
+            <li><span class="n">2</span><b>Confira e ajuste</b><span>Veja a prévia, troque a capa e acerte os capítulos.</span></li>
+            <li><span class="n">3</span><b>Leve para o Kindle</b><span>Baixe o EPUB ou mande direto para o aparelho.</span></li>
+          </ol>
+        </div>
       </div>
     </section>
 
     <section id="historySec" aria-labelledby="estanteT" hidden>
       <div class="sec-head">
         <h2 id="estanteT">Sua estante <span class="count" id="shelfCount"></span></h2>
-        <span class="muted" style="font-size:13px">Os últimos 12 livros ficam guardados neste navegador.</span>
+        <span class="sec-note">Os últimos 12 livros ficam guardados neste navegador.</span>
       </div>
       <div class="shelf" id="history"></div>
     </section>

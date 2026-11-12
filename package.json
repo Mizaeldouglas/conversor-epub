@@ -1,6 +1,6 @@
 {
   "name": "conversor-epub",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "description": "Conversor de PDF para EPUB (Kindle) que roda inteiro no navegador.",
   "license": "MIT",
@@ -11,7 +11,8 @@
     "test": "node --test --test-concurrency=1 tests/*.test.mjs",
     "fixtures": "python3 tools/gerar-fixtures.py",
     "og": "node tools/og.mjs",
-    "screenshots": "node tools/screenshots.mjs"
+    "screenshots": "node tools/screenshots.mjs",
+    "icones": "node tools/icones.mjs"
   },
   "devDependencies": {
     "jszip": "3.10.1",
