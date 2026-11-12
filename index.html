@@ -4337,10 +4337,12 @@ const dbP = {};
 function openDb(name, store){
   return dbP[name] ||= new Promise((res, rej) => {
     try {
+      // outra aba (de uma versão anterior) pode estar segurando o banco: não espera para sempre
+      const t = setTimeout(() => { delete dbP[name]; rej(Object.assign(new Error("banco ocupado por outra aba"), { name: "DbBusy" })); }, 4000);
       const r = indexedDB.open(name);
       r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains(store)) r.result.createObjectStore(store, { keyPath: "id" }); };
-      r.onsuccess = () => { r.result.onversionchange = () => { r.result.close(); delete dbP[name]; }; res(r.result); };
-      r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error("banco ocupado por outra aba"));
+      r.onsuccess = () => { clearTimeout(t); r.result.onversionchange = () => { r.result.close(); delete dbP[name]; }; res(r.result); };
+      r.onerror = () => { clearTimeout(t); rej(r.error); };
     } catch (e) { rej(e); }
   });
 }
@@ -4363,7 +4365,11 @@ async function saveHistory(job){
 async function renderHistory(){
   const sec = $("#historySec"), box = $("#history");
   let all;
-  try { all = await histAll(); } catch { sec.hidden = true; return; }
+  try { all = await histAll(); } catch (e) {
+    sec.hidden = true;
+    if (e && e.name === "DbBusy" && !renderHistory.warned) { renderHistory.warned = true; toast("A estante está presa por outra aba ou janela do Lombada aberta antes da atualização. Feche as outras e recarregue esta página.", 9000); }
+    return;
+  }
   sec.hidden = !all.length;
   $("#shelfCount").textContent = all.length ? String(all.length) : "";
   box.innerHTML = "";

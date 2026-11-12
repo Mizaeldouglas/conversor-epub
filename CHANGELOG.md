@@ -2,7 +2,7 @@
 
 ## 3.0.2 — 12 nov 2026
 
-- Corrigido: com uma aba antiga do Lombada aberta, a estante não aparecia na aba nova.
+- Corrigido: com uma aba antiga do Lombada aberta, a estante não aparecia na aba nova. Se ainda acontecer, a página avisa o que fazer.
 
 ## 3.0.1 — 12 nov 2026
 
