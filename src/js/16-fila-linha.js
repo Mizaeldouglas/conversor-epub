@@ -41,7 +41,7 @@ function editPanelHtml(job){
           <button class="btn ghost sm" data-f="go" disabled>Substituir tudo</button></div></div>` : ""}
       ${imgs.length ? `<div class="imgalts"><b>Descrição das imagens (${imgs.length})</b><span class="muted">O leitor de tela lê esta descrição no lugar da imagem. Deixe em branco nas que são só enfeite.</span>
         <ul>${imgs.map(x => `<li><img alt="" data-ai="${x.bi}"><input type="text" data-alt="${x.bi}" aria-label="Descrição da imagem" placeholder="O que a imagem mostra" autocomplete="off"></li>`).join("")}</ul></div>` : ""}
-      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor no Google Books e na Open Library. Só esses dois dados saem do aparelho; o arquivo não.</span>
+      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor na Open Library e, se não achar, no Google Books. Só esses dois dados saem do aparelho; o arquivo não.</span>
         <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
       ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
         <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>

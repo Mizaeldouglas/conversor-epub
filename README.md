@@ -24,7 +24,7 @@ Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capí
 
 ## Privacidade
 
-A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. A única função que manda algo para fora é “Buscar dados deste livro”, que envia o título e o autor ao Google Books e à Open Library quando você clica. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
+A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. A única função que manda algo para fora é “Buscar dados deste livro”, que envia o título e o autor à Open Library e, se ela não achar, ao Google Books quando você clica. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
 
 ## Limitações conhecidas
 

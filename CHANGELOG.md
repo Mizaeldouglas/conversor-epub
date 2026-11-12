@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.0.1 — 12 nov 2026
+
+- Capa e sinopse da internet: a busca passa a usar primeiro a Open Library, que responde sempre; o Google Books fica como reserva.
+
 ## 3.0.0 — 12 nov 2026
 
 - Novos formatos de entrada: DOCX, TXT, HTML, Markdown, FB2, MOBI/AZW3 sem proteção e CBZ. Todos seguem o mesmo caminho do PDF e podem ser editados.
@@ -7,7 +11,7 @@
 - Corrigir o texto direto na prévia, clicando no parágrafo.
 - Mudar a ordem dos capítulos e desfazer a última alteração.
 - EPUB pronto pode ser aberto para editar capa, capítulos e texto.
-- Buscar capa e sinopse na internet (Google Books e Open Library), só quando você pede.
+- Buscar capa e sinopse na internet (Open Library e Google Books), só quando você pede.
 - Descrição (texto alternativo) para as imagens.
 - Imagens menores ou em tons de cinza, e download em KEPUB para o Kobo.
 - Cada livro guarda as opções com que foi convertido e pode ser convertido de novo com outras.

@@ -500,7 +500,7 @@ body.noscroll{overflow:hidden}
         <details id="privacidade"><summary>Privacidade: o que acontece com meus arquivos?</summary><div class="ans">
           <p>Nada sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
           <p>O navegador baixa apenas o próprio programa: as bibliotecas de leitura de PDF e ZIP (cdnjs), as fontes da página (Google Fonts) e, se você ligar o OCR, o leitor de texto (jsDelivr). Esses serviços veem o seu endereço de internet, como em qualquer site, mas não os seus arquivos.</p>
-          <p>Só uma função manda algo para fora, e só quando você clica nela: “Buscar dados deste livro” envia o título e o autor ao Google Books e à Open Library para trazer capa e sinopse.</p>
+          <p>Só uma função manda algo para fora, e só quando você clica nela: “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books para trazer capa e sinopse.</p>
           <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar.</p>
           <p><button class="btn ghost sm" id="wipeBtn">Apagar tudo o que está guardado neste navegador</button></p></div></details>
         <details><summary>Kobo e outros leitores</summary><div class="ans">
@@ -592,7 +592,7 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">3.0.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">3.0.1</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
 </footer>
 
 <div class="updatebar" id="updateBar" hidden role="status">
@@ -644,7 +644,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const $ = s => document.querySelector(s);
 const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const jobs = [];
-const VERSION = "3.0.0";
+const VERSION = "3.0.1";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -3353,7 +3353,7 @@ function editPanelHtml(job){
           <button class="btn ghost sm" data-f="go" disabled>Substituir tudo</button></div></div>` : ""}
       ${imgs.length ? `<div class="imgalts"><b>Descrição das imagens (${imgs.length})</b><span class="muted">O leitor de tela lê esta descrição no lugar da imagem. Deixe em branco nas que são só enfeite.</span>
         <ul>${imgs.map(x => `<li><img alt="" data-ai="${x.bi}"><input type="text" data-alt="${x.bi}" aria-label="Descrição da imagem" placeholder="O que a imagem mostra" autocomplete="off"></li>`).join("")}</ul></div>` : ""}
-      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor no Google Books e na Open Library. Só esses dois dados saem do aparelho; o arquivo não.</span>
+      ${ON_SITE ? `<div class="reopen lookup"><b>Capa e sinopse da internet</b><span class="muted">Procura pelo título e pelo autor na Open Library e, se não achar, no Google Books. Só esses dois dados saem do aparelho; o arquivo não.</span>
         <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
       ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
         <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
@@ -3700,12 +3700,13 @@ function bindEditPanel(job, row){
       out.innerHTML = `<ul class="lk-list">${list.map((r, i) => `<li><span><b></b> <span class="muted"></span></span><button class="btn ghost sm" data-use="${i}">Usar</button></li>`).join("")}</ul>`;
       out.querySelectorAll("li").forEach((li, i) => { li.querySelector("b").textContent = list[i].title; li.querySelector(".muted").textContent = [list[i].author, list[i].year].filter(Boolean).join(", "); });
       out.querySelectorAll("[data-use]").forEach(btn => btn.onclick = async () => {
-        const r = list[+btn.dataset.use]; btn.disabled = true; btn.textContent = "Buscando a capa…";
+        const r = list[+btn.dataset.use]; btn.disabled = true; btn.textContent = "Buscando…";
+        const cv = await lookupDetails(r);
         if (r.author && !author) dr.author = r.author;
         if (r.description) dr.description = r.description;
-        if (r.subject) dr.subject = r.subject;
+        if (r.subject && !(dr.subject ?? (job.meta || {}).subject)) dr.subject = r.subject;
         let got = false;
-        if (rich) try { const cv = await lookupCover(r.isbn); if (cv) { dr.cover = cv; dr.coverOn = true; got = true; } } catch {}
+        if (rich && cv) { dr.cover = cv; dr.coverOn = true; got = true; }
         toast((r.description ? "Sinopse preenchida" : "Este resultado não traz sinopse") + (rich ? (got ? ", capa trocada." : ", sem capa disponível.") : ".") + " Confira e clique em “Gerar EPUB de novo”.", 6000);
         job.editOpen = true; render(job);
       });
@@ -3745,23 +3746,37 @@ function rebuild(job){
 }
 
 
-// dados do livro na internet (só quando a pessoa pede): Google Books para autor e sinopse, Open Library para a capa
-async function lookupBook(title, author){
-  const q = `intitle:${title}` + (author ? ` inauthor:${author}` : "");
-  const r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=5&printType=books&q=" + encodeURIComponent(q));
+// dados do livro na internet (só quando a pessoa pede): Open Library primeiro; Google Books se ela não achar
+const cleanDesc = t => String(t || "").replace(/<[^>]+>/g, " ").replace(/\*\*|__/g, "").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").replace(/\s*-{4,}[\s\S]*$/, "").replace(/\s+/g, " ").trim();
+async function googleBooks(title, author){
+  const r = await fetch("https://www.googleapis.com/books/v1/volumes?maxResults=5&printType=books&q=" + encodeURIComponent(`intitle:${title}` + (author ? ` inauthor:${author}` : "")));
   if (!r.ok) throw new Error("HTTP " + r.status);
   return ((await r.json()).items || []).map(it => {
     const v = it.volumeInfo || {}, ids = v.industryIdentifiers || [], isbn = ids.find(i => i.type === "ISBN_13") || ids.find(i => i.type === "ISBN_10");
-    return { title: v.title || "", author: (v.authors || []).join(", "), year: (v.publishedDate || "").slice(0, 4), description: (v.description || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
-      subject: (v.categories || []).join(", "), isbn: isbn ? isbn.identifier : "" };
+    return { title: v.title || "", author: (v.authors || []).join(", "), year: (v.publishedDate || "").slice(0, 4), description: cleanDesc(v.description), subject: (v.categories || []).join(", "), isbn: isbn ? isbn.identifier : "" };
   });
 }
-async function lookupCover(isbn){
-  if (!isbn) return null;
-  const r = await fetch(`https://covers.openlibrary.org/b/isbn/${encodeURIComponent(isbn)}-L.jpg?default=false`);
-  if (!r.ok) return null;
-  const b = await r.blob();
-  return /^image\//.test(b.type) && b.size > 2000 ? imageToJpeg(b) : null;
+async function lookupBook(title, author){
+  let list = [];
+  try {
+    const r = await fetch("https://openlibrary.org/search.json?limit=5&fields=key,title,author_name,first_publish_year,cover_i,subject&title=" + encodeURIComponent(title) + (author ? "&author=" + encodeURIComponent(author) : ""));
+    if (r.ok) list = ((await r.json()).docs || []).map(d => ({ title: d.title || "", author: (d.author_name || []).join(", "), year: d.first_publish_year ? String(d.first_publish_year) : "",
+      subject: (d.subject || []).slice(0, 4).join(", "), work: d.key, coverId: d.cover_i }));
+  } catch (e) { console.warn("open library", e); }
+  if (!list.length) list = await googleBooks(title, author);
+  return list;
+}
+// sinopse e capa do resultado escolhido
+async function lookupDetails(r){
+  if (r.work && !r.description) try { const w = await fetch("https://openlibrary.org" + r.work + ".json"); if (w.ok) { const j = await w.json(); r.description = cleanDesc(j.description && j.description.value || j.description); } } catch {}
+  if (!r.description) try { const g = (await googleBooks(r.title, r.author)).find(x => x.description); if (g) { r.description = g.description; r.isbn ||= g.isbn; } } catch {}
+  let cover = null;
+  try {
+    const url = r.coverId ? `https://covers.openlibrary.org/b/id/${r.coverId}-L.jpg` : r.isbn ? `https://covers.openlibrary.org/b/isbn/${encodeURIComponent(r.isbn)}-L.jpg?default=false` : null;
+    const c = url && await fetch(url);
+    if (c && c.ok) { const b = await c.blob(); if (/^image\//.test(b.type) && b.size > 2000) cover = await imageToJpeg(b); }
+  } catch {}
+  return cover;
 }
 
 // KEPUB (Kobo): o mesmo EPUB com cada trecho de texto marcado, para o Kobo guardar a posição e as estatísticas de leitura
