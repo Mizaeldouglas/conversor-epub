@@ -55,7 +55,7 @@ $("#wipeBtn").onclick = async () => {
   try { if ("caches" in window) await caches.delete("conversor-epub-compartilhado"); } catch {}
   delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador";
   renderHistory(); renderFixes();
-  toast("Pronto: nada do conversor ficou guardado neste navegador.");
+  toast("Pronto: nada do Lombada ficou guardado neste navegador.");
 };
 
 const drop = $("#drop"), input = $("#file");

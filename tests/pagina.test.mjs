@@ -24,7 +24,7 @@ test("o PDF é lido num worker, fora da tela", () => {
 test("versão no rodapé e dados para compartilhar o link", async () => {
   assert.equal(await app.page.textContent("#appVersion"), version);
   const og = await app.page.$$eval('meta[property^="og:"]', m => Object.fromEntries(m.map(x => [x.getAttribute("property"), x.content])));
-  assert.equal(og["og:title"], "Conversor PDF para EPUB");
+  assert.equal(og["og:title"], "Lombada: PDF para EPUB");
   assert.match(og["og:image"], /^https:\/\/.+\/og\.png$/);
   assert.match(await app.page.getAttribute('meta[name="description"]', "content"), /navegador/);
 });

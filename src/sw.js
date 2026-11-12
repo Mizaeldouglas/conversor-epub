@@ -1,4 +1,4 @@
-// Conversor PDF para EPUB: funciona sem internet e recebe arquivos pelo "Compartilhar" do celular
+// Lombada (PDF para EPUB): funciona sem internet e recebe arquivos pelo "Compartilhar" do celular
 const VERSION = "@@VERSION@@";
 const CACHE = "conversor-epub-" + VERSION;
 const SHARE = "conversor-epub-compartilhado";

@@ -1,5 +1,9 @@
 # Novidades
 
+## 2.2.0 — 12 nov 2026
+
+- O app agora se chama Lombada. O endereço do site continua o mesmo.
+
 ## 2.1.0 — 12 nov 2026
 
 - Visual novo: a área de soltar virou a capa de um livro, em azul, com o amarelo de marca-texto nas ações e nas palavras conferidas.

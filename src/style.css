@@ -1,4 +1,4 @@
-/* Conversor PDF para EPUB
+/* Lombada: PDF para EPUB
    Ideia: a página é uma mesa de trabalho clara; a área de soltar é a capa de um livro (azul-ultramar, lombada à esquerda)
    e o amarelo de marca-texto aparece só onde uma palavra é conferida ou uma ação começa.
    A interface fala em grotesca (Bricolage); os livros falam em Literata, a fonte de leitura. */
@@ -49,7 +49,8 @@ a{color:var(--accent);text-underline-offset:2px}
 .top{max-width:1200px;margin:0 auto;padding:18px 20px 14px;display:flex;align-items:center;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .brand svg{flex:none}
-.brand h1{font:700 1.12rem/1.2 var(--f-ui);margin:0;letter-spacing:-.01em}
+.brand h1{font:800 1.35rem/1.1 var(--f-ui);margin:0;letter-spacing:-.02em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand .tag{font:550 13px/1.2 var(--f-ui);letter-spacing:0;color:var(--muted)}
 .top-actions{display:flex;gap:6px;align-items:center}
 
 /* botões */

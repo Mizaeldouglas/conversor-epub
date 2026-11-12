@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Conversor PDF para EPUB</title>
+<title>Lombada: PDF para EPUB</title>
 <meta name="description" content="Converta PDF em EPUB para ler no Kindle, com capítulos, sumário, páginas numeradas e o texto conferido palavra por palavra. Tudo no seu navegador: o arquivo não sai do seu computador.">
 <meta name="theme-color" content="#2536c7">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Conversor PDF para EPUB">
-<meta property="og:title" content="Conversor PDF para EPUB">
+<meta property="og:site_name" content="Lombada">
+<meta property="og:title" content="Lombada: PDF para EPUB">
 <meta property="og:description" content="PDF em EPUB para o Kindle, com capítulos, sumário e o texto igual ao original. Funciona no navegador; seus arquivos não saem do computador.">
 <meta property="og:url" content="https://mizaeldouglas.github.io/conversor-epub/">
 <meta property="og:image" content="https://mizaeldouglas.github.io/conversor-epub/og.png">
@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap">
 <style>
-/* Conversor PDF para EPUB
+/* Lombada: PDF para EPUB
    Ideia: a página é uma mesa de trabalho clara; a área de soltar é a capa de um livro (azul-ultramar, lombada à esquerda)
    e o amarelo de marca-texto aparece só onde uma palavra é conferida ou uma ação começa.
    A interface fala em grotesca (Bricolage); os livros falam em Literata, a fonte de leitura. */
@@ -73,7 +73,8 @@ a{color:var(--accent);text-underline-offset:2px}
 .top{max-width:1200px;margin:0 auto;padding:18px 20px 14px;display:flex;align-items:center;gap:16px}
 .brand{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
 .brand svg{flex:none}
-.brand h1{font:700 1.12rem/1.2 var(--f-ui);margin:0;letter-spacing:-.01em}
+.brand h1{font:800 1.35rem/1.1 var(--f-ui);margin:0;letter-spacing:-.02em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand .tag{font:550 13px/1.2 var(--f-ui);letter-spacing:0;color:var(--muted)}
 .top-actions{display:flex;gap:6px;align-items:center}
 
 /* botões */
@@ -368,7 +369,7 @@ body.noscroll{overflow:hidden}
 <header class="top">
   <div class="brand">
     <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="3" width="28" height="34" rx="5" fill="var(--cover)"/><rect x="6" y="3" width="6" height="34" rx="3" fill="var(--cover-deep)"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="var(--mark)"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
-    <h1>Conversor PDF para EPUB</h1>
+    <h1>Lombada <span class="tag">PDF para EPUB</span></h1>
   </div>
   <div class="top-actions">
     <button class="btn ghost sm" id="installBtn" hidden>Instalar app</button>
@@ -557,11 +558,11 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Conversor PDF para EPUB, versão <span id="appVersion">2.1.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">2.2.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
 </footer>
 
 <div class="updatebar" id="updateBar" hidden role="status">
-  <span>Saiu uma versão nova do conversor.</span>
+  <span>Saiu uma versão nova do Lombada.</span>
   <button class="btn sm" id="updateBtn">Atualizar agora</button>
   <button class="btn quiet sm" id="updateLater">Depois</button>
 </div>
@@ -607,7 +608,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const $ = s => document.querySelector(s);
 const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const jobs = [];
-const VERSION = "2.1.0";
+const VERSION = "2.2.0";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -3393,7 +3394,7 @@ $("#wipeBtn").onclick = async () => {
   try { if ("caches" in window) await caches.delete("conversor-epub-compartilhado"); } catch {}
   delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador";
   renderHistory(); renderFixes();
-  toast("Pronto: nada do conversor ficou guardado neste navegador.");
+  toast("Pronto: nada do Lombada ficou guardado neste navegador.");
 };
 
 const drop = $("#drop"), input = $("#file");

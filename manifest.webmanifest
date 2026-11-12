@@ -1,6 +1,6 @@
 {
-  "name": "Conversor PDF para EPUB",
-  "short_name": "PDF para EPUB",
+  "name": "Lombada: PDF para EPUB",
+  "short_name": "Lombada",
   "description": "Converte PDF em EPUB para o Kindle, no próprio navegador.",
   "lang": "pt-BR",
   "start_url": "./",

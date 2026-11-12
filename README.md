@@ -1,4 +1,4 @@
-# Conversor PDF para EPUB
+# Lombada: PDF para EPUB
 
 Converte PDF em EPUB para ler no Kindle, com capítulos, sumário, notas clicáveis, números de página e o texto conferido palavra por palavra. Roda inteiro no navegador: **o arquivo não sai do seu computador**.
 
