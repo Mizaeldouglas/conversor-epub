@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.2.0 — 12 nov 2026
+
+- A opção “Idioma” do livro saiu: ela não traduzia nada e confundia. O idioma do livro agora é reconhecido pelo próprio texto.
+
 ## 3.1.0 — 12 nov 2026
 
 - Interface em inglês e espanhol, além do português. O idioma vem do navegador e pode ser trocado no topo da página.

@@ -15,7 +15,18 @@ function addFiles(list, restored){
 }
 
 // opções lidas quando o arquivo entra na fila; cada livro guarda as suas e pode ser convertido de novo com outras
-const readOpts = () => ({ lang: $("#lang").value, mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
+// idioma do livro: descoberto pelo próprio texto; enquanto não há texto (OCR, quadrinhos), vale o da interface
+const defaultLang = () => uiLang === "pt" ? "pt-BR" : uiLang;
+const LANG_WORDS = { "pt-BR": "não uma com do da você ele ela são foi mas os em seu sua também já", en: "the and of to that was is it with for his her you not had they this", es: "el y los las del con una pero muy ella por más está fue sus como también" };
+function detectLang(blocks){
+  let text = "";
+  for (const b of blocks) { if (b.type === "p" && typeof b.text === "string") { text += " " + plainOf(stripPg(b.text)); if (text.length > 30000) break; } }
+  const words = text.toLowerCase().match(/\p{L}+/gu) || [], score = {};
+  for (const [l, list] of Object.entries(LANG_WORDS)) { const set = new Set(list.split(" ")); score[l] = words.filter(w => set.has(w)).length; }
+  const [best, second] = Object.entries(score).sort((a, b) => b[1] - a[1]);
+  return best[1] >= 5 && best[1] > second[1] * 1.3 ? best[0] : null;
+}
+const readOpts = () => ({ lang: defaultLang(), mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
   ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value });
 const lookOf = () => ({ font: $("#lookFont").value, justify: $("#lookJustify").checked, indent: $("#lookIndent").value, lh: $("#lookLh").value });
 function stopIfCancelled(job){ if (job.ctrl && job.ctrl.signal.aborted) throw abortErr(); }
@@ -98,6 +109,7 @@ async function runImport(job){
     if (res.title) job.title = res.title;
     if (res.author && !job.author) job.author = res.author;
     if (res.lang) job.lang = /^pt/i.test(res.lang) ? "pt-BR" : res.lang.slice(0, 2).toLowerCase() || job.lang;
+    else if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (res.meta) job.meta = { ...res.meta, ...(job.meta || {}) };
     if (res.cover) { job.coverBlob = res.cover; job.coverOn = true; } else job.coverBlob = null;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
@@ -131,6 +143,7 @@ async function runPdf(job){
     const meta = res.metaTitle;
     if (meta && meta.length > 2 && !/^(untitled|microsoft word|document|\(anonymous\)|sem t[íi]tulo)/i.test(meta)) job.title = cleanTitle(meta);
     job.coverBlob = res.cover ? res.cover.blob : null;
+    if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
     await buildPdf(job);
   } catch (e) {

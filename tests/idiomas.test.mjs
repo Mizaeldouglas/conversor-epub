@@ -56,13 +56,17 @@ for (const [lang, sample] of [["en", { drop: "Your PDF becomes a Kindle book", b
   });
 }
 
-test("o idioma escolhido fica guardado, e o sumário do EPUB segue o idioma do livro", async () => {
+test("o idioma da interface fica guardado, e o idioma do livro é reconhecido pelo texto", async () => {
   const app = await openApp(browser, server), p = app.page;
   await p.selectOption("#uiLang", "en"); await p.reload();
   assert.equal(await p.inputValue("#uiLang"), "en");
   assert.equal(await p.textContent("#filaT"), "Queue ");
-  await p.selectOption("#lang", "en");
-  await addFiles(p, ["conto.txt"]); await waitJob(p, 0);
+  // sem opção de idioma: o livro em inglês é reconhecido pelo texto
+  const en = "CHAPTER 1\n\n" + "The keeper of the light walked up the stairs and he counted the steps, and it was not the first time that he had lost the count. ".repeat(4);
+  await p.setInputFiles("#file", { name: "keeper.txt", mimeType: "text/plain", buffer: Buffer.from(en) }); await waitJob(p, 0);
+  assert.equal(await p.evaluate(() => window.__app.jobs[0].lang), "en");
+  await addFiles(p, ["capitulos.pdf"]); await waitJob(p, 1);
+  assert.equal(await p.evaluate(() => window.__app.jobs[1].lang), "pt-BR", "livro em português convertido com a interface em inglês");
   assert.match(await (await epubOf(p, 0)).file("OEBPS/nav.xhtml").async("string"), /<h1>Contents<\/h1>/);
   await app.ctx.close();
 });

@@ -528,17 +528,13 @@ body.noscroll{overflow:hidden}
         <h3>Livro (PDF)</h3>
         <div class="grp-body">
           <label class="field" for="author"><span>Autor</span><input id="author" type="text" placeholder="Opcional, ex.: Machado de Assis" autocomplete="off"></label>
-          <div class="cols">
-            <label class="field" for="lang"><span>Idioma</span>
-              <select id="lang"><option value="pt-BR" selected>Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
-            <label class="field" for="mode"><span>Tipo de PDF</span>
+          <label class="field" for="mode"><span>Tipo de PDF</span>
               <select id="mode">
                 <option value="auto" selected>Livro de texto</option>
                 <option value="pages">Página como imagem</option>
                 <option value="comic">Quadrinhos</option>
                 <option value="manga">Mangá</option>
               </select></label>
-          </div>
         </div>
       </div>
 
@@ -595,7 +591,7 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">3.1.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">3.2.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
 </footer>
 
 <div class="updatebar" id="updateBar" hidden role="status">
@@ -653,7 +649,7 @@ const UI_LANG_KEY = "conversor-epub:idioma";
 let uiLang = "pt";
 try { uiLang = localStorage.getItem(UI_LANG_KEY) || (/^pt/i.test(navigator.language) ? "pt" : /^es/i.test(navigator.language) ? "es" : "en"); } catch {}
 const uiLocale = () => uiLang === "en" ? "en-US" : uiLang === "es" ? "es" : "pt-BR";
-const VERSION = "3.1.0";
+const VERSION = "3.2.0";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -3388,7 +3384,6 @@ function editPanelHtml(job){
         <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
       ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
         <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
-          <label>Idioma <select data-o="lang"><option value="pt-BR">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
           <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
           <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
           <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
@@ -3881,7 +3876,18 @@ function addFiles(list, restored){
 }
 
 // opções lidas quando o arquivo entra na fila; cada livro guarda as suas e pode ser convertido de novo com outras
-const readOpts = () => ({ lang: $("#lang").value, mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
+// idioma do livro: descoberto pelo próprio texto; enquanto não há texto (OCR, quadrinhos), vale o da interface
+const defaultLang = () => uiLang === "pt" ? "pt-BR" : uiLang;
+const LANG_WORDS = { "pt-BR": "não uma com do da você ele ela são foi mas os em seu sua também já", en: "the and of to that was is it with for his her you not had they this", es: "el y los las del con una pero muy ella por más está fue sus como también" };
+function detectLang(blocks){
+  let text = "";
+  for (const b of blocks) { if (b.type === "p" && typeof b.text === "string") { text += " " + plainOf(stripPg(b.text)); if (text.length > 30000) break; } }
+  const words = text.toLowerCase().match(/\p{L}+/gu) || [], score = {};
+  for (const [l, list] of Object.entries(LANG_WORDS)) { const set = new Set(list.split(" ")); score[l] = words.filter(w => set.has(w)).length; }
+  const [best, second] = Object.entries(score).sort((a, b) => b[1] - a[1]);
+  return best[1] >= 5 && best[1] > second[1] * 1.3 ? best[0] : null;
+}
+const readOpts = () => ({ lang: defaultLang(), mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
   ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value });
 const lookOf = () => ({ font: $("#lookFont").value, justify: $("#lookJustify").checked, indent: $("#lookIndent").value, lh: $("#lookLh").value });
 function stopIfCancelled(job){ if (job.ctrl && job.ctrl.signal.aborted) throw abortErr(); }
@@ -3964,6 +3970,7 @@ async function runImport(job){
     if (res.title) job.title = res.title;
     if (res.author && !job.author) job.author = res.author;
     if (res.lang) job.lang = /^pt/i.test(res.lang) ? "pt-BR" : res.lang.slice(0, 2).toLowerCase() || job.lang;
+    else if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (res.meta) job.meta = { ...res.meta, ...(job.meta || {}) };
     if (res.cover) { job.coverBlob = res.cover; job.coverOn = true; } else job.coverBlob = null;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
@@ -3997,6 +4004,7 @@ async function runPdf(job){
     const meta = res.metaTitle;
     if (meta && meta.length > 2 && !/^(untitled|microsoft word|document|\(anonymous\)|sem t[íi]tulo)/i.test(meta)) job.title = cleanTitle(meta);
     job.coverBlob = res.cover ? res.cover.blob : null;
+    if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
     await buildPdf(job);
   } catch (e) {
@@ -4454,14 +4462,13 @@ function updateOptSum(){
   const m = $("#mode"); if (m.value !== "auto") chips.push(m.options[m.selectedIndex].text);
   if ($("#ocr").checked) chips.push("OCR");
   if ($("#shownums").checked) chips.push("Nº de página");
-  const l = $("#lang"); if (l.value !== "pt-BR") chips.push(l.options[l.selectedIndex].text);
   $("#optSum").innerHTML = chips.map(c => `<span class="chip">${esc(c)}</span>`).join("");
 }
 document.querySelectorAll(".side input, .side select").forEach(el => el.addEventListener("change", updateOptSum));
 if (window.matchMedia("(max-width: 1040px)").matches) $("#optPanel").open = false;
 
 /* ---------- opções lembradas neste navegador ---------- */
-const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "lang", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images"];
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "mode", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images"];
 const OPT_KEY = "conversor-epub:opcoes";
 function loadOptions(){
   try {

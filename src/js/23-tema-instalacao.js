@@ -25,7 +25,6 @@ function updateOptSum(){
   const m = $("#mode"); if (m.value !== "auto") chips.push(m.options[m.selectedIndex].text);
   if ($("#ocr").checked) chips.push("OCR");
   if ($("#shownums").checked) chips.push("Nº de página");
-  const l = $("#lang"); if (l.value !== "pt-BR") chips.push(l.options[l.selectedIndex].text);
   $("#optSum").innerHTML = chips.map(c => `<span class="chip">${esc(c)}</span>`).join("");
 }
 document.querySelectorAll(".side input, .side select").forEach(el => el.addEventListener("change", updateOptSum));

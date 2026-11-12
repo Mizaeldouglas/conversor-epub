@@ -45,7 +45,6 @@ function editPanelHtml(job){
         <button class="btn ghost sm" data-l="go">Buscar dados deste livro</button><div data-l="out" aria-live="polite"></div></div>` : ""}
       ${realPdf ? `<details class="reconv"><summary>Converter este PDF de novo com outras opções</summary>
         <div class="reconv-body"><label>Tipo <select data-o="mode"><option value="auto">Livro de texto</option><option value="pages">Página como imagem</option><option value="comic">Quadrinhos</option><option value="manga">Mangá</option></select></label>
-          <label>Idioma <select data-o="lang"><option value="pt-BR">Português</option><option value="en">Inglês</option><option value="es">Espanhol</option></select></label>
           <label class="mini"><input type="checkbox" data-o="headers"> tirar cabeçalhos e rodapés</label>
           <label class="mini"><input type="checkbox" data-o="notes"> notas clicáveis</label>
           <label class="mini"><input type="checkbox" data-o="ocr"> OCR</label>
