@@ -24,7 +24,7 @@ Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capí
 
 ## Privacidade
 
-A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. A única função que manda algo para fora é “Buscar dados deste livro”, que envia o título e o autor à Open Library e, se ela não achar, ao Google Books quando você clica. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
+A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navegador. Nenhum arquivo é enviado, e o site não usa cookies nem contadores de visita. Duas funções mandam algo para fora, e só quando você pede: “Buscar dados deste livro” envia o título e o autor à Open Library (e, se ela não achar, ao Google Books), e “Entrar com Google” guarda os EPUBs prontos numa pasta Lombada do seu próprio Google Drive. O Lombada não tem servidor e não recebe os livros. O navegador baixa só o próprio programa: pdf.js e JSZip do cdnjs, as fontes do Google Fonts e, com o OCR ligado, o Tesseract do jsDelivr. A estante, as opções e as correções lembradas ficam só no seu navegador e podem ser apagadas em “Como funciona > Privacidade”.
 
 ## Limitações conhecidas
 
@@ -34,6 +34,10 @@ A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navega
 - Páginas com texto em várias colunas (créditos, índices) podem sair na ordem das colunas lidas de cima para baixo.
 - O OCR pode trocar letras; confira na prévia com o PDF ao lado.
 - O Kindle mostra posições, não páginas. Use “Número da página no texto” se quiser ver o número lá.
+
+## Login com Google
+
+O botão “Entrar com Google” só aparece quando `googleClientId`, no `package.json`, tem o ID de um cliente OAuth do Google (termina em `.apps.googleusercontent.com`). O ID não é segredo: ele fica visível na página. O app pede só o escopo `drive.file`, que dá acesso apenas aos arquivos criados pelo próprio Lombada. Os testes usam um Google simulado (`tests/fake-google.mjs`).
 
 ## Desenvolvimento
 

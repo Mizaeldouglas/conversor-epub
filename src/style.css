@@ -235,6 +235,24 @@ details.reconv > summary{cursor:pointer;font-weight:650;color:var(--accent);widt
 .reconv-body select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:14px}
 .edit-actions{gap:8px}
 
+.drive-note{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.drive-note::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.drive-note.err{color:var(--err)}
+.drive-note.err::before{background:var(--err)}
+
+/* conta Google */
+.acct{position:relative;display:flex}
+.acct-menu > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:3px 10px 3px 3px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:13px;font-weight:650}
+.acct-menu > summary::-webkit-details-marker{display:none}
+.acct-menu > summary:hover{border-color:var(--accent)}
+.acct-menu img,.acct-initial{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none}
+.acct-initial{display:grid;place-items:center;background:var(--cover);color:#fff;font-weight:700;font-size:13px}
+.acct-initial[hidden]{display:none}
+.acct-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:30;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--lift);padding:14px;display:grid;gap:8px;min-width:240px;font-size:13.5px}
+.acct-pop p{margin:0 0 4px;color:var(--muted);overflow-wrap:anywhere}
+.acct-pop b{color:var(--ink);font-weight:650;display:block}
+.book .cloud{position:absolute;top:6px;left:10px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92);color:#2536c7;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+
 /* estante */
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:28px 22px}
 .book{display:flex;flex-direction:column;gap:6px;min-width:0;position:relative}
@@ -356,6 +374,13 @@ body.noscroll{overflow:hidden}
   .top{padding:14px 16px 12px}
   .hero,.layout,.foot{padding-left:16px;padding-right:16px}
   .top-actions .quiet{display:none}
+  .acct-name{display:none}
+  .acct-menu > summary{padding:3px}
+  #loginBtn{padding:0;width:36px;height:36px;border-radius:50%}
+  .login-txt{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .top{gap:8px}
+  .top-actions{gap:4px;flex:none}
+  #uiLang{max-width:7.8em;padding:6px 0}
   .drop{grid-template-columns:1fr;border-radius:6px 20px 20px 6px;padding:30px 24px 30px 40px}
   .drop-art{display:none}
   .path{grid-template-columns:1fr}

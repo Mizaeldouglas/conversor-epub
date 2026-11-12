@@ -6,7 +6,7 @@ const I18N_MISSING = new Set();
 window.__app.i18nMissing = I18N_MISSING;
 const I18N_NUM = /\d+(?:[.,]\d+)*/g;
 const I18N_SPLIT = /(?<=[\p{L}\d"”’)\]]{2}[.!?…]["”’)]?)\s+(?=[\p{Lu}“"(\d])/u;
-const I18N_SKIP = ".name,.byline,.spine,.book .t,.book .d,.pv-page,#pvToc,#pvTitle,details.diffs b,.fixmem b,.lk-list b,.lk-list .muted,script,style,textarea,#uiLang";
+const I18N_SKIP = ".acct-name,.acct-mail,.acct-initial,.name,.byline,.spine,.book .t,.book .d,.pv-page,#pvToc,#pvTitle,details.diffs b,.fixmem b,.lk-list b,.lk-list .muted,script,style,textarea,#uiLang";
 // frases com um trecho que varia (nome de arquivo, título, mensagem do navegador): [expressão, inglês, espanhol]
 const I18N_PATS = [
   [/^Arquivo salvo: (.+)$/, "File saved: $1", "Archivo guardado: $1"],

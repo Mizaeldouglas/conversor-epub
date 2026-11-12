@@ -1,5 +1,10 @@
 # Novidades
 
+## 3.4.0 — 12 nov 2026
+
+- Entrar com Google (opcional): cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar. O Lombada pede só o acesso aos arquivos que ele mesmo cria.
+- Livro tirado da estante vai para a lixeira do Drive. Livros convertidos antes de entrar podem ser guardados no Drive com um clique.
+
 ## 3.3.0 — 12 nov 2026
 
 - O painel de opções saiu da lateral. A página fica só com a área de soltar, a fila e a estante; os ajustes abrem pelo botão “Ajustes”, no topo.

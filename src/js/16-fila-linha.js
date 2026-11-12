@@ -158,6 +158,7 @@ function render(job){
       ${verifyHtml}
       ${ocrHtml}
       ${ligHtml}
+      ${!job.busy && job.epub && job.driveState ? `<div class="drive-note${job.driveState === "err" ? " err" : ""}">${job.driveState === "up" ? "Enviando ao Google Drive…" : job.driveState === "ok" ? "Guardado no seu Google Drive." : `Não consegui guardar no Drive. <button class="linkbtn" data-a="driveRetry">Tentar de novo</button>`}</div>` : ""}
       ${editPanelHtml(job)}
       ${reconvHtml(job)}
       ${!job.busy && job.imagePages && !job.ocrPages && !job.ocrError ? `<div class="verify neutral">${job.imagePages} página${job.imagePages > 1 ? "s são" : " é"} só imagem e ${job.imagePages > 1 ? "entraram" : "entrou"} como figura. Se o PDF for escaneado, o OCR transforma essas páginas em texto. <button class="linkbtn" data-a="ocr">Converter de novo com OCR</button></div>` : ""}
@@ -176,6 +177,7 @@ function render(job){
   on('[data-a="docx"]', () => offer(safeFile(job.title) + ".docx", job.docx));
   on('[data-a="cancel"]', () => cancelJob(job));
   on('[data-a="remove"]', () => removeJob(job));
+  on('[data-a="driveRetry"]', () => driveSaveJob(job));
   on('[data-a="ocr"]', () => { job.forceOcr = true; retryPdf(job); });
   on('[data-a="reopen"]', () => { job.kind = "pdf"; job.fromEpub = true; job.stage = "pdf"; job.verify = null; job.epub = null; job.draft = null; job.editOpen = true; retryPdf(job); });
   const pw = row.querySelector('[data-a="pw"]');

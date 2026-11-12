@@ -46,7 +46,7 @@ export async function launch(){
 }
 
 // abre o app com as bibliotecas do CDN redirecionadas para o servidor local
-export async function openApp(browser, server, { viewport = { width: 1200, height: 1000 } } = {}){
+export async function openApp(browser, server, { viewport = { width: 1200, height: 1000 }, setup } = {}){
   const ctx = await browser.newContext({ viewport, locale: "pt-BR", acceptDownloads: true, serviceWorkers: "block" });
   const page = await ctx.newPage();
   const errors = [];
@@ -55,6 +55,7 @@ export async function openApp(browser, server, { viewport = { width: 1200, heigh
   await ctx.route(/cdnjs\.cloudflare\.com\/.*\/(pdf\.min\.js|pdf\.worker\.min\.js|jszip\.min\.js)$/, (route, req) =>
     route.fulfill({ path: firstExisting(LIBS[req.url().split("/").pop()]), contentType: "text/javascript", headers: { "access-control-allow-origin": "*" } }));
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, route => route.fulfill({ status: 200, contentType: "text/css", body: "" }));
+  if (setup) await setup(ctx);
   await page.goto(server.url);
   await page.evaluate(() => document.querySelectorAll(".side details").forEach(d => d.open = true));
   return { page, ctx, errors };

@@ -1562,5 +1562,161 @@
 "O PDF é lido de novo com estas opções; as correções feitas neste livro são descartadas.": [
 "The PDF is read again with these options; fixes made to this book are discarded.",
 "El PDF se lee otra vez con estas opciones; las correcciones hechas en este libro se descartan."
+],
+"Entrar com Google": [
+"Sign in with Google",
+"Entrar con Google"
+],
+"Conta Google": [
+"Google account",
+"Cuenta de Google"
+],
+"Conectado como": [
+"Signed in as",
+"Conectado como"
+],
+"Abrir a pasta no Drive": [
+"Open the folder in Drive",
+"Abrir la carpeta en Drive"
+],
+"Sair": [
+"Sign out",
+"Salir"
+],
+"Guardar no Drive os livros deste navegador (": [
+"Save this browser's books to Drive (",
+"Guardar en Drive los libros de este navegador ("
+],
+"Guardar os livros no Google Drive": [
+"Saving your books to Google Drive",
+"Guardar los libros en Google Drive"
+],
+"Com “Entrar com Google”, cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta.": [
+"With “Sign in with Google”, every converted book goes to the Lombada folder in your Google Drive, and the shelf shows those books on any device where you sign in with the same account.",
+"Con “Entrar con Google”, cada libro convertido va a la carpeta Lombada de tu Google Drive, y el estante muestra esos libros en cualquier dispositivo donde entres con la misma cuenta."
+],
+"Sem entrar, a estante fica só neste navegador.": [
+"Without signing in, the shelf stays in this browser only.",
+"Sin entrar, el estante queda solo en este navegador."
+],
+"O Lombada pede só o acesso aos arquivos que ele mesmo cria: não vê nem mexe no resto do seu Drive.": [
+"Lombada only asks for access to the files it creates itself: it can't see or touch the rest of your Drive.",
+"Lombada solo pide acceso a los archivos que él mismo crea: no ve ni toca el resto de tu Drive."
+],
+"Tirar um livro da estante o manda para a lixeira do Drive, de onde dá para recuperar por {0} dias.": [
+"Removing a book from the shelf sends it to the Drive trash, where you can restore it for {0} days.",
+"Quitar un libro del estante lo manda a la papelera de Drive, donde se puede recuperar durante {0} días."
+],
+"Em “Sair”, a conexão é desfeita e os livros continuam no seu Drive.": [
+"“Sign out” disconnects the account, and the books stay in your Drive.",
+"Con “Salir”, la conexión se deshace y los libros siguen en tu Drive."
+],
+"Duas funções mandam algo para fora, e só quando você pede.": [
+"Two features send something out, and only when you ask.",
+"Dos funciones envían algo afuera, y solo cuando lo pides."
+],
+"“Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse.": [
+"“Look up this book” sends the title and author to Open Library and, if it finds nothing, to Google Books, to fetch a cover and synopsis.",
+"“Buscar datos de este libro” envía el título y el autor a Open Library y, si no encuentra nada, a Google Books, para traer portada y sinopsis."
+],
+"“Entrar com Google” guarda os EPUBs prontos numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.": [
+"“Sign in with Google” saves the finished EPUBs in a Lombada folder in your own Google Drive; Lombada has no server and never receives the books.",
+"“Entrar con Google” guarda los EPUB listos en una carpeta Lombada de tu propio Google Drive; Lombada no tiene servidor y no recibe los libros."
+],
+"Guardados na pasta Lombada do seu Google Drive: aparecem em qualquer aparelho em que você entrar.": [
+"Saved in the Lombada folder in your Google Drive: they show up on any device where you sign in.",
+"Guardados en la carpeta Lombada de tu Google Drive: aparecen en cualquier dispositivo donde entres."
+],
+"Os últimos {0} livros ficam neste navegador.": [
+"The last {0} books stay in this browser.",
+"Los últimos {0} libros quedan en este navegador."
+],
+"Entre com o Google para guardar no seu Drive e ver em outros aparelhos.": [
+"Sign in with Google to save them to your Drive and see them on other devices.",
+"Entra con Google para guardarlos en tu Drive y verlos en otros dispositivos."
+],
+"Guardado no seu Google Drive": [
+"Saved in your Google Drive",
+"Guardado en tu Google Drive"
+],
+"No Google Drive": [
+"In Google Drive",
+"En Google Drive"
+],
+"Enviando ao Google Drive…": [
+"Sending to Google Drive…",
+"Enviando a Google Drive…"
+],
+"Guardado no seu Google Drive.": [
+"Saved in your Google Drive.",
+"Guardado en tu Google Drive."
+],
+"Não consegui guardar no Drive.": [
+"I couldn't save it to Drive.",
+"No pude guardarlo en Drive."
+],
+"Tentar de novo": [
+"Try again",
+"Intentar otra vez"
+],
+"Tente de novo.": [
+"Try again.",
+"Inténtalo otra vez."
+],
+"Conectado ao Google Drive.": [
+"Connected to Google Drive.",
+"Conectado a Google Drive."
+],
+"O Google não deu acesso ao Drive.": [
+"Google did not grant access to Drive.",
+"Google no dio acceso a Drive."
+],
+"Entre de novo e marque a permissão para o Lombada guardar os livros.": [
+"Sign in again and tick the permission for Lombada to save your books.",
+"Entra otra vez y marca el permiso para que Lombada guarde los libros."
+],
+"Não consegui entrar com o Google.": [
+"I couldn't sign in with Google.",
+"No pude entrar con Google."
+],
+"Você saiu da conta Google.": [
+"You signed out of your Google account.",
+"Saliste de la cuenta de Google."
+],
+"Os livros continuam no seu Drive.": [
+"Your books stay in your Drive.",
+"Los libros siguen en tu Drive."
+],
+"A conexão com o Google expirou.": [
+"The Google connection expired.",
+"La conexión con Google expiró."
+],
+"Entre de novo para continuar guardando no Drive.": [
+"Sign in again to keep saving to Drive.",
+"Entra otra vez para seguir guardando en Drive."
+],
+"Baixando do Drive…": [
+"Downloading from Drive…",
+"Descargando de Drive…"
+],
+"Não consegui baixar este livro do Drive.": [
+"I couldn't download this book from Drive.",
+"No pude descargar este libro de Drive."
+],
+"Livro movido para a lixeira do seu Drive.": [
+"Book moved to your Drive trash.",
+"Libro movido a la papelera de tu Drive."
+],
+"Não consegui tirar este livro do Drive.": [
+"I couldn't remove this book from Drive.",
+"No pude quitar este libro de Drive."
+],
+"{0} livro guardado no seu Drive.": [
+"{0} book saved to your Drive.",
+"{0} libro guardado en tu Drive."
+],
+"{0} livros guardados no seu Drive.": [
+"{0} books saved to your Drive.",
+"{0} libros guardados en tu Drive."
 ]
 }
