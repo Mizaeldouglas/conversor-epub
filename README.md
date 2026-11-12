@@ -30,8 +30,7 @@ A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navega
 
 - Livros com DRM não abrem, em nenhum formato. MOBI com compressão Huffman e CBR também não.
 - MOBI e AZW3 foram testados com arquivos gerados para os testes; arquivos de loja podem ter variações.
-- Links internos do PDF (de uma página para outra) não são mantidos; os links para sites, sim.
-- A interface está só em português.
+- A interface em inglês e espanhol é uma camada de tradução sobre os textos em português (`src/data/idiomas.json`); um texto novo sem tradução aparece em português, e o teste `tests/idiomas.test.mjs` acusa.
 - Páginas com texto em várias colunas (créditos, índices) podem sair na ordem das colunas lidas de cima para baixo.
 - O OCR pode trocar letras; confira na prévia com o PDF ao lado.
 - O Kindle mostra posições, não páginas. Use “Número da página no texto” se quiser ver o número lá.

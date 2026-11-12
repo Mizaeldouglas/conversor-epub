@@ -23,6 +23,7 @@ test("PDF: sumário interno, duas colunas, tabela, listas, link e versos", async
   assert.deepEqual(r.diffs, []);
   assert.deepEqual(toc, [["Livro Primeiro", ["A chegada dos barcos", "A tabela das marés"]], ["Livro Segundo", ["O que dizem os velhos"]]]);
   assert.match(all, /<a href="https:\/\/www\.exemplo\.org\/porto">www\.exemplo\.org\/porto<\/a>/);
+  assert.match(all, /<a href="ch003\.xhtml#pg\d+">Veja a tabela das marés\.<\/a>/, "link interno do PDF");
   assert.match(all, /<ul class="lista"><li>• corda de cânhamo, três braças<\/li>/);
   assert.match(all, /<li>• lanterna de azeite com pavio novo e vidro limpo, guardada sempre na caixa seca do convés<\/li>/, "item de lista em duas linhas partido");
   assert.match(all, /<li>2\. Recolher a vela\.<\/li>/);

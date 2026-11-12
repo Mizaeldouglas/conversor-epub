@@ -60,7 +60,7 @@ async function renderHistory(){
     el.innerHTML = `<button class="cover" data-h="pv" aria-label="Prévia">${r.cover ? `<img alt="">` : `<span class="spine"></span>`}</button>
       <button class="rm" data-h="rm" aria-label="Tirar da estante" title="Tirar da estante">×</button>
       <div class="t"></div>
-      <div class="d">${esc(new Date(r.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }))}, ${kb(r.size)}</div>
+      <div class="d">${esc(new Date(r.date).toLocaleDateString(uiLocale(), { day: "2-digit", month: "short" }))}, ${kb(r.size)}</div>
       <div class="acts"><button class="btn sm" data-h="dl">Baixar</button><a class="btn ghost sm" data-h="kd" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Kindle</a></div>`;
     const name = r.title + (r.author ? " — " + r.author : "");
     el.querySelector(".t").textContent = r.title; el.querySelector(".t").title = name;

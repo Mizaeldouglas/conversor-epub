@@ -22,8 +22,10 @@ async function blocksToDocx(blocks, title, author){
       if (seg === IT_ON) { st |= 1; return ""; } if (seg === IT_OFF) { st &= ~1; return ""; }
       if (seg === BD_ON) { st |= 2; return ""; } if (seg === BD_OFF) { st &= ~2; return ""; }
       if (seg[0] === LK_ON) {
-        lkN++; rels.push(`<Relationship Id="rIdL${lkN}" Type="${NS_R}/hyperlink" Target="${esc(seg.slice(1, -1))}" TargetMode="External"/>`);
-        const pre = lk ? "</w:hyperlink>" : ""; lk = true; return pre + `<w:hyperlink r:id="rIdL${lkN}">`;
+        const url = seg.slice(1, -1), pre = lk ? "</w:hyperlink>" : ""; lk = true;
+        if (url.startsWith("pg:")) return pre + `<w:hyperlink w:anchor="pg_${hexEnc(url.slice(3))}">`;
+        lkN++; rels.push(`<Relationship Id="rIdL${lkN}" Type="${NS_R}/hyperlink" Target="${esc(url)}" TargetMode="External"/>`);
+        return pre + `<w:hyperlink r:id="rIdL${lkN}">`;
       }
       if (seg === LK_OFF) { if (!lk) return ""; lk = false; return "</w:hyperlink>"; }
       if (seg[0] === PG_A) return bookmark(seg.slice(1, -1));

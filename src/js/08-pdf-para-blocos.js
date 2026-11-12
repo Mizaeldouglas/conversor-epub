@@ -119,7 +119,19 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     }
     const tc = await page.getTextContent({ disableNormalization: true });
     let links = [];
-    try { links = (await page.getAnnotations()).filter(a => a.subtype === "Link" && a.url && /^(https?:|mailto:)/i.test(a.url) && a.rect).map(a => ({ r: a.rect, url: a.url })); } catch {}
+    try {
+      for (const a of await page.getAnnotations()) {
+        if (a.subtype !== "Link" || !a.rect) continue;
+        if (a.url && /^(https?:|mailto:)/i.test(a.url)) links.push({ r: a.rect, url: a.url });
+        else if (a.dest) {   // link para outra página do próprio PDF
+          try {
+            const d = typeof a.dest === "string" ? await pdf.getDestination(a.dest) : a.dest;
+            const n = d && d[0] != null ? (typeof d[0] === "object" ? await pdf.getPageIndex(d[0]) + 1 : d[0] + 1) : 0;
+            if (n && n !== p) links.push({ r: a.rect, url: "pg:" + labelOf(n) });
+          } catch {}
+        }
+      }
+    } catch {}
     const linkAt = (x, y) => { for (const l of links) if (x >= l.r[0] - 1 && x <= l.r[2] + 1 && y >= l.r[1] - 2 && y <= l.r[3] + 2) return l.url; return ""; };
     let ol = null, gs = { chars: [], keys: [], spaceBefore: [], real: false };
     try {

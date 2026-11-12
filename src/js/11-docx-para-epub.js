@@ -46,6 +46,8 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
   const linkOf = t => {
     const h = t.parentNode && t.parentNode.parentNode;
     if (!h || h.localName !== "hyperlink") return "";
+    const an = /^pg_([0-9a-f]*)$/.exec(h.getAttributeNS(W, "anchor") || h.getAttribute("w:anchor") || "");
+    if (an) return "pg:" + hexDec(an[1]);
     const u = relMap[h.getAttributeNS(NS_R, "id") || h.getAttribute("r:id")] || "";
     return /^(https?:|mailto:)/i.test(u) ? u : "";
   };
@@ -195,6 +197,7 @@ a{color:inherit}
 .title{text-align:center;margin-top:30%}.title h1{font-size:2em;text-align:center}.title p{text-indent:0;text-align:center;font-style:italic}`);
 
   const files = [], pageList = [];
+  const NAV_T = /^en/i.test(lang) ? ["Contents", "Pages"] : /^es/i.test(lang) ? ["Índice", "Páginas"] : ["Sumário", "Páginas"];
   let pgN = 0;
   const pgSpan = (label, fn, block) => {
     pgN++; const pid = "pg" + pgN; pageList.push({ fn, pid, label });
@@ -223,7 +226,7 @@ a{color:inherit}
       if (seg[0] === LK_ON || seg === LK_OFF) {
         while (stack.length) out.push(`</${stack.pop()}>`);
         if (link) { out.push("</a>"); link = false; }
-        if (seg[0] === LK_ON) { out.push(`<a href="${esc(seg.slice(1, -1))}">`); link = true; }
+        if (seg[0] === LK_ON) { const u = seg.slice(1, -1); out.push(u.startsWith("pg:") ? `<a href="\uE00D${esc(u.slice(3))}\uE00D">` : `<a href="${esc(u)}">`); link = true; }
         continue;
       }
       if (seg === IT_ON) want |= 1; else if (seg === IT_OFF) want &= ~1; else if (seg === BD_ON) want |= 2; else if (seg === BD_OFF) want &= ~2;
@@ -236,6 +239,7 @@ a{color:inherit}
   if (coverPage) z.file("OEBPS/text/cover.xhtml", xhtml(title, `<div class="cover" epub:type="cover"><img src="../images/cover.jpg" alt="${esc(title)}"/></div>`));
   if (!cover) z.file("OEBPS/text/titlepage.xhtml", xhtml(title,
     `<section class="title" epub:type="titlepage"><h1>${esc(title)}</h1>${author ? `<p>${esc(author)}</p>` : ""}</section>`));
+  const chapterDocs = [];
   chapters.forEach((c, i) => {
     const fn = `ch${String(i + 1).padStart(3, "0")}.xhtml`;
     files.push({ fn, title: c.title, part: c.part });
@@ -250,17 +254,21 @@ a{color:inherit}
         : it.tag === "verse" ? `<p class="verso">${rich(it.text, fn)}</p>`
         : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
     const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
-    z.file("OEBPS/text/" + fn, xhtml(c.title, `<section epub:type="${c.part ? "part" : "chapter"}"${c.part ? ' class="parte"' : ""}>${inner}</section>${notes ? "\n" + notes : ""}`));
+    chapterDocs.push([fn, xhtml(c.title, `<section epub:type="${c.part ? "part" : "chapter"}"${c.part ? ' class="parte"' : ""}>${inner}</section>${notes ? "\n" + notes : ""}`)]);
   });
+  // links internos: só agora todas as páginas têm endereço; destino que não existe deixa o texto sem link
+  const pageAt = new Map(pageList.map(pg => [esc(pg.label), pg.fn + "#" + pg.pid]));
+  for (const [fn, doc] of chapterDocs) z.file("OEBPS/text/" + fn, doc
+    .replace(/<a href="\uE00D([^\uE00D]*)\uE00D">([\s\S]*?)<\/a>/g, (m, l, inner) => pageAt.has(l) ? `<a href="${pageAt.get(l)}">${inner}</a>` : inner));
 
   z.file("OEBPS/nav.xhtml", `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}">
-<head><meta charset="UTF-8"/><title>Sumário</title></head>
-<body><nav epub:type="toc" id="toc"><h1>Sumário</h1><ol>
+<head><meta charset="UTF-8"/><title>${NAV_T[0]}</title></head>
+<body><nav epub:type="toc" id="toc"><h1>${NAV_T[0]}</h1><ol>
 ${tocTree(files).map(t => `<li><a href="text/${t.f.fn}">${esc(t.f.title)}</a>${t.kids.length ? `<ol>\n${t.kids.map(k => `<li><a href="text/${k.fn}">${esc(k.title)}</a></li>`).join("\n")}\n</ol>` : ""}</li>`).join("\n")}
 </ol></nav>
-${pageList.length ? `<nav epub:type="page-list" id="page-list" hidden=""><h2>Páginas</h2><ol>
+${pageList.length ? `<nav epub:type="page-list" id="page-list" hidden=""><h2>${NAV_T[1]}</h2><ol>
 ${pageList.map(pg => `<li><a href="text/${pg.fn}#${pg.pid}">${esc(pg.label)}</a></li>`).join("\n")}
 </ol></nav>` : ""}
 </body></html>`);

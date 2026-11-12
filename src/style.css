@@ -52,6 +52,8 @@ a{color:var(--accent);text-underline-offset:2px}
 .brand h1{font:800 1.35rem/1.1 var(--f-ui);margin:0;letter-spacing:-.02em;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .brand .tag{font:550 13px/1.2 var(--f-ui);letter-spacing:0;color:var(--muted)}
 .top-actions{display:flex;gap:6px;align-items:center}
+#uiLang{background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 4px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;max-width:9em}
+#uiLang:hover{border-color:var(--line)}
 
 /* botões */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:650;font-size:14px;line-height:1.2;border-radius:var(--r-sm);padding:9px 16px;border:1px solid transparent;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-decoration:none;white-space:nowrap;transition:background-color .15s,border-color .15s,transform .1s}
@@ -143,7 +145,7 @@ a{color:var(--accent);text-underline-offset:2px}
 @media (prefers-reduced-motion:reduce){.steps .work .dot,.bar.indet span{animation:none}}
 
 /* avisos do livro: uma faixa de cor diz o tipo */
-.row-extra{display:grid;gap:10px}
+.row-extra{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
 .row-extra:not(:empty){margin-top:18px}
 .seal{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.5;color:var(--ok);background:var(--ok-soft);border-radius:var(--r-sm);padding:10px 14px}
 .seal svg{flex:none;margin-top:2px}

@@ -32,6 +32,7 @@
     <h1>Lombada <span class="tag">PDF para EPUB</span></h1>
   </div>
   <div class="top-actions">
+    <select id="uiLang" aria-label="Idioma da interface"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select>
     <button class="btn ghost sm" id="installBtn" hidden>Instalar app</button>
     <a class="btn quiet sm" href="#ajuda">Como funciona</a>
     <button class="btn ghost icon-btn" id="themeBtn" aria-label="Tema: automático" title="Tema: automático">
@@ -268,6 +269,7 @@
 <div class="toast" id="toast" hidden role="status"></div>
 <div class="sr-only" id="sr" aria-live="polite"></div>
 
+<script type="application/json" id="i18n-data">@@I18N@@</script>
 <script type="text/plain" id="pt-words">@@WORDS@@</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>

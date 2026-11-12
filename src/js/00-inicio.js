@@ -5,6 +5,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs
 const $ = s => document.querySelector(s);
 const W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const jobs = [];
+// idioma da interface: o escolhido antes, ou o do navegador (português, espanhol; os demais veem em inglês)
+const UI_LANG_KEY = "conversor-epub:idioma";
+let uiLang = "pt";
+try { uiLang = localStorage.getItem(UI_LANG_KEY) || (/^pt/i.test(navigator.language) ? "pt" : /^es/i.test(navigator.language) ? "es" : "en"); } catch {}
+const uiLocale = () => uiLang === "en" ? "en-US" : uiLang === "es" ? "es" : "pt-BR";
 const VERSION = "@@VERSION@@";
 const SITE_URL = "@@SITE@@";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma

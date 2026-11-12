@@ -211,6 +211,7 @@ def recursos():
     y = paragraph(c, y, frase * 2)
     y = paragraph(c, y - 4, "O regulamento completo está em")
     c.setFont("Times-Roman", 11); c.drawString(M + 18, y, "www.exemplo.org/porto"); c.linkURL("https://www.exemplo.org/porto", (M + 16, y - 3, M + 130, y + 10)); y -= 15
+    c.setFont("Times-Roman", 11); c.drawString(M + 18, y, "Veja a tabela das marés."); c.linkAbsolute("", "c2", (M + 16, y - 3, M + 140, y + 10)); y -= 15
     y = paragraph(c, y - 4, frase * 2)
     # lista com marcadores e lista numerada
     for it in ["corda de cânhamo, três braças", "lanterna de azeite com pavio novo e vidro limpo, guardada sempre na caixa seca do convés", "sal grosso"]:
@@ -250,5 +251,7 @@ def recursos():
     c.save()
 
 
-for f in (estilos, grudado, capitulos, gibi, escaneado, erros, epub, recursos): f()
+import sys
+for f in (estilos, grudado, capitulos, gibi, escaneado, erros, epub, recursos):
+    if len(sys.argv) < 2 or f.__name__ in sys.argv[1:]: f()
 print("fixtures em", os.path.abspath(OUT))

@@ -1,5 +1,11 @@
 # Novidades
 
+## 3.1.0 — 12 nov 2026
+
+- Interface em inglês e espanhol, além do português. O idioma vem do navegador e pode ser trocado no topo da página.
+- O sumário dentro do EPUB (“Sumário”, “Contents”, “Índice”) segue o idioma do livro.
+- PDF: links de uma página para outra do próprio livro (como os do sumário impresso) continuam funcionando no EPUB.
+
 ## 3.0.2 — 12 nov 2026
 
 - Corrigido: com uma aba antiga do Lombada aberta, a estante não aparecia na aba nova. Se ainda acontecer, a página avisa o que fazer.

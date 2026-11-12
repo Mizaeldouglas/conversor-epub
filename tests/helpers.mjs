@@ -47,7 +47,7 @@ export async function launch(){
 
 // abre o app com as bibliotecas do CDN redirecionadas para o servidor local
 export async function openApp(browser, server, { viewport = { width: 1200, height: 1000 } } = {}){
-  const ctx = await browser.newContext({ viewport, acceptDownloads: true, serviceWorkers: "block" });
+  const ctx = await browser.newContext({ viewport, locale: "pt-BR", acceptDownloads: true, serviceWorkers: "block" });
   const page = await ctx.newPage();
   const errors = [];
   page.on("pageerror", e => errors.push(e.message));
