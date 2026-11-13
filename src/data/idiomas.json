@@ -1926,5 +1926,41 @@
 "Política de Privacidade": [
 "Privacy Policy (in Portuguese)",
 "Política de Privacidad (en portugués)"
+],
+"O navegador bloqueou o login do Google.": [
+"The browser blocked Google sign-in.",
+"El navegador bloqueó el inicio de sesión de Google."
+],
+"No Brave, desligue o Shields para este site (ícone do leão na barra de endereço); em outros navegadores, libere accounts.google.com no bloqueador de anúncios.": [
+"In Brave, turn off Shields for this site (the lion icon in the address bar); in other browsers, allow accounts.google.com in your ad blocker.",
+"En Brave, desactiva Shields para este sitio (el ícono del león en la barra de direcciones); en otros navegadores, permite accounts.google.com en el bloqueador de anuncios."
+],
+"O navegador bloqueou a janela do Google.": [
+"The browser blocked the Google window.",
+"El navegador bloqueó la ventana de Google."
+],
+"Permita pop-ups para este site e tente de novo.": [
+"Allow pop-ups for this site and try again.",
+"Permite ventanas emergentes para este sitio e inténtalo otra vez."
+],
+"A janela do Google foi fechada antes de terminar.": [
+"The Google window was closed before finishing.",
+"La ventana de Google se cerró antes de terminar."
+],
+"O Google negou o acesso.": [
+"Google denied access.",
+"Google negó el acceso."
+],
+"Confira se sua conta está em “Usuários de teste” ou se o app foi publicado no Google Cloud.": [
+"Check that your account is in “Test users” or that the app was published in Google Cloud.",
+"Revisa si tu cuenta está en “Usuarios de prueba” o si la app se publicó en Google Cloud."
+],
+"A Google Drive API não está ativada no projeto do Google Cloud.": [
+"The Google Drive API is not enabled in the Google Cloud project.",
+"La Google Drive API no está activada en el proyecto de Google Cloud."
+],
+"Ative em APIs e serviços > Biblioteca > Google Drive API e tente de novo daqui a alguns minutos.": [
+"Enable it under APIs & Services > Library > Google Drive API and try again in a few minutes.",
+"Actívala en APIs y servicios > Biblioteca > Google Drive API e inténtalo otra vez en unos minutos."
 ]
 }

@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.5.2 — 12 nov 2026
+
+- Quando o login com Google falha, a mensagem diz o motivo (bloqueador do navegador, pop-up bloqueado, acesso negado, Drive API desativada).
+
 ## 3.5.1 — 12 nov 2026
 
 - Página própria com a Política de Privacidade (`privacidade.html`), exigida pelo Google para liberar o login a todos.

@@ -15,6 +15,8 @@ const I18N_PATS = [
   [/^(.+?): ((?:Este|Não|Faltou|Senha|O ) ?.+)$/, "$1: $2", "$1: $2"],
   [/^Tema (automático|claro|escuro)$/, m => "Theme: " + ({ automático: "automatic", claro: "light", escuro: "dark" })[m[1]], m => "Tema " + ({ automático: "automático", claro: "claro", escuro: "oscuro" })[m[1]]],
   [/^Tema: (automático|claro|escuro)$/, m => "Theme: " + ({ automático: "automatic", claro: "light", escuro: "dark" })[m[1]], m => "Tema: " + ({ automático: "automático", claro: "claro", escuro: "oscuro" })[m[1]]],
+  [/^Não consegui entrar com o Google \((.*)\)\.$/, "I couldn't sign in with Google ($1).", "No pude entrar con Google ($1)."],
+  [/^O Google recusou o acesso ao Drive \((.*)\)\.$/, "Google refused access to Drive ($1).", "Google rechazó el acceso a Drive ($1)."],
   [/^Não consegui ler este PDF \((.*)\)\.$/, "I couldn't read this PDF ($1).", "No pude leer este PDF ($1)."],
   [/^Não consegui ler este arquivo (\S+): (.*)$/, "I couldn't read this $1 file: $2", "No pude leer este archivo $1: $2"],
   [/^Falha ao montar o EPUB: (.*)\.$/, "Could not build the EPUB: $1.", "No se pudo armar el EPUB: $1."],

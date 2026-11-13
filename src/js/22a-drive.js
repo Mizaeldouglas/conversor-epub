@@ -52,8 +52,19 @@ async function driveLogin(){
     drv.pending.clear();
   } catch (e) {
     console.warn("login google", e);
-    if (!(e && /popup_closed|access_denied/.test(e.type || e.message || ""))) toast("Não consegui entrar com o Google. Tente de novo.");
+    toast(loginErrorText(e), 12000);
   } finally { loginBtns(true); }
+}
+// diz o que impediu a entrada e o que fazer
+function loginErrorText(e){
+  const t = (e && (e.type || e.reason || e.message)) || "";
+  if (e && e.message === "gis") return "O navegador bloqueou o login do Google. No Brave, desligue o Shields para este site (ícone do leão na barra de endereço); em outros navegadores, libere accounts.google.com no bloqueador de anúncios.";
+  if (/popup_failed_to_open/.test(t)) return "O navegador bloqueou a janela do Google. Permita pop-ups para este site e tente de novo.";
+  if (/popup_closed/.test(t)) return "A janela do Google foi fechada antes de terminar. Tente de novo.";
+  if (/access_denied/.test(t)) return "O Google negou o acesso. Confira se sua conta está em “Usuários de teste” ou se o app foi publicado no Google Cloud.";
+  if (/accessNotConfigured|SERVICE_DISABLED|has not been used/i.test(t)) return "A Google Drive API não está ativada no projeto do Google Cloud. Ative em APIs e serviços > Biblioteca > Google Drive API e tente de novo daqui a alguns minutos.";
+  if (e && e.status === 403) return "O Google recusou o acesso ao Drive (" + (e.reason || "403") + ").";
+  return "Não consegui entrar com o Google (" + (t || "erro desconhecido") + "). Tente de novo.";
 }
 function driveLogout(){
   const tok = drv.token;
@@ -76,7 +87,11 @@ async function gapi(path, opt = {}, raw){
   if (!driveConnected()) { driveExpired(); throw driveErr("sem conexão", "DriveAuth"); }
   const r = await fetch(/^https:/.test(path) ? path : DRIVE_API + path, { ...opt, headers: { Authorization: "Bearer " + drv.token, ...(opt.headers || {}) } });
   if (r.status === 401) { driveExpired(); throw driveErr("acesso expirado", "DriveAuth"); }
-  if (!r.ok) throw driveErr("Drive " + r.status, "DriveHttp");
+  if (!r.ok) {
+    let reason = "";
+    try { const j = await r.json(); reason = (j.error && ((j.error.errors && j.error.errors[0] && j.error.errors[0].reason) || j.error.status || j.error.message)) || ""; } catch {}
+    throw Object.assign(driveErr("Drive " + r.status + (reason ? " " + reason : ""), "DriveHttp"), { status: r.status, reason });
+  }
   return raw ? r : r.status === 204 ? null : r.json();
 }
 const qs = o => Object.entries(o).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");

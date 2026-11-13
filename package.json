@@ -1,6 +1,6 @@
 {
   "name": "conversor-epub",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "private": true,
   "description": "Lombada: conversor de PDF para EPUB (Kindle) que roda inteiro no navegador.",
   "license": "MIT",
