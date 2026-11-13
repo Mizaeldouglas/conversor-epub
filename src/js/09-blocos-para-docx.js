@@ -53,6 +53,7 @@ async function blocksToDocx(blocks, title, author){
     }
     if (b.type === "scene") { parts.push(para("Cena", b.text)); continue; }
     if (b.type === "table") { parts.push(table(b.rows)); continue; }
+    if (b.type === "toc") { parts.push(para("SumarioPdf" + (b.level || 0), b.text)); continue; }
     if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : b.part && /^h[12]$/.test(b.type) ? "Parte" : styleOf[b.type], b.text)); continue; }
     n++;
     const file = `image${n}.jpg`;
@@ -78,6 +79,10 @@ async function blocksToDocx(blocks, title, author){
 <w:style w:type="paragraph" w:styleId="Cena"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="NotaRodape"><w:name w:val="Nota de rodapé"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Lista"><w:name w:val="Item de lista"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="567" w:hanging="283"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="SumarioPdf0"><w:name w:val="SumarioPdf0"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="40"/><w:ind w:left="0" w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="SumarioPdf1"><w:name w:val="SumarioPdf1"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="40"/><w:ind w:left="360" w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="SumarioPdf2"><w:name w:val="SumarioPdf2"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="40"/><w:ind w:left="720" w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="SumarioPdf3"><w:name w:val="SumarioPdf3"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="0" w:after="40"/><w:ind w:left="1080" w:firstLine="0"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Codigo"><w:name w:val="Codigo"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120" w:line="240" w:lineRule="auto"/><w:jc w:val="left"/></w:pPr><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Verso"><w:name w:val="Verso"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120"/><w:ind w:left="567"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>

@@ -92,4 +92,18 @@ test("apostila: código em bloco próprio, linha a linha e com o recuo", async (
   assert.match(html, /<p>Repare que as linhas/);
 });
 
+test("índice do próprio PDF: uma entrada por linha, com o recuo e o link, sem sumário repetido", async () => {
+  const { html, z } = await convert("farol-indice-chrome.pdf", T.farol);
+  const idx = /<h1>[^]*?Índice<\/h1>([^]*?)<\/section>/.exec(html);
+  assert.ok(idx, "a página de índice sumiu");
+  const entries = [...idx[1].matchAll(/<p class="toc-pdf n(\d)"><a href="(ch\d+\.xhtml#pg\d+)">([^<]+)<\/a><\/p>/g)].map(m => [+m[1], m[3], m[2]]);
+  assert.deepEqual(entries.map(e => [e[0], e[1]]), [[0, "Parte um — A chegada"], [1, "Capítulo 1 — A ilha"], [1, "Capítulo 2 — O caderno verde"],
+    [0, "Parte dois — A luz que voltou a girar sobre o mar nas noites de nevoeiro da ilha de Ponta Seca"], [1, "Capítulo 3 — O guardião"], [1, "Capítulo 4 — A luz"]]);
+  for (const [, t, href] of entries) {
+    const [f, id] = href.split("#"), doc = await z.file("OEBPS/text/" + f).async("string");
+    assert.ok(doc.includes(`id="${id}"`), "link quebrado: " + t);
+  }
+  assert.equal(z.file("OEBPS/text/sumario.xhtml"), null, "o livro ficou com dois sumários");
+});
+
 test("nenhum erro de JavaScript", () => assert.deepEqual(app.errors, []));

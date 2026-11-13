@@ -19,9 +19,10 @@ mkdirSync(OUT, { recursive: true }); mkdirSync(EX, { recursive: true });
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const inline = s => esc(s).replace(/&lt;(\/?)i&gt;/g, "<$1i>");
 
-function html(book, { capa = false } = {}){
+function html(book, { capa = false, indice = null } = {}){
+  let hn = 0;
   const body = book.blocos.map(b => {
-    if (b.h1) return `<h1>${esc(b.h1)}</h1>`;
+    if (b.h1) return `<h1 id="c${++hn}">${esc(b.h1)}</h1>`;
     if (b.h2) return `<h2>${esc(b.h2)}</h2>`;
     if (b.cena) return `<p class="cena">* * *</p>`;
     if (b.ul) return `<ul>${b.ul.map(i => `<li>${esc(i)}</li>`).join("")}</ul>`;
@@ -54,11 +55,16 @@ pre{font:9.5pt/1.35 "Liberation Mono","DejaVu Sans Mono",monospace;margin:8pt 0 
 .capa{break-after:page;height:150mm;display:flex;flex-direction:column;justify-content:center;text-align:center}
 .capa h1{font-size:30pt;break-before:auto;margin:0 0 12pt}
 .capa p{text-align:center;text-indent:0;font-style:italic;font-size:14pt}
+.indice{break-after:page}
+.indice p{text-indent:0;text-align:left;margin:0 0 4pt}
+.indice p.n1{margin-left:16pt}
+.indice a{color:#123;text-decoration:none}
 .ficha{break-after:page;font-size:8.5pt;line-height:1.35;padding-top:60mm}
 .ficha p{text-indent:0;text-align:left;margin:0 0 3pt}
 </style></head><body>
 ${capa ? `<section class="capa"><div style="font-size:30pt;font-weight:bold;margin-bottom:12pt">${esc(book.titulo)}</div><p>${esc(book.autor)}</p></section>` : ""}
 ${capa && book.ficha ? `<section class="ficha">${book.ficha.map(l => `<p>${esc(l)}</p>`).join("")}</section>` : ""}
+${indice ? `<section class="indice"><h1>Índice</h1>${indice.map(([nivel, texto, alvo]) => `<p class="n${nivel}"><a href="#c${alvo}">${esc(texto)}</a></p>`).join("")}</section>` : ""}
 ${body}
 </body></html>`;
 }
@@ -78,6 +84,8 @@ await chromePdf(T.bicicleta, join(OUT, "bicicleta-chrome.pdf"));
 await chromePdf(T.poemas, join(OUT, "poemas-chrome.pdf"));
 await chromePdf(T.revista, join(OUT, "revista-chrome.pdf"));
 await chromePdf(T.apostila, join(OUT, "apostila-chrome.pdf"));
+// romance com página de índice clicável, com partes e capítulos recuados, como os livros de editora
+await chromePdf(T.farol, join(OUT, "farol-indice-chrome.pdf"), { indice: [[0, "Parte um — A chegada", 1], [1, "Capítulo 1 — A ilha", 1], [1, "Capítulo 2 — O caderno verde", 2], [0, "Parte dois — A luz que voltou a girar sobre o mar nas noites de nevoeiro da ilha de Ponta Seca", 3], [1, "Capítulo 3 — O guardião", 3], [1, "Capítulo 4 — A luz", 4]] });
 await chromePdf(T.farol, join(EX, "o-farol-apagado.pdf"), { capa: true });
 await browser.close();
 

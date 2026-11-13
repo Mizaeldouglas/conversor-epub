@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.9.1 — 13 nov 2026
+
+- O índice do próprio PDF sai igual ao do PDF: uma entrada por linha, com o recuo de partes e capítulos e o link para o capítulo. Antes, as entradas se juntavam em parágrafos. Entrada que quebra em duas linhas volta a ser uma, sem o hífen do meio. Quando o PDF já tem índice, o Lombada não acrescenta o sumário dele no começo, para o livro não ficar com dois.
+
 ## 3.9.0 — 13 nov 2026
 
 - Dados do livro preenchidos sozinhos: autor, editora, ano, ISBN e gênero saem da página de créditos e da ficha catalográfica do próprio PDF (e do autor gravado no arquivo). O que faltar, incluindo a sinopse, vem do Google Books pelo ISBN, que é exato, ou pelo título e autor, só quando o resultado é o mesmo livro; depois, da Open Library. A internet nunca troca o que o PDF já diz, e a busca pode ser desligada em Ajustes.

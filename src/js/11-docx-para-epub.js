@@ -134,6 +134,7 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     if (!splitStyle && ch.weight >= 60) newCh("Parte " + (chapters.length + 1));
     if (p.style === "img") { ch.items.push({ tag: "img", src: p.src, full: p.full, alt: p.alt }); ch.weight += 5; continue; }
     if (p.style === "table") { ch.items.push({ tag: "table", rows: p.rows }); ch.weight += p.rows.length; continue; }
+    if (/^SumarioPdf\d$/.test(p.style)) { ch.items.push({ tag: "tocline", level: +p.style.slice(-1), text: p.text }); ch.weight += 1; ch.hasPdfToc = true; continue; }
     if (p.style === "Codigo") { ch.items.push({ tag: "code", text: p.text }); ch.weight += 1; continue; }
     if (p.style === "Lista" || p.style === "Verso") { ch.items.push({ tag: p.style === "Lista" ? "li" : "verse", text: p.text }); ch.weight += 1; continue; }
     const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : p.style === "Heading3" ? "h2" : "p";
@@ -193,6 +194,10 @@ ul.lista li{margin:0 0 .3em 1.6em;text-indent:-1em;text-align:left}
 p.verso{text-indent:0;text-align:left;margin:.8em 0 .8em 1.6em}
 pre.codigo{font-family:"Courier New",Courier,monospace;font-size:.82em;line-height:1.35;white-space:pre-wrap;text-align:left;margin:1em 0;padding:.5em .7em;border-left:3px solid #999}
 pre.codigo code{font-family:inherit}
+p.toc-pdf{text-indent:0;text-align:left;margin:0 0 .35em}
+p.toc-pdf.n1{margin-left:1.5em}
+p.toc-pdf.n2{margin-left:3em}
+p.toc-pdf.n3{margin-left:4.5em}
 table{border-collapse:collapse;margin:1em auto;font-size:.9em}
 td{border:1px solid #888;padding:.25em .5em;text-align:left;vertical-align:top}
 a{color:inherit}
@@ -261,6 +266,7 @@ a{color:inherit}
         : it.tag === "table" ? `<table>${it.rows.map(r => `<tr>${r.map(t => `<td>${rich(t, fn)}</td>`).join("")}</tr>`).join("")}</table>`
         : it.tag === "li" ? `${(c.items[k - 1] || {}).tag === "li" ? "" : '<ul class="lista">'}<li>${rich(it.text, fn)}</li>${(c.items[k + 1] || {}).tag === "li" ? "" : "</ul>"}`
         : it.tag === "verse" ? `<p class="verso">${rich(it.text, fn)}</p>`
+        : it.tag === "tocline" ? `<p class="toc-pdf n${it.level}">${rich(it.text, fn)}</p>`
         : it.tag === "code" ? `<pre class="codigo"><code>${rich(it.text, fn)}</code></pre>`
         : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
     const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
@@ -272,7 +278,8 @@ a{color:inherit}
     .replace(/<a href="\uE00D([^\uE00D]*)\uE00D">([\s\S]*?)<\/a>/g, (m, l, inner) => pageAt.has(l) ? `<a href="${pageAt.get(l)}">${inner}</a>` : inner));
 
   // sumário no começo do livro, como nos ebooks de loja (o do menu do leitor continua no nav.xhtml)
-  const tocPage = extra.tocPage !== false && files.length >= 3;
+  // se o PDF já tem um sumário (a página de índice dele), o livro fica com o dele, sem repetir
+  const tocPage = extra.tocPage !== false && files.length >= 3 && !chapters.some(c => c.hasPdfToc);
   if (tocPage) z.file("OEBPS/text/sumario.xhtml", xhtml(NAV_T[0], `<nav class="sumario" aria-labelledby="sumario-t"><h1 id="sumario-t">${NAV_T[0]}</h1><ol>
 ${tocTree(files).map(t => `<li${t.f.part ? ' class="parte-item"' : ""}><a href="${t.f.fn}">${esc(t.f.title)}</a>${t.kids.length ? `<ol>\n${t.kids.map(k => `<li><a href="${k.fn}">${esc(k.title)}</a></li>`).join("\n")}\n</ol>` : ""}</li>`).join("\n")}
 </ol></nav>`));

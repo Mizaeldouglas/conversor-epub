@@ -256,7 +256,13 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       const mono = realIts.length > 0 && realIts.every(i => i.mono);
       const cw = mono ? Math.max(1, realIts.reduce((a, i) => a + i.w, 0) / Math.max(1, realIts.reduce((a, i) => a + i.str.length, 0))) : 0;
       if (mono) cells = null;
-      pageItems.push({ mono, cw, page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
+      // linha de sumário do próprio PDF: a linha inteira é um link para outra página do livro,
+      // ou termina em pontinhos e número de página ("Capítulo 1 ........ 21")
+      const lks = new Set(realIts.map(i => i.lk));
+      const tocUrl = lks.size === 1 && /^pg:/.test(realIts[0].lk) ? realIts[0].lk : "";
+      const toc = !!tocUrl || (!mono && /\S\s*(?:\.\s?){4,}\s*\d{1,4}\s*$/.test(plainOf(text)));
+      if (toc) cells = null;
+      pageItems.push({ mono, cw, toc, tocUrl, page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
         cells: cells && cells.length === cellX.length ? cells : null, cellX });
     }
     // capitular volta para o começo da primeira linha do parágrafo ("M" + "ira tinha" = "Mira tinha")
@@ -472,6 +478,23 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
     const gg = geo[gk(l)] || { left: l.x0, right: l.x1 };
+    // sumário do PDF: cada entrada na sua linha; uma entrada que quebrou em duas linhas (mesmo link) continua junta
+    if (l.toc && l.size < body * 1.4) {
+      // só é a mesma entrada se a linha de cima foi até a margem direita (quebrou por falta de espaço)
+      const pr = prev && geo[gk(prev)];
+      const same = cur && cur.type === "toc" && prev && prev.page === l.page && l.tocUrl && cur.tocUrl === l.tocUrl && l.x0 > cur.x0 - 2 && pr && prev.x1 >= pr.right - body * 2.5;
+      if (same) {
+        // um link só para a entrada inteira, e a palavra partida no fim da linha volta a ser uma
+        let a = cur.text, b = l.text;
+        const open = LK_ON + l.tocUrl + LK_MID;
+        if (a.endsWith(LK_OFF) && b.startsWith(open)) { a = a.slice(0, -1); b = b.slice(open.length); }
+        const head = (plainOf(a).match(/(\p{L}+)-$/u) || ["", ""])[1], tail = (plainOf(b).match(/^\p{Ll}+/u) || [""])[0];
+        cur.text = head && tail ? (keepHyphen(head, tail) ? a : a.replace(/-([\uE004-\uE007]*)$/, "$1")) + mark + b : a + " " + mark + b;
+        cur.last = l.page;
+      }
+      else { cur = { type: "toc", x0: l.x0, tocUrl: l.tocUrl, text: mark + l.text.replace(/\s*(?:\.\s?){4,}\s*(\d{1,4})\s*$/, " $1"), page: l.page, last: l.page }; blocks.push(cur); }
+      prev = { ...l, isHead: false }; continue;
+    }
     // código: cada linha continua sendo uma linha, com o recuo de antes
     if (l.mono && l.size < body * 1.15) {
       const cont = cur && cur.type === "code" && prev && (prev.page === l.page ? prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 2.6 : l.page === prev.page + 1);
@@ -596,6 +619,12 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     }
     const kill = (it > all * 0.5 ? IT_ON + IT_OFF : "") + (bd > all * 0.5 ? BD_ON + BD_OFF : "");
     if (kill) { const re = new RegExp("[" + kill + "]", "g"); for (const b of blocks) if (typeof b.text === "string") b.text = b.text.replace(re, ""); }
+  }
+  // sumário do PDF: o recuo de cada entrada vira o nível (0 a 3), medido a partir da entrada mais à esquerda da página
+  {
+    const minX = {};
+    for (const b of blocks) if (b.type === "toc") minX[b.page] = Math.min(minX[b.page] ?? Infinity, b.x0);
+    for (const b of blocks) if (b.type === "toc") b.level = Math.max(0, Math.min(3, Math.round((b.x0 - minX[b.page]) / (body * 1.6))));
   }
   // ligaduras sem texto: decide cada código uma vez, com o livro inteiro
   await resolveLigatures(liga, blocks.filter(b => typeof b.text === "string").map(b => b.text), lang);
