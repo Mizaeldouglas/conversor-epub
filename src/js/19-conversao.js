@@ -26,8 +26,23 @@ function detectLang(blocks){
   const [best, second] = Object.entries(score).sort((a, b) => b[1] - a[1]);
   return best[1] >= 5 && best[1] > second[1] * 1.3 ? best[0] : null;
 }
+// tempo que falta, pelo ritmo das páginas já lidas
+function etaText(t0, p, total){
+  const el = (Date.now() - t0) / 1000;
+  if (p < 3 || el < 4 || p >= total) return "";
+  const left = el / p * (total - p);
+  return left < 50 ? "menos de 1 minuto" : left < 90 ? "cerca de 1 minuto" : `cerca de ${Math.round(left / 60)} minutos`;
+}
+// aviso do navegador quando o livro fica pronto com a aba em segundo plano
+function notifyDone(job){
+  try {
+    if (!("Notification" in window) || Notification.permission !== "granted" || !document.hidden) return;
+    const n = new Notification(i18nText(job.title + ": EPUB pronto."), { body: i18nText("Volte ao Lombada para baixar ou mandar ao Kindle."), icon: "icon-192.png", tag: job.histId });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch {}
+}
 const readOpts = () => ({ lang: defaultLang(), mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
-  ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value });
+  ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value, tocpage: $("#tocpage").checked });
 const lookOf = () => ({ font: $("#lookFont").value, justify: $("#lookJustify").checked, indent: $("#lookIndent").value, lh: $("#lookLh").value });
 function stopIfCancelled(job){ if (job.ctrl && job.ctrl.signal.aborted) throw abortErr(); }
 function markCancelled(job){ queueDone(job); job.busy = false; job.cancelled = true; job.progress = ""; job.stage = null; render(job); }
@@ -55,7 +70,7 @@ async function runEpub(job){
     for (const k of ["read", "pages", "epub", "check"]) if (!job.done.includes(k)) job.done.push(k);
     job.structure = await checkEpubStructure(res.blob);
     job.epub = res.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -111,7 +126,7 @@ async function runImport(job){
     if (res.lang) job.lang = /^pt/i.test(res.lang) ? "pt-BR" : res.lang.slice(0, 2).toLowerCase() || job.lang;
     else if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (res.meta) job.meta = { ...res.meta, ...(job.meta || {}) };
-    if (res.cover) { job.coverBlob = res.cover; job.coverOn = true; } else job.coverBlob = null;
+    job.coverOn = true; job.coverBlob = res.cover || null; job.coverAuto = false;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
     await buildPdf(job);
   } catch (e) {
@@ -129,20 +144,22 @@ async function runPdf(job){
   if (job.fmt || job.fromEpub) return runImport(job);
   const o = job.opts ||= readOpts();
   job.lang = o.lang; job.mode = o.mode; job.fixed = job.mode === "comic" || job.mode === "manga";
-  job.showNums = o.showNums; job.coverOn = o.cover; job.author = job.author || o.author; job.look = o.look; job.images = o.images;
+  job.showNums = o.showNums; job.coverOn = true; job.author = job.author || o.author; job.look = o.look; job.images = o.images;
   job.busy = true;
   try {
     const buf = await job.file.arrayBuffer();
     let lastPaint = 0;
+    const t0 = Date.now();
     const res = await pdfToBlocks(buf, job.fixed ? "pages" : job.mode, (p, total, what) => {
       job.progress = what ? `${what}: página ${p} de ${total}` : `lendo página ${p} de ${total}`; job.pct = p / total;
+      job.eta = etaText(t0, p, total);
       const now = Date.now(); if (now - lastPaint > 250 || p === total || what) { lastPaint = now; paintProgress(job); }
     }, job.lang, { headers: o.headers, notes: o.notes, cover: !job.fixed, ocr: (o.ocr || job.forceOcr) && !job.fixed, signal: job.ctrl.signal, password: job.password });
     job.src = res; job.pages = res.numPages; job.ligatures = res.ligatures; job.headersRemoved = res.headersRemoved;
     job.ocrPages = res.ocrPages; job.ocrError = res.ocrError; job.imagePages = job.fixed ? 0 : res.imagePages; job.outlineUsed = res.outlineUsed; job.columnPages = res.columnPages;
     const meta = res.metaTitle;
     if (meta && meta.length > 2 && !/^(untitled|microsoft word|document|\(anonymous\)|sem t[íi]tulo)/i.test(meta)) job.title = cleanTitle(meta);
-    job.coverBlob = res.cover ? res.cover.blob : null;
+    job.coverBlob = o.cover && res.cover ? res.cover.blob : null;
     if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
     await buildPdf(job);
@@ -161,13 +178,19 @@ async function buildPdf(job){
   try {
     stopIfCancelled(job);
     job.stage = "docx"; job.progress = "montando DOCX"; render(job);
+    job.eta = "";
+    // livro sem capa ganha uma capa com o título; ela acompanha o título se ele mudar
+    if (!job.fixed && job.coverOn && (!job.coverBlob || job.coverAuto)) {
+      const key = job.title + "\u0000" + (job.author || "");
+      if (!job.coverBlob || job.coverAutoKey !== key) { job.coverBlob = await autoCover(job.title, job.author); job.coverAuto = true; job.coverAutoKey = key; }
+    }
     if (!job.fixed && !src.partsMarked) { if (!src.outlineUsed) markParts(src.blocks); src.partsMarked = true; }
     job.docx = await blocksToDocx(src.blocks, job.title, job.author);
     stopIfCancelled(job);
     job.done.push("docx"); job.stage = "epub"; job.progress = "montando EPUB"; render(job);
     const ep = job.fixed
       ? await buildFixedEpub(src.blocks, { title: job.title, author: job.author, lang: job.lang, rtl: job.mode === "manga", meta: job.meta })
-      : await docxToEpub(job.docx, job.author, job.lang, job.showNums, { cover: job.coverOn ? job.coverBlob : null, meta: job.meta, look: job.look, images: job.images });
+      : await docxToEpub(job.docx, job.author, job.lang, job.showNums, { cover: job.coverOn ? job.coverBlob : null, meta: job.meta, look: job.look, images: job.images, tocPage: job.opts ? job.opts.tocpage !== false : true });
     job.chapters = ep.chapters; job.images = ep.images; job.pageMarks = ep.pages; job.notesN = ep.notes || 0;
     job.done.push("epub");
     if (job.verifyOn && !job.fixed && !job.reordered) {
@@ -181,11 +204,25 @@ async function buildPdf(job){
     stopIfCancelled(job);
     job.structure = await checkEpubStructure(ep.blob);
     job.epub = ep.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
     job.busy = false; job.error = "Falha ao montar o EPUB: " + ((e && e.message) || "erro desconhecido") + ".";
     render(job);
   }
+}
+
+// livro de exemplo: só no site (o artefato não tem a pasta exemplo/)
+if (ON_SITE) {
+  const sb = $("#sampleBtn"); sb.hidden = false;
+  sb.addEventListener("click", async () => {
+    sb.disabled = true;
+    try {
+      const r = await fetch("exemplo/o-farol-apagado.pdf");
+      if (!r.ok) throw new Error(r.status);
+      addFiles([new File([await r.blob()], "O Farol Apagado.pdf", { type: "application/pdf" })]);
+    } catch (e) { toast("Não deu para abrir o livro de exemplo agora."); }
+    sb.disabled = false;
+  });
 }

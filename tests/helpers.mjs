@@ -64,7 +64,7 @@ export async function openApp(browser, server, { viewport = { width: 1200, heigh
 }
 
 export async function addFiles(page, names){
-  await page.setInputFiles("#file", names.map(n => join(FIX, n)));
+  await page.setInputFiles("#file", names.map(n => n.includes("/") ? join(ROOT, n) : join(FIX, n)));
 }
 
 export async function waitJob(page, i, timeout = 120000){

@@ -87,3 +87,34 @@ async function shrinkJpeg(blob, mode){
     return new Uint8Array(await out.arrayBuffer());
   } catch { return null; }
 }
+
+
+// capa gerada para livro sem capa: tecido colorido, lombada mais escura, título e autor
+const COVER_CLOTH = [["#2536c7", "#1b279a"], ["#0f6b4a", "#0a4f37"], ["#7a1f3d", "#5b142c"], ["#0e5a6b", "#09414e"], ["#131833", "#0a0d1f"], ["#8f4f00", "#6b3a00"]];
+async function autoCover(title, author){
+  title = String(title || "").trim() || "Sem título"; author = String(author || "").trim();
+  try { await Promise.all([document.fonts.load('700 100px "Literata"'), document.fonts.load('italic 400 50px "Literata"')]); } catch {}
+  const W = 1200, H = 1800, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  let h = 0; for (const ch of title + author) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  const [cloth, spine] = COVER_CLOTH[h % COVER_CLOTH.length];
+  x.fillStyle = cloth; x.fillRect(0, 0, W, H);
+  x.fillStyle = spine; x.fillRect(0, 0, 110, H);
+  x.fillStyle = "rgba(255,255,255,.14)"; x.fillRect(110, 0, 3, H);
+  x.fillStyle = "#ffd84a"; x.beginPath(); x.moveTo(930, 0); x.lineTo(1030, 0); x.lineTo(1030, 230); x.lineTo(980, 190); x.lineTo(930, 230); x.closePath(); x.fill();
+  const serif = '"Literata", Georgia, "Times New Roman", serif';
+  // título: a maior fonte em que ele cabe em até 6 linhas
+  const lines = (txt, max) => { const out = []; let cur = ""; for (const w of txt.split(/\s+/)) { const t = cur ? cur + " " + w : w; if (x.measureText(t).width > max && cur) { out.push(cur); cur = w; } else cur = t; } if (cur) out.push(cur); return out; };
+  let size = 132, ls;
+  for (; size >= 64; size -= 6) { x.font = `700 ${size}px ${serif}`; ls = lines(title, 880); if (ls.length <= 6 && ls.every(l => x.measureText(l).width <= 880)) break; }
+  x.fillStyle = "#fff"; x.textBaseline = "alphabetic";
+  let y = 520;
+  for (const l of ls.slice(0, 7)) { x.fillText(l, 200, y); y += size * 1.12; }
+  x.fillStyle = "#ffd84a"; x.fillRect(200, y - size * .55, 120, 8);
+  if (author) {
+    x.font = `italic 400 ${Math.min(64, Math.max(44, size * .5))}px ${serif}`; x.fillStyle = "rgba(255,255,255,.88)";
+    let ay = y + 60; for (const l of lines(author, 880).slice(0, 3)) { x.fillText(l, 200, ay); ay += 72; }
+  }
+  const blob = await toJpeg(c, 0.88); c.width = c.height = 0;
+  return blob;
+}

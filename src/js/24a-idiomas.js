@@ -1,7 +1,11 @@
 /* ---------- idioma da interface: português (original), inglês e espanhol ----------
    Os textos nascem em português no código. Aqui cada frase que aparece na tela é trocada pela tradução
    (src/data/idiomas.json); números viram {0}, {1}… na chave, então "7 capítulos" e "12 capítulos" usam a mesma linha. */
-const I18N = JSON.parse(document.getElementById("i18n-data").textContent || "{}");
+// traduções: no site vêm de um arquivo à parte, baixado só quando o idioma não é o português
+let I18N = null;
+{ const el = document.getElementById("i18n-data"); if (el) I18N = JSON.parse(el.textContent || "{}"); }
+let i18nP = null;
+const ensureI18n = () => I18N ? Promise.resolve() : i18nP ||= fetch("dados/idiomas.json?v=" + VERSION).then(r => r.ok ? r.json() : {}).catch(() => ({})).then(j => { I18N = j; });
 const I18N_MISSING = new Set();
 window.__app.i18nMissing = I18N_MISSING;
 const I18N_NUM = /\d+(?:[.,]\d+)*/g;
@@ -33,10 +37,10 @@ const i18nNum = s => uiLang !== "en" ? s : /^\d{1,3}(\.\d{3})+$/.test(s) ? s.rep
 const i18nKey = t => { let i = 0; return t.replace(I18N_NUM, () => "{" + (i++) + "}"); };
 // trecho variável de uma frase: traduz se for conhecido (uma mensagem de erro), senão fica como está (um nome de arquivo)
 const i18nPart = t => { if (!/\s/.test(t)) return t; const w = i18nDirect(t); if (w != null) return w; const ps = t.split(I18N_SPLIT); return ps.length > 1 ? ps.map(p => i18nDirect(p) ?? p).join(" ") : t; };
-const i18nDirect = core => { const nums = [], key = core.replace(I18N_NUM, m => { nums.push(m); return "{" + (nums.length - 1) + "}"; }); const t = I18N[key] || I18N[core]; return t ? t[uiLang === "en" ? 0 : 1].replace(/\{(\d+)\}/g, (_, i) => i18nNum(nums[+i] ?? "")) : null; };
+const i18nDirect = core => { const nums = [], key = core.replace(I18N_NUM, m => { nums.push(m); return "{" + (nums.length - 1) + "}"; }); const t = I18N && (I18N[key] || I18N[core]); return t ? t[uiLang === "en" ? 0 : 1].replace(/\{(\d+)\}/g, (_, i) => i18nNum(nums[+i] ?? "")) : null; };
 function i18nLookup(core){
   const nums = [], key = core.replace(I18N_NUM, m => { nums.push(m); return "{" + (nums.length - 1) + "}"; });
-  const t = I18N[key] || I18N[core];
+  const t = I18N && (I18N[key] || I18N[core]);
   if (t) { const out = t[uiLang === "en" ? 0 : 1]; if (out) return out.replace(/\{(\d+)\}/g, (_, i) => i18nNum(nums[+i] ?? "")); }
   for (const [re, en, es] of I18N_PATS) {
     const m = re.exec(core); if (!m) continue;
@@ -83,9 +87,14 @@ function i18nTree(root){
   for (let n; (n = w.nextNode());) i18nNode(n);
 }
 const I18N_TITLE = { pt: "Lombada: PDF para EPUB", en: "Lombada: PDF to EPUB", es: "Lombada: PDF a EPUB" };
-function setUiLang(l, save){
+async function setUiLang(l, save){
   uiLang = /^(pt|en|es)$/.test(l) ? l : "pt";
-  if (save) try { localStorage.setItem(UI_LANG_KEY, uiLang); } catch {}
+  if (save) try { localStorage.setItem(UI_LANG_KEY, uiLang); } catch {}   // guarda antes de baixar as traduções
+  if (uiLang !== "pt" && !I18N) {
+    document.documentElement.classList.add("i18n-wait");   // evita mostrar o português por um instante
+    await ensureI18n();
+    document.documentElement.classList.remove("i18n-wait");
+  }
   document.documentElement.lang = uiLang === "pt" ? "pt-BR" : uiLang;
   document.title = I18N_TITLE[uiLang];
   $("#uiLang").value = uiLang;

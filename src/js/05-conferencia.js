@@ -1,5 +1,6 @@
 /* ---------- conferência palavra por palavra ---------- */
-const normW = w => w.normalize("NFKC").normalize("NFC");
+// hífen tipográfico (U+2010) e hífen opcional valem como o hífen comum, como no EPUB
+const normW = w => w.normalize("NFKC").replace(/[\u2010\u2011]/g, "-").replace(/\u00AD$/, "-").replace(/\u00AD/g, "").normalize("NFC");
 // compara palavra por palavra; a pontuação nas pontas não conta (alguns PDFs desenham pontos e vírgulas em outra
 // ordem), mas palavras grudadas ("dinheiro.Enfim") ou separadas ("tam bem") continuam aparecendo
 const edgeW = w => normW(w).replace(/^[\p{P}\p{S}]+|[\p{P}\p{S}]+$/gu, "");
@@ -36,7 +37,14 @@ function compareWords(ref, outWords){
     if (!found) { push(i, 1, j, 1); i++; j++; }
   }
   if (i < A.length || j < B.length) push(i, A.length - i, j, B.length - j);
-  return { total: A.length, diffs, ignored };
+  // trecho que só mudou de lugar (cabeçalho que o PDF desenha depois do texto): está inteiro nos dois, não é diferença
+  for (let x = 0; x < diffs.length; x++) {
+    const d = diffs[x]; if (!d || !!d.pdf === !!d.epub) continue;
+    const y = diffs.findIndex((e, k) => k !== x && e && (d.pdf ? !e.pdf && e.epub === d.pdf : !e.epub && e.pdf === d.epub));
+    if (y < 0) continue;
+    ignored += (d.pdf || d.epub).split(" ").length; diffs[x] = diffs[y] = null;
+  }
+  return { total: A.length, diffs: diffs.filter(Boolean), ignored };
 }
 
 // palavras de um documento XHTML (sem as marcas de página), separando blocos

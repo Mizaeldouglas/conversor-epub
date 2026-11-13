@@ -58,7 +58,8 @@ jobs:
       - name: Monta o site
         run: |
           mkdir _site
-          cp -r index.html privacidade.html sw.js manifest.webmanifest icon-192.png icon-512.png og.png ocr _site/
+          mkdir -p _site/docs exemplo && cp docs/tela.png docs/previa.png docs/celular.png _site/docs/
+          cp -r index.html privacidade.html termos.html 404.html exemplo dados sw.js manifest.webmanifest icon-192.png icon-512.png og.png ocr _site/
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -34,6 +34,7 @@
   --lift:0 18px 44px -18px rgba(0,0,0,.7); color-scheme:dark}
 
 [hidden]{display:none!important}
+.i18n-wait body{visibility:hidden}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
 body{margin:0;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-ui);font-optical-sizing:auto;-webkit-font-smoothing:antialiased}
@@ -146,6 +147,7 @@ body.gated .hero,body.gated .layout,body.gated #settingsBtn,body.gated .top-acti
 /* fila vazia: o caminho em três passos */
 .list{display:flex;flex-direction:column;gap:14px}
 .empty{border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.empty .sample{display:block;margin:0 auto 18px}
 .path{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 .path li{padding:20px 22px 22px;display:grid;gap:4px;align-content:start}
 .path li + li{border-left:1px solid var(--line-soft)}
@@ -231,6 +233,8 @@ details.edit[open] > summary::before{transform:rotate(45deg) translate(-2px,-2px
 .edit-fields{display:grid;gap:12px}
 .edit-fields label,.newchap label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}
 .two{display:grid;grid-template-columns:1fr 84px;gap:10px}
+.three{display:grid;grid-template-columns:minmax(0,1.4fr) 80px minmax(0,1fr);gap:10px}
+.eta{font-size:13px;color:var(--muted);margin-top:2px}
 .chap,.findrep{border-top:1px solid var(--line-soft);padding-top:18px}
 .chap-head{font-size:13.5px;display:grid;gap:2px}
 .chap-head > b,.findrep > b{font-weight:700;font-size:15px;color:var(--ink)}
@@ -290,6 +294,14 @@ details.reconv > summary{cursor:pointer;font-weight:650;color:var(--accent);widt
 .acct-pop p{margin:0 0 4px;color:var(--muted);overflow-wrap:anywhere}
 .acct-pop b{color:var(--ink);font-weight:650;display:block}
 .book .cloud{position:absolute;top:6px;left:10px;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.92);color:#2536c7;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+
+.shelf-tools{display:flex;gap:8px;flex-wrap:wrap;flex-basis:100%}
+.shelf-tools input,.shelf-tools select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px;min-width:0}
+.shelf-tools input{flex:1 1 220px}
+.shelf-empty{grid-column:1/-1;color:var(--muted);margin:0}
+.dropall{position:fixed;inset:0;z-index:70;background:color-mix(in srgb,var(--cover) 88%,transparent);color:#fff;display:grid;place-items:center;pointer-events:none}
+.dropall > div{display:grid;justify-items:center;gap:14px;padding:48px 64px;border:3px dashed var(--mark);border-radius:24px}
+.dropall b{font:800 clamp(1.6rem,4vw,2.6rem)/1.1 var(--f-ui);letter-spacing:-.02em}
 
 /* estante */
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:28px 22px}
@@ -438,6 +450,7 @@ body.noscroll{overflow:hidden}
   .row-top .actions .btn.quiet{flex:0 0 auto}
   .edit-top{grid-template-columns:1fr}
   .cols{grid-template-columns:1fr}
+  .three{grid-template-columns:1fr 80px}
   .shelf{grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:24px 16px}
   .modal{padding:0}.modal-box{height:100%;border-radius:0}
   .pv-main{flex-direction:column}.pv-pdf{border-left:0;border-bottom:1px solid var(--line-soft);order:-1;max-height:48%}

@@ -70,6 +70,16 @@ input.onchange = () => { addFiles([...input.files]); input.value = ""; };
 ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
 ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
 drop.addEventListener("drop", e => addFiles([...e.dataTransfer.files]));
+// arquivos soltos em qualquer lugar da página também entram na fila
+const dropAll = $("#dropAll"); let dragDepth = 0;
+const hasFiles = e => e.dataTransfer && [...(e.dataTransfer.types || [])].includes("Files");
+const canDrop = () => !document.body.classList.contains("gated") && $("#preview").hidden;
+document.addEventListener("dragenter", e => { if (!hasFiles(e) || !canDrop()) return; dragDepth++; dropAll.hidden = false; });
+document.addEventListener("dragleave", e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) dropAll.hidden = true; });
 document.addEventListener("dragover", e => e.preventDefault());
-document.addEventListener("drop", e => e.preventDefault());
+document.addEventListener("drop", e => {
+  e.preventDefault(); dragDepth = 0; dropAll.hidden = true;
+  if (e.defaultPrevented && drop.contains(e.target)) return;
+  if (hasFiles(e) && canDrop() && !drop.contains(e.target)) addFiles([...e.dataTransfer.files]);
+});
 })();

@@ -193,6 +193,12 @@ p.verso{text-indent:0;text-align:left;margin:.8em 0 .8em 1.6em}
 table{border-collapse:collapse;margin:1em auto;font-size:.9em}
 td{border:1px solid #888;padding:.25em .5em;text-align:left;vertical-align:top}
 a{color:inherit}
+.sumario h1{text-align:center;margin:1em 0 1.2em}
+.sumario ol{list-style:none;margin:0;padding:0}
+.sumario li{margin:0 0 .55em;text-indent:0}
+.sumario li ol{margin:.5em 0 .8em 1.4em}
+.sumario .parte-item > a{font-weight:bold}
+.sumario a{text-decoration:none;color:inherit}
 .parte h1{font-size:2em;text-align:center;margin-top:30%}
 .title{text-align:center;margin-top:30%}.title h1{font-size:2em;text-align:center}.title p{text-indent:0;text-align:center;font-style:italic}`);
 
@@ -261,6 +267,11 @@ a{color:inherit}
   for (const [fn, doc] of chapterDocs) z.file("OEBPS/text/" + fn, doc
     .replace(/<a href="\uE00D([^\uE00D]*)\uE00D">([\s\S]*?)<\/a>/g, (m, l, inner) => pageAt.has(l) ? `<a href="${pageAt.get(l)}">${inner}</a>` : inner));
 
+  // sumário no começo do livro, como nos ebooks de loja (o do menu do leitor continua no nav.xhtml)
+  const tocPage = extra.tocPage !== false && files.length >= 3;
+  if (tocPage) z.file("OEBPS/text/sumario.xhtml", xhtml(NAV_T[0], `<nav class="sumario" aria-labelledby="sumario-t"><h1 id="sumario-t">${NAV_T[0]}</h1><ol>
+${tocTree(files).map(t => `<li${t.f.part ? ' class="parte-item"' : ""}><a href="${t.f.fn}">${esc(t.f.title)}</a>${t.kids.length ? `<ol>\n${t.kids.map(k => `<li><a href="${k.fn}">${esc(k.title)}</a></li>`).join("\n")}\n</ol>` : ""}</li>`).join("\n")}
+</ol></nav>`));
   z.file("OEBPS/nav.xhtml", `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}">
@@ -299,12 +310,14 @@ ${cover ? `<meta name="cover" content="${cover.id}"/>` : ""}
 <item id="css" href="style.css" media-type="text/css"/>
 ${cover ? "" : `<item id="titlepage" href="text/titlepage.xhtml" media-type="application/xhtml+xml"/>`}
 ${coverPage ? `<item id="coverpage" href="text/cover.xhtml" media-type="application/xhtml+xml"/>` : ""}
+${tocPage ? `<item id="sumario" href="text/sumario.xhtml" media-type="application/xhtml+xml"/>` : ""}
 ${images.map(im => `<item id="${im.id}" href="${im.href}" media-type="image/jpeg"${cover && im.id === cover.id ? ` properties="cover-image"` : ""}/>`).join("\n")}
 ${files.map((f, i) => `<item id="c${i + 1}" href="text/${f.fn}" media-type="application/xhtml+xml"/>`).join("\n")}
 </manifest>
 <spine toc="ncx">
 ${cover ? "" : `<itemref idref="titlepage"/>`}
 ${coverPage ? `<itemref idref="coverpage"/>` : ""}
+${tocPage ? `<itemref idref="sumario"/>` : ""}
 ${files.map((f, i) => `<itemref idref="c${i + 1}"/>`).join("\n")}
 </spine>
 </package>`);

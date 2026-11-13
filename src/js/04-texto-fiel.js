@@ -121,9 +121,12 @@ async function ligaturePass(ol, page, state){
 let WORDS = null;
 async function loadWordList(){
   if (WORDS) return WORDS;
+  // no site a lista vem num arquivo à parte, baixado só na primeira conversão; no artefato ela vem dentro da página
   const el = document.getElementById("pt-words");
-  if (!el) return null;
-  const bin = atob(el.textContent.trim()), u = new Uint8Array(bin.length);
+  let b64 = el ? el.textContent : null;
+  if (!b64) { try { const r = await fetch("dados/pt-words.b64?v=" + VERSION); if (r.ok) b64 = await r.text(); } catch {} }
+  if (!b64) return null;
+  const bin = atob(b64.trim()), u = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
   const txt = await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
   WORDS = new Set(txt.split("\n"));
@@ -228,10 +231,13 @@ function respaceItems(items, gs, hint){
     const str = it.str0;
     if (!str || !str.trim()) { if (str) pendHint = true; continue; }
     // trecho novo na mesma linha, afastado do anterior: também conta como separação
+    let wide = false;
     if (prevItem) {
       const size = Math.hypot(it.transform[2], it.transform[3]) || it.height || 10;
       const end = prevItem.transform[4] + (prevItem.width || 0);
       if (Math.abs(it.transform[5] - prevItem.transform[5]) < size * 0.5 && it.transform[4] - end > size * 0.15) pendHint = true;
+      // vão largo (célula de tabela, coluna): é separação de verdade, mesmo sem caractere de espaço
+      if (Math.abs(it.transform[5] - prevItem.transform[5]) < size * 0.5 && it.transform[4] - end > size * 1.0) wide = true;
       if (/\s$/.test(prevItem.str0)) pendHint = true;
     }
     let out = "", prevIdx = -1, hadSpace = pendHint && !!prevItem;
@@ -244,6 +250,7 @@ function respaceItems(items, gs, hint){
       for (let j = p, end = Math.min(gs.keys.length, p + 60); j < end; j++) if (gs.keys[j] === k) { q = j; break; }
       if (q >= 0) p = q + 1;
       if (q >= 0 && hadSpace && hint) hint[q] = 1;
+      if (q >= 0 && wide) { gs.spaceBefore[q] = 1; wide = false; }
       if (out) {
         const sp = q >= 0 && prevIdx >= 0 && q > prevIdx ? streamSpace(gs, prevIdx, q) : hadSpace;
         if (sp) out += " ";

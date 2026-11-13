@@ -16,7 +16,8 @@ Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capí
 - **Vários formatos.** Além de PDF e EPUB, abre DOCX, TXT, HTML, Markdown, FB2, MOBI/AZW3 sem proteção e CBZ.
 - **PDFs difíceis.** Usa o sumário interno do PDF, lê duas colunas na ordem certa e mantém tabelas, listas, links e versos.
 - **Correção na prévia.** Clique num parágrafo para reescrever; mude a ordem dos capítulos; desfaça a última alteração.
-- **Mais:** KEPUB para Kobo, imagens menores ou em tons de cinza, descrição das imagens, capa e sinopse da internet, notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
+- **Pronto para a biblioteca.** Capa com título e autor quando o PDF não tem uma, página de sumário no começo do livro, editora, ano e ISBN, e arquivo com o nome “Autor - Título.epub”.
+- **Mais:** livro de exemplo para experimentar, tempo restante e aviso quando a conversão termina, busca e ordem na estante, KEPUB para Kobo, imagens menores ou em tons de cinza, descrição das imagens, capa e sinopse da internet, notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
 
 | Prévia com o sumário | Capítulos e partes |
 | --- | --- |
@@ -48,8 +49,9 @@ src/index.html        página (HTML) com os marcadores do build
 src/style.css         estilos
 src/js/NN-*.js        módulos, na ordem do número (leitura do PDF, DOCX, EPUB, fila, prévia…)
 src/sw.js             service worker (app instalável e sem internet)
-src/data/             lista de palavras do português
-tools/build.mjs       monta index.html e sw.js na raiz
+src/data/             lista de palavras do português e traduções da interface
+tools/build.mjs       monta index.html, sw.js e dados/ na raiz (e dist/artefato.html, tudo num arquivo só)
+tools/gerar-corpus.mjs gera os PDFs de tests/corpus e o livro de exemplo
 tests/                testes de ponta a ponta (Playwright) e arquivos de teste
 ```
 
@@ -60,7 +62,7 @@ npm run build                                # gera index.html e sw.js
 npm test                                     # converte os arquivos de tests/fixtures e confere tudo
 ```
 
-Os testes abrem o app num Chromium, convertem os PDFs de `tests/fixtures` e conferem o sumário, o texto, os erros, a acessibilidade e o teclado. Com `EPUBCHECK_JAR` apontando para o EPUBCheck, cada EPUB gerado também é validado. Os arquivos de teste são gerados por `tools/gerar-fixtures.py`, com texto escrito só para isso.
+Os testes abrem o app num Chromium, convertem os PDFs de `tests/fixtures` e conferem o sumário, o texto, os erros, a acessibilidade e o teclado. Com `EPUBCHECK_JAR` apontando para o EPUBCheck, cada EPUB gerado também é validado. Os arquivos de teste são gerados por `tools/gerar-fixtures.py`, com texto escrito só para isso. Os PDFs de `tests/corpus` saem de programas reais (o Chromium, como “Salvar como PDF”, e o LibreOffice exportando um DOCX), com hifenização, cabeçalho, número de página, colunas, tabela, listas e versos; `npm run corpus` gera de novo.
 
 A cada push, o GitHub Actions confere se o `index.html` está em dia com `src/`, roda os testes e o EPUBCheck e, se tudo passar, publica o site.
 

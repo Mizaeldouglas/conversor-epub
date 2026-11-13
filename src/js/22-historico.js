@@ -60,6 +60,16 @@ async function renderHistory(){
   if (on) for (const d of drv.list) if (!seen.has(d.hid)) items.push({ d, date: d.date });
   items.sort((a, b) => b.date - a.date);
   sec.hidden = !items.length;
+  // busca e ordem aparecem quando a estante passa de 6 livros
+  const tools = $("#shelfTools"), total = items.length;
+  tools.hidden = total <= 6;
+  const fold = t => String(t || "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+  const find = tools.hidden ? "" : fold($("#shelfFind").value.trim()), sort = tools.hidden ? "date" : $("#shelfSort").value;
+  const tOf = it => it.r ? it.r.title : it.d.title, aOf = it => (it.r ? it.r.author : it.d.author) || "";
+  if (find) items.splice(0, items.length, ...items.filter(it => fold(tOf(it) + " " + aOf(it)).includes(find)));
+  const coll = new Intl.Collator(uiLocale(), { sensitivity: "base", numeric: true });
+  if (sort === "title") items.sort((a, b) => coll.compare(tOf(a), tOf(b)));
+  if (sort === "author") items.sort((a, b) => coll.compare(aOf(a) || "\uffff", aOf(b) || "\uffff") || coll.compare(tOf(a), tOf(b)));
   $("#shelfCount").textContent = items.length ? String(items.length) : "";
   const localOnly = on ? local.filter(r => !inDrive.has(r.id)).length : 0;
   $("#driveAllBtn").hidden = !localOnly;
@@ -69,6 +79,7 @@ async function renderHistory(){
     : DRIVE_ON ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
     : "Os últimos 12 livros ficam guardados neste navegador.";
   box.innerHTML = "";
+  if (!items.length && total) { const p = document.createElement("p"); p.className = "shelf-empty"; p.textContent = "Nenhum livro com esse título ou autor."; box.appendChild(p); }
   for (const it of items) {
     const r = it.r, d = it.d, title = r ? r.title : d.title, author = r ? r.author : d.author, size = r ? r.size : d.size;
     const el = document.createElement("div"); el.className = "book";
@@ -100,3 +111,6 @@ async function renderHistory(){
     box.appendChild(el);
   }
 }
+
+$("#shelfFind").addEventListener("input", () => renderHistory());
+$("#shelfSort").addEventListener("change", () => renderHistory());

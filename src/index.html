@@ -146,7 +146,7 @@
       <li><b>O acesso é mínimo.</b> O Lombada só enxerga os arquivos que ele mesmo criou. Não vê o resto do seu Drive, seus e-mails nem seus contatos.</li>
       <li><b>Você sai quando quiser.</b> Ao sair, a conexão é desfeita e os livros continuam no seu Drive.</li>
     </ul>
-    <p class="lp-more">Os detalhes estão na <a href="privacidade.html">Política de Privacidade</a>.</p>
+    <p class="lp-more">Os detalhes estão na <a href="privacidade.html">Política de Privacidade</a> e nos <a href="termos.html">Termos de Uso</a>.</p>
     <button class="btn lp-login" data-login><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Entrar com Google</span></button>
   </section>
 </main>
@@ -218,7 +218,7 @@
           <div class="grp-body">
             <label class="sw-row" for="headers"><span class="lbl">Tirar cabeçalhos e rodapés</span><input class="sw" id="headers" type="checkbox" checked><span class="desc">Nome do livro, do capítulo e número da página repetidos em toda página.</span></label>
             <label class="sw-row" for="notes"><span class="lbl">Notas de rodapé clicáveis</span><input class="sw" id="notes" type="checkbox" checked><span class="desc">Abrem numa janelinha no Kindle.</span></label>
-            <label class="sw-row" for="cover"><span class="lbl">1ª página como capa</span><input class="sw" id="cover" type="checkbox" checked><span class="desc">Dá para trocar depois em “Editar livro”.</span></label>
+            <label class="sw-row" for="cover"><span class="lbl">1ª página como capa</span><input class="sw" id="cover" type="checkbox" checked><span class="desc">Desligado, o livro ganha uma capa com o título e o autor. Dá para trocar depois em “Editar livro”.</span></label>
             <label class="sw-row" for="ocr"><span class="lbl">OCR em páginas escaneadas</span><input class="sw" id="ocr" type="checkbox"><span class="desc">Transforma página que é só imagem em texto. Mais lento.</span></label>
             <label class="sw-row" for="shownums"><span class="lbl">Número da página no texto</span><input class="sw" id="shownums" type="checkbox"><span class="desc">Mostra “[p. 12]” no meio do texto, útil no Kindle.</span></label>
           </div>
@@ -237,6 +237,7 @@
               <select id="lookIndent"><option value="indent" selected>Recuo na primeira linha</option><option value="space">Sem recuo, com espaço entre eles</option></select></label>
             <label class="field" for="images"><span>Imagens</span>
               <select id="images"><option value="orig" selected>Como no original</option><option value="small">Menores (arquivo mais leve)</option><option value="gray">Menores e em tons de cinza</option></select></label>
+            <label class="sw-row" for="tocpage"><span class="lbl">Sumário no começo do livro</span><input class="sw" id="tocpage" type="checkbox" checked><span class="desc">Uma página com os capítulos, logo depois da capa.</span></label>
             <label class="sw-row" for="lookJustify"><span class="lbl">Texto justificado</span><input class="sw" id="lookJustify" type="checkbox" checked></label>
             <p class="hint">O Kindle pode trocar fonte e espaçamento pelas configurações dele; isto vale como padrão do livro.</p>
           </div>
@@ -281,6 +282,7 @@
             <li><span class="n">2</span><b>Confira e ajuste</b><span>Veja a prévia, troque a capa e acerte os capítulos.</span></li>
             <li><span class="n">3</span><b>Leve para o Kindle</b><span>Baixe o EPUB ou mande direto para o aparelho.</span></li>
           </ol>
+          <button class="btn ghost sm sample" id="sampleBtn" hidden>Experimentar com um livro de exemplo</button>
         </div>
       </div>
     </section>
@@ -290,6 +292,10 @@
         <h2 id="estanteT">Sua estante <span class="count" id="shelfCount"></span></h2>
         <span class="sec-note" id="shelfNote">Os últimos 12 livros ficam guardados neste navegador.</span>
         <a class="btn ghost sm" id="driveOpen" href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener" hidden><svg width="16" height="16" viewBox="0 0 87.3 78" aria-hidden="true"><path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/><path d="M43.65 25 29.9 1.2c-1.35.8-2.5 1.9-3.3 3.3L1.2 48.5A9 9 0 0 0 0 53h27.5z" fill="#00ac47"/><path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z" fill="#ea4335"/><path d="M43.65 25 57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/><path d="M59.8 53H27.5L13.75 76.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/><path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3L43.65 25 59.8 53h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/></svg>Abrir no Google Drive</a>
+        <div class="shelf-tools" id="shelfTools" hidden>
+          <input type="search" id="shelfFind" placeholder="Buscar por título ou autor" aria-label="Buscar na estante" autocomplete="off">
+          <select id="shelfSort" aria-label="Ordem da estante"><option value="date">Mais recentes</option><option value="title">Título (A–Z)</option><option value="author">Autor (A–Z)</option></select>
+        </div>
         <button class="btn ghost sm" id="driveAllBtn" hidden>Guardar no Drive os livros deste navegador (<span id="driveAllN">0</span>)</button>
       </div>
       <div class="shelf" id="history"></div>
@@ -343,8 +349,10 @@
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">@@VERSION@@</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">@@VERSION@@</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a>, a <a href="#privacidade" data-open="privacidade">política de privacidade</a> e os <a href="termos.html">termos de uso</a>.</p>
 </footer>
+
+<div class="dropall" id="dropAll" hidden aria-hidden="true"><div><svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Solte para converter</b></div></div>
 
 <div class="updatebar" id="updateBar" hidden role="status">
   <span>Saiu uma versão nova do Lombada.</span>
@@ -384,8 +392,7 @@
 <div class="toast" id="toast" hidden role="status"></div>
 <div class="sr-only" id="sr" aria-live="polite"></div>
 
-<script type="application/json" id="i18n-data">@@I18N@@</script>
-<script type="text/plain" id="pt-words">@@WORDS@@</script>
+@@DATA@@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>

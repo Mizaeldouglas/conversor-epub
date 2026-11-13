@@ -11,13 +11,16 @@ function editPanelHtml(job){
           <label class="btn ghost sm filebtn">Trocar capa<input type="file" accept="image/*" data-e="coverfile" hidden></label>
           ${job.src.cover ? `<button class="linkbtn" data-e="coverpdf">${job.fmt || job.fromEpub ? "Capa original" : "1ª página do PDF"}</button>` : ""}
           ${job.file instanceof Blob && !job.merged && job.pages > 1 ? `<form class="coverpg" data-e="coverpg"><label>Página <input type="number" min="1" max="${job.pages}" inputmode="numeric" required aria-label="Número da página do PDF para a capa"></label><button class="btn ghost sm">Usar</button></form>` : ""}
-          <button class="linkbtn" data-e="coveroff">Sem capa</button></div>` : ""}
+          <button class="linkbtn" data-e="coverauto">Capa com o título</button><button class="linkbtn" data-e="coveroff">Sem capa</button></div>` : ""}
         <div class="edit-fields">
           <label>Título <input type="text" data-e="title" autocomplete="off"></label>
           <label>Autor <input type="text" data-e="author" autocomplete="off" placeholder="Opcional"></label>
           <div class="two"><label>Série <input type="text" data-e="series" autocomplete="off" placeholder="Ex.: A Saga de Zephyrus"></label>
           <label>Nº <input type="text" data-e="seriesIndex" inputmode="decimal" autocomplete="off" placeholder="1"></label></div>
           <label>Gênero / assunto <input type="text" data-e="subject" autocomplete="off" placeholder="Ex.: Fantasia, Aventura"></label>
+          <div class="three"><label>Editora <input type="text" data-e="publisher" autocomplete="off" placeholder="Opcional"></label>
+          <label>Ano <input type="text" data-e="year" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="2024"></label>
+          <label>ISBN <input type="text" data-e="isbn" inputmode="numeric" autocomplete="off" placeholder="978…"></label></div>
           <label>Sinopse <textarea data-e="description" rows="3" placeholder="Opcional"></textarea></label>
         </div>
       </div>
@@ -149,7 +152,8 @@ function render(job){
     </div>
     <div class="row-status">
       ${busy ? `<div class="bar${pct == null ? " indet" : ""}" role="progressbar" aria-label="Andamento"${pct != null ? ` aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"` : ""}><span${pct != null ? ` style="width:${pct}%"` : ""}></span></div>
-        <div class="progress-txt">${esc(job.progress || "")}</div>` : ""}
+        <div class="progress-txt">${esc(job.progress || "")}</div>${job.eta ? `<div class="eta">${esc(job.eta)}</div>` : ""}
+        ${"Notification" in window && Notification.permission === "default" && job.pages > 40 ? `<button class="linkbtn" data-a="notify">Avisar quando terminar</button>` : ""}` : ""}
       ${job.epub && !job.busy ? "" : `<ol class="steps" aria-label="Etapas">${steps}</ol>`}
     </div>
     <div class="row-extra">
@@ -178,6 +182,7 @@ function render(job){
   on('[data-a="cancel"]', () => cancelJob(job));
   on('[data-a="remove"]', () => removeJob(job));
   on('[data-a="driveRetry"]', () => driveSaveJob(job));
+  on('[data-a="notify"]', async () => { try { await Notification.requestPermission(); } catch {} render(job); });
   on('[data-a="driveLogin"]', () => driveLogin());
   on('[data-a="ocr"]', () => { job.forceOcr = true; retryPdf(job); });
   on('[data-a="reopen"]', () => { job.kind = "pdf"; job.fromEpub = true; job.stage = "pdf"; job.verify = null; job.epub = null; job.draft = null; job.editOpen = true; retryPdf(job); });
@@ -205,6 +210,8 @@ function paintProgress(job){
   const pct = Math.max(3, Math.round(job.pct * 100));
   bar.firstElementChild.style.width = pct + "%"; bar.setAttribute("aria-valuenow", pct);
   row.querySelector(".progress-txt").textContent = job.progress || "";
+  const eta = row.querySelector(".eta");
+  if (eta) eta.textContent = job.eta || ""; else if (job.eta) render(job);
 }
 function updateQueueButtons(){
   $("#allZip").hidden = jobs.filter(j => j.epub).length < 2;

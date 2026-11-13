@@ -6,7 +6,7 @@ const STAGES = {
 const fmtN = n => n.toLocaleString("pt-BR");
 const fileNameOf = job => job.kind === "epub"
   ? safeFile(job.title || baseName(job.file.name)) + " (com páginas).epub"
-  : safeFile(job.title + (job.author ? " - " + job.author : "")) + ".epub";
+  : safeFile((job.author ? job.author + " - " : "") + job.title) + ".epub";   // "Autor - Título", como o Kindle e o Calibre organizam
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const MARK_SPLIT = /(\uE000[^\uE001]*\uE001|\uE002[^\uE003]*\uE003|[\uE004-\uE008]|\uE009[^\uE00A]*\uE00A|\uE00B)/;
 // troca texto só fora dos marcadores (página, nota, itálico)
@@ -140,3 +140,4 @@ function moveChapter(job, bi, dir){
   B.splice(start, end - start, ...second, ...first);
   return true;
 }
+window.__app.fileNameOf = fileNameOf;

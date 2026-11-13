@@ -1,5 +1,20 @@
 # Novidades
 
+## 3.7.0 — 13 nov 2026
+
+- Livro de exemplo: um botão na fila converte “O Farol Apagado” para quem quer ver o Lombada funcionando antes de usar um arquivo seu.
+- Capa automática com o título e o autor quando o livro não tem capa, e o botão “Capa com o título” para trocar a capa por ela.
+- Página de sumário no começo do livro, logo depois da capa (opção “Sumário no começo do livro”).
+- Tempo restante na conversão e “Avisar quando terminar”, que manda uma notificação quando o EPUB fica pronto com a aba em segundo plano.
+- O arquivo baixado se chama “Autor - Título.epub”.
+- Editora, ano e ISBN nos dados do livro.
+- Dá para soltar o arquivo em qualquer lugar da página.
+- Busca por título ou autor e ordem (recentes, título, autor) na estante, quando ela passa de 6 livros.
+- Página mais leve: a lista de palavras e as traduções são baixadas só quando precisam (o `index.html` caiu de 660 KB para 350 KB).
+- Instalação com prints do app, página de Termos de Uso e página 404 própria.
+- PDFs reais nos testes, feitos pelo Chromium e pelo LibreOffice. Eles mostraram e já corrigidos: hífen do Chromium (U+2010) que não juntava a palavra, cabeçalho de tabela com células em negrito, revista em duas colunas lida como tabela, versos numa página só de poema, itens numerados partidos ou grudados no parágrafo seguinte e marcadores de lista desenhados como figura.
+- O idioma escolhido fica guardado mesmo se a página for recarregada logo em seguida.
+
 ## 3.6.1 — 13 nov 2026
 
 - Página de entrada: o print do app deu lugar a uma ilustração de uma prateleira de livros com um leitor de e-book.

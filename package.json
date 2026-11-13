@@ -1,6 +1,6 @@
 {
   "name": "conversor-epub",
-  "version": "3.6.1",
+  "version": "3.7.0",
   "private": true,
   "description": "Lombada: conversor de PDF para EPUB (Kindle) que roda inteiro no navegador.",
   "license": "MIT",
@@ -12,6 +12,7 @@
     "fixtures": "python3 tools/gerar-fixtures.py",
     "og": "node tools/og.mjs",
     "screenshots": "node tools/screenshots.mjs",
+    "corpus": "node tools/gerar-corpus.mjs",
     "icones": "node tools/icones.mjs"
   },
   "devDependencies": {

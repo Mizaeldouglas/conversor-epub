@@ -23,7 +23,7 @@ async function openPreview(blob, title, job, opt = {}){
     const docs = [];
     for (const r of opf.getElementsByTagNameNS("*", "itemref")) {
       const m = man.get(r.getAttribute("idref"));
-      if (!m || !/html/.test(m.type)) continue;
+      if (!m || !/html/.test(m.type) || /(^|\/)sumario\.xhtml$/.test(m.href)) continue;
       const path = resolvePath(opfDir, decodeURIComponent(m.href.split("#")[0]));
       const f = z.file(path); if (!f) continue;
       const s = await f.async("string");

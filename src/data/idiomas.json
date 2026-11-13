@@ -1974,5 +1974,113 @@
 "texto igual ao original": [
 "text matches the original",
 "texto igual al original"
+],
+"e nos": [
+"and the",
+"y en los"
+],
+"Termos de Uso": [
+"Terms of Use (in Portuguese)",
+"Términos de Uso (en portugués)"
+],
+"Desligado, o livro ganha uma capa com o título e o autor.": [
+"When off, the book gets a cover with the title and author.",
+"Desactivado, el libro recibe una portada con el título y el autor."
+],
+"Sumário no começo do livro": [
+"Table of contents at the start of the book",
+"Índice al comienzo del libro"
+],
+"Uma página com os capítulos, logo depois da capa.": [
+"A page listing the chapters, right after the cover.",
+"Una página con los capítulos, justo después de la portada."
+],
+"Experimentar com um livro de exemplo": [
+"Try it with a sample book",
+"Probar con un libro de ejemplo"
+],
+"Buscar por título ou autor": [
+"Search by title or author",
+"Buscar por título o autor"
+],
+"Buscar na estante": [
+"Search the shelf",
+"Buscar en la estantería"
+],
+"Ordem da estante": [
+"Shelf order",
+"Orden de la estantería"
+],
+"Mais recentes": [
+"Most recent",
+"Más recientes"
+],
+"Título (A–Z)": [
+"Title (A–Z)",
+"Título (A–Z)"
+],
+"Autor (A–Z)": [
+"Author (A–Z)",
+"Autor (A–Z)"
+],
+"e os": [
+"and the",
+"y los"
+],
+"termos de uso": [
+"terms of use",
+"términos de uso"
+],
+"Solte para converter": [
+"Drop to convert",
+"Suelta para convertir"
+],
+"Capa com o título": [
+"Cover with the title",
+"Portada con el título"
+],
+"Editora": [
+"Publisher",
+"Editorial"
+],
+"Ano": [
+"Year",
+"Año"
+],
+"ISBN": [
+"ISBN",
+"ISBN"
+],
+"Avisar quando terminar": [
+"Notify me when done",
+"Avisar al terminar"
+],
+"menos de 1 minuto": [
+"less than 1 minute",
+"menos de 1 minuto"
+],
+"cerca de 1 minuto": [
+"about 1 minute",
+"cerca de 1 minuto"
+],
+"cerca de {0} minutos": [
+"about {0} minutes",
+"cerca de {0} minutos"
+],
+"Nenhum livro com esse título ou autor.": [
+"No book with that title or author.",
+"Ningún libro con ese título o autor."
+],
+"Volte ao Lombada para baixar ou mandar ao Kindle.": [
+"Go back to Lombada to download it or send it to your Kindle.",
+"Vuelve a Lombada para descargarlo o enviarlo al Kindle."
+],
+"Não deu para abrir o livro de exemplo agora.": [
+"Couldn't open the sample book right now.",
+"No se pudo abrir el libro de ejemplo ahora."
+],
+"Capa automática com o título": [
+"Automatic cover with the title",
+"Portada automática con el título"
 ]
 }

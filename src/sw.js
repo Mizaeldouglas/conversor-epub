@@ -3,7 +3,7 @@ const VERSION = "@@VERSION@@";
 const CACHE = "conversor-epub-" + VERSION;
 const SHARE = "conversor-epub-compartilhado";
 const CORE = [
-  "./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
+  "./", "./index.html", "./dados/pt-words.b64?v=" + VERSION, "./manifest.webmanifest", "./icon-192.png", "./icon-512.png",
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"

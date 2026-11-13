@@ -1,7 +1,7 @@
 // Monta o index.html publicado a partir de src/ (HTML, CSS, módulos JS e lista de palavras).
-// Uso: node tools/build.mjs        -> escreve index.html e sw.js na raiz
+// Uso: node tools/build.mjs        -> escreve index.html, sw.js e dados/ na raiz, e dist/artefato.html (tudo num arquivo só)
 //      node tools/build.mjs --check -> falha se os arquivos da raiz estiverem desatualizados
-import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
@@ -30,19 +30,26 @@ const put = (s, key, val) => { if (!s.includes(key)) throw new Error("marcador a
 let html = src("index.html");
 html = put(html, "/* @@CSS@@ */", src("style.css").trimEnd());
 html = put(html, "/* @@JS@@ */", js);
-html = put(html, "@@WORDS@@", src("data/pt-words.b64").trim());
-html = put(html, "@@I18N@@", JSON.stringify(JSON.parse(src("data/idiomas.json"))).replace(/</g, "\\u003c"));
+const words = src("data/pt-words.b64").trim(), i18n = JSON.stringify(JSON.parse(src("data/idiomas.json")));
+// o site baixa a lista de palavras e as traduções só quando precisa; o artefato (um arquivo só) leva tudo dentro
+const inline = `<script type="application/json" id="i18n-data">${i18n.replace(/</g, "\\u003c")}</script>\n<script type="text/plain" id="pt-words">${words}</script>`;
+const artifactHtml = put(html, "@@DATA@@", inline);
+html = put(html, "@@DATA@@", "");
 html = html.replaceAll("@@GCLIENT@@", googleClientId).replaceAll("@@SITE@@", SITE).replaceAll("@@FAVICON@@", encodeURIComponent(favicon)).replaceAll("@@VERSION@@", version);
-if (/@@[A-Z]+@@/.test(html)) throw new Error("marcador não substituído: " + html.match(/@@[A-Z]+@@/)[0]);
+const fill = h => h.replaceAll("@@GCLIENT@@", googleClientId).replaceAll("@@SITE@@", SITE).replaceAll("@@FAVICON@@", encodeURIComponent(favicon)).replaceAll("@@VERSION@@", version);
+const artifact = fill(artifactHtml);
+for (const h of [html, artifact]) if (/@@[A-Z]+@@/.test(h)) throw new Error("marcador não substituído: " + h.match(/@@[A-Z]+@@/)[0]);
 
 const sw = src("sw.js").replaceAll("@@VERSION@@", version);
-const out = { "index.html": html, "sw.js": sw };
+const out = { "index.html": html, "sw.js": sw, "dados/pt-words.b64": words + "\n", "dados/idiomas.json": i18n + "\n" };
 
 if (process.argv.includes("--check")) {
   const stale = Object.keys(out).filter(f => { try { return readFileSync(join(root, f), "utf8") !== out[f]; } catch { return true; } });
   if (stale.length) { console.error("Desatualizado: " + stale.join(", ") + ". Rode: npm run build"); process.exit(1); }
   console.log("index.html e sw.js em dia (v" + version + ")");
 } else {
+  mkdirSync(join(root, "dados"), { recursive: true }); mkdirSync(join(root, "dist"), { recursive: true });
   for (const [f, s] of Object.entries(out)) writeFileSync(join(root, f), s);
-  console.log(`index.html (${Math.round(html.length / 1024)} KB, ${files.length} módulos) e sw.js — v${version}`);
+  writeFileSync(join(root, "dist/artefato.html"), artifact);
+  console.log(`index.html (${Math.round(html.length / 1024)} KB, ${files.length} módulos), sw.js e dados/ — v${version}; artefato em dist/ (${Math.round(artifact.length / 1024)} KB)`);
 }

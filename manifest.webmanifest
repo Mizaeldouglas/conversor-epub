@@ -1,7 +1,7 @@
 {
   "name": "Lombada: PDF para EPUB",
   "short_name": "Lombada",
-  "description": "Converte PDF em EPUB para o Kindle, no próprio navegador.",
+  "description": "Converte PDF, DOCX, MOBI e outros formatos em EPUB para o Kindle, com capítulos, sumário e o texto conferido palavra por palavra. A conversão é feita no navegador.",
   "lang": "pt-BR",
   "start_url": "./",
   "scope": "./",
@@ -47,5 +47,34 @@
         }
       ]
     }
-  }
+  },
+  "id": "./",
+  "categories": [
+    "books",
+    "productivity",
+    "utilities"
+  ],
+  "screenshots": [
+    {
+      "src": "docs/tela.png",
+      "sizes": "1280x860",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Livro convertido, conferido e pronto para o Kindle"
+    },
+    {
+      "src": "docs/previa.png",
+      "sizes": "1280x860",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Prévia do EPUB com o sumário"
+    },
+    {
+      "src": "docs/celular.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Lombada no celular"
+    }
+  ]
 }

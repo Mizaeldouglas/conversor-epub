@@ -432,6 +432,9 @@ async function epubToBlocks(file){
     let d = new DOMParser().parseFromString(s, "application/xhtml+xml");
     if (hasParseError(d)) d = new DOMParser().parseFromString(s, "text/html");
     const body = d.getElementsByTagNameNS("*", "body")[0] || d.documentElement;
+    // página de sumário (do Lombada ou de outro programa): os capítulos já são refeitos
+    const links = [...body.querySelectorAll("a[href]")], linkTxt = links.reduce((s, a) => s + a.textContent.trim().length, 0), allTxt = body.textContent.replace(/\s+/g, "").length;
+    if (body.querySelector('nav, [epub\\:type~="toc"], .sumario') || (links.length >= 3 && linkTxt >= allTxt * 0.7)) continue;
     const imgs = body.querySelectorAll("img, image");
     // página que é só a capa
     if (imgs.length === 1 && !body.textContent.trim() && (/cover|capa/i.test(m.href) || body.querySelector("[epub\\:type~='cover'], .cover"))) {

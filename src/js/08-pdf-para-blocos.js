@@ -57,7 +57,7 @@ function findGutter(items, pageW){
     for (let k = Math.max(0, Math.floor(x / BIN)), e = Math.min(n - 1, Math.floor((x + w) / BIN)); k <= e; k++) cover[k]++;
     ys.add(Math.round(i.transform[5]));
   }
-  const thr = Math.max(1, ys.size * 0.04);
+  const thr = Math.max(2, ys.size * 0.08);
   let best = null, run = 0;
   for (let k = Math.floor(n * 0.3); k <= Math.ceil(n * 0.7); k++) {
     if (cover[k] <= thr) { run++; if (!best || run > best.len) best = { end: k, len: run }; } else run = 0;
@@ -216,7 +216,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
           else sp = (gs.real && it.firstIdx >= 0 && !!gs.spaceBefore[it.firstIdx]) || (end !== null && it.x - end > it.size * (gs.real ? 0.6 : 0.25));
           if (sp) text += " ";
           // vão bem largo entre trechos da mesma linha: outra célula (tabela)
-          if (end !== null && it.x - end > it.size * 2.2) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + CELL; curSt = 0; curLk = ""; cellX.push(it.x); }
+          if (end !== null && it.x - end > it.size * 1.25) { text = styleSwitch(text, curSt, 0) + (curLk ? LK_OFF : "") + CELL; curSt = 0; curLk = ""; cellX.push(it.x); }
         }
         if (!cellX.length) cellX.push(it.x);
         const sup = opts.notes && base && it !== base && it.size < base.size * 0.8 && it.y - base.y > base.size * 0.15
@@ -231,7 +231,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       }
       if (curSt) text = styleSwitch(text, curSt, 0);
       if (curLk) text += LK_OFF;
-      text = text.replace(/\s+/g, " ").trim().replace(/\uE004(\s*)\uE005|\uE006(\s*)\uE007/g, "$1$2");
+      text = text.replace(/\s+/g, " ").trim().replace(/\uE004(\s*)\uE005|\uE006(\s*)\uE007/g, "$1$2")
+        .replace(/[\u2010\u2011]/g, "-").replace(/\u00AD(?=[\uE004-\uE007\uE00B]*$)/, "-").replace(/\u00AD/g, "");
       let cells = null;
       if (text.includes(CELL)) { cells = text.split(CELL).map(t => t.trim()); if (cells.some(t => !plainOf(t).trim())) cells = null; text = text.replace(/\s*\uE00C\s*/g, " "); }
       if (!plainOf(text).trim()) continue;
@@ -400,6 +401,10 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   // versos: três ou mais linhas curtas e recuadas, bem mais estreitas que o texto
   {
     let run = [], vid = 0;
+    // margens do livro inteiro: numa página só de poema, a margem da própria página não diz nada
+    const bodyLines = lines.filter(l => Math.abs(l.size - body) < body * 0.12);
+    const pct = (arr, q) => { const v = arr.slice().sort((a, b) => a - b); return v.length ? v[Math.min(v.length - 1, Math.floor(v.length * q))] : 0; };
+    const bookRight = pct(bodyLines.map(l => l.x1), 0.9), bookLeft = pct(bodyLines.map(l => l.x0), 0.1);
     const flush = () => {
       if (run.length >= 3) {
         // mais estreito do que uma citação recuada dos dois lados seria: as linhas acabam cedo de propósito
@@ -407,7 +412,16 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
         // prosa quebra a linha onde acaba o espaço; verso quebra na pontuação ou abre cada linha com maiúscula
         const frac = re => run.filter(l => re.test(l.plain.trim())).length / run.length;
         const versey = frac(/[,;.!?:…—–]["”»')]?$/u) >= 0.6 || frac(/^["“«(]?\p{Lu}/u) >= 0.75;
-        if (g && versey && maxR < g.right - (minL - g.left) - body * 3 && run.every(l => l.x0 >= g.left + body * 1.2 && !l.olLevel && !/^[—–-]\s/.test(l.plain))) { vid++; for (const l of run) l.verse = vid; }
+        const clean = run.every(l => !l.olLevel && !/^[—–-]\s/.test(l.plain));
+        const onPage = g && maxR < g.right - (minL - g.left) - body * 3 && run.every(l => l.x0 >= g.left + body * 1.2);
+        // poema sozinho na página: as linhas acabam bem antes da margem direita do livro e começam recuadas em relação a ela
+        const inBook = bookRight > 0 && maxR < bookRight - body * 6 && minL >= bookLeft + body * 0.8 && run.length >= 4;
+        if (versey && clean && (onPage || inBook)) { vid++; for (const l of run) l.verse = vid; }
+        // lista cujo marcador o PDF desenhou como figura (o Chrome faz isso): linhas recuadas, alinhadas,
+        // de tamanhos variados e sem pontuação no fim viram itens
+        else if (g && clean && run.every(l => Math.abs(l.x0 - run[0].x0) < 2 && l.x0 >= g.left + body * 0.9 && l.x1 < g.right - body * 2)
+          && run.filter(l => l.x1 < maxR - body * 3).length >= (run.length - 1) * 0.5
+          && run.slice(0, -1).every(l => !/[.!?:;]["”»')]?$/u.test(l.plain.trim()))) for (const l of run) l.bulletItem = true;
       }
       run = [];
     };
@@ -468,8 +482,17 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       else { cur = { type: "verse", verse: l.verse, text: mark + l.text, page: l.page, last: l.page }; blocks.push(cur); }
       prev = { ...l, isHead: false }; continue;
     }
-    const isBul = BUL_RE.test(l.plain);
+    const isBul = BUL_RE.test(l.plain) || !!l.bulletItem;
+    if (l.bulletItem && !BUL_RE.test(l.plain)) l.text = "• " + l.text;
+    const numM = /^\(?(\d{1,2})[.)]\s+\S/.exec(l.plain), isNum = numM ? +numM[1] : null;
     let start = !cur || !prev || cur.type === "verse", sceneGap = false;
+    const near = !start && prev.page === l.page && prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 1.55;
+    // item numerado: o seguinte ("2.") abre outro bloco; linhas recuadas depois do número continuam o mesmo item
+    if (!start && cur.num != null && isNum === cur.num + 1) start = true;
+    // depois de um item que terminou com ponto, uma frase nova é outro parágrafo
+    else if (!start && cur.num != null && isNum == null && terminal.test(prev.text) && /^\p{Lu}/u.test(l.plain)) start = true;
+    else if (!start && cur.num != null && isNum == null && near && l.x0 > cur.x0 + body * 0.4 && l.x0 < cur.x0 + body * 4
+      && !(terminal.test(prev.text) && prev.x1 < g.right - body * 4)) { cur.text += " " + mark + l.text; cur.last = l.page; prev = { ...l, isHead: false }; continue; }
     // item de lista: as linhas seguintes, recuadas, continuam o mesmo item
     if (!start && cur.type === "li" && !isBul && prev.page === l.page && prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 1.55 && l.x0 > cur.x0 + body * 0.4) start = false;
     else if (isBul || (cur && cur.type === "li")) start = true;
@@ -489,7 +512,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     if (!start) cur.last = l.page;
     if (start) {
       if (sceneGap) blocks.push({ type: "scene", text: "", page: l.page, last: l.page });
-      cur = { type: isBul ? "li" : "p", text: mark + l.text, page: l.page, last: l.page, x0: l.x0 }; blocks.push(cur);
+      cur = { type: isBul ? "li" : "p", text: mark + l.text, page: l.page, last: l.page, x0: l.x0, num: isNum }; blocks.push(cur);
     } else {
       let [ja, jb] = joinParts(cur.text, l.text), pa = plainOf(ja), pb = plainOf(jb);
       // palavra composta quebrada com o hífen repetido na linha seguinte ("terças-" / "-feiras")

@@ -52,7 +52,7 @@ function bindEditPanel(job, row){
   const dr = job.draft ||= { heads: {} };
   const q = s => box.querySelector(s);
   const meta = job.meta || {};
-  for (const k of ["title", "author", "series", "seriesIndex", "subject", "description"]) {
+  for (const k of ["title", "author", "series", "seriesIndex", "subject", "description", "publisher", "year", "isbn"]) {
     const el = q(`[data-e="${k}"]`); if (!el) continue;
     el.value = dr[k] ?? (k === "title" ? job.title : k === "author" ? job.author : meta[k]) ?? "";
     el.oninput = () => { dr[k] = el.value; };
@@ -64,11 +64,13 @@ function bindEditPanel(job, row){
     if (on && blob) cv.querySelector("img").src = urlOf(blob);
     q('[data-e="coverfile"]').onchange = async e => {
       const f = e.target.files[0]; if (!f) return;
-      try { dr.cover = await imageToJpeg(f); dr.coverOn = true; render(job); } catch { toast("Não consegui abrir essa imagem."); }
+      try { dr.cover = await imageToJpeg(f); dr.coverOn = true; dr.coverAuto = false; render(job); } catch { toast("Não consegui abrir essa imagem."); }
     };
     const cp = q('[data-e="coverpdf"]');
-    if (cp) cp.onclick = () => { dr.cover = job.src.cover ? job.src.cover.blob : null; dr.coverOn = !!dr.cover; render(job); };
+    if (cp) cp.onclick = () => { dr.cover = job.src.cover ? job.src.cover.blob : null; dr.coverOn = !!dr.cover; dr.coverAuto = false; render(job); };
     q('[data-e="coveroff"]').onclick = () => { dr.coverOn = false; render(job); };
+    const ca = q('[data-e="coverauto"]');
+    if (ca) ca.onclick = async () => { dr.cover = await autoCover(dr.title ?? job.title, dr.author ?? job.author); dr.coverAuto = true; dr.coverOn = true; render(job); };
     const cpg = q('[data-e="coverpg"]');
     if (cpg) cpg.onsubmit = async e => {
       e.preventDefault();
@@ -190,9 +192,9 @@ function applyDraft(job){
   if (dr.title != null && dr.title.trim()) job.title = dr.title.trim();
   if (dr.author != null) job.author = dr.author.trim();
   const meta = job.meta ||= {};
-  for (const k of ["series", "seriesIndex", "subject", "description"]) if (dr[k] != null) meta[k] = dr[k].trim();
+  for (const k of ["series", "seriesIndex", "subject", "description", "publisher", "year", "isbn"]) if (dr[k] != null) meta[k] = dr[k].trim();
   if (job.kind === "epub") { job.titleOverride = job.title; job.authorOverride = job.author; return; }
-  if (dr.cover !== undefined) job.coverBlob = dr.cover;
+  if (dr.cover !== undefined) { job.coverBlob = dr.cover; job.coverAuto = !!dr.coverAuto; }
   if (dr.coverOn !== undefined) job.coverOn = dr.coverOn;
   if (!job.src) return;
   const B = job.src.blocks, ref = job.src.ref;
