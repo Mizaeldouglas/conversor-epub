@@ -94,8 +94,8 @@ function findTables(pageItems, p, pageH){
 }
 async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const pdf = await pdfjsLib.getDocument({ data: buf, password: opts.password || undefined, isOffscreenCanvasSupported: false, fontExtraProperties: true }).promise;
-  let metaTitle = "";
-  try { const m = await pdf.getMetadata(); metaTitle = (m.info && m.info.Title || "").trim(); } catch {}
+  let metaTitle = "", metaAuthor = "";
+  try { const m = await pdf.getMetadata(); metaTitle = (m.info && m.info.Title || "").trim(); metaAuthor = String(m.info && m.info.Author || "").trim(); } catch {}
   let pageLabels = null;
   try { pageLabels = await pdf.getPageLabels(); } catch {}
   const labelOf = p => ((pageLabels && pageLabels[p - 1] || "").trim() || String(p)).slice(0, 14);
@@ -602,6 +602,6 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   for (const b of blocks) if (typeof b.text === "string") b.text = applyLigatures(liga, b.text, "");
   const used = liga.used, unresolved = liga.unresolved;
   liga.used = {}; for (const r of ref) r.w = applyLigatures(liga, r.w, "\uFFFD");
-  return { blocks, metaTitle, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages, outlineUsed, columnPages,
+  return { blocks, metaTitle, metaAuthor, numPages, ref, hiddenChars, ligatures: used, ligUnresolved: unresolved, cover, headersRemoved, notes: notesLinked, labels, ocrPages, ocrError, imagePages, outlineUsed, columnPages,
     approx: textPages > 0 && realPages < textPages / 2 };
 }

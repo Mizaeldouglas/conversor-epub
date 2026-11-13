@@ -23,7 +23,7 @@ function cleanTitle(raw){
   const s = String(raw || "");
   let t = s.replace(/_+/g, " ").replace(/\s+/g, " ").trim();
   if (/^\d+_/.test(s)) t = t.replace(/^\d+\s+/, "");
-  t = t.replace(/\s*[-–(]?\s*\b(e-?book|pdf|epub)\b\)?\s*$/i, "").trim();
+  t = t.replace(/\s*[-–(]?\s*\b(e-?book|pdf|epub)\b\)?\s*$/i, "").replace(/(?<![.!?])\.$/, "").trim();   // "Título." sem o ponto final
   if (t && t === t.toUpperCase() && /\p{Lu}/u.test(t)) {
     const small = new Set("a o as os e de da do das dos em na no nas nos para por com sem um uma à ao".split(" "));
     t = t.toLowerCase().split(" ").map((w, i) => i && small.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)).join(" ");

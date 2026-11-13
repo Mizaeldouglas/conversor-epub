@@ -54,8 +54,11 @@ pre{font:9.5pt/1.35 "Liberation Mono","DejaVu Sans Mono",monospace;margin:8pt 0 
 .capa{break-after:page;height:150mm;display:flex;flex-direction:column;justify-content:center;text-align:center}
 .capa h1{font-size:30pt;break-before:auto;margin:0 0 12pt}
 .capa p{text-align:center;text-indent:0;font-style:italic;font-size:14pt}
+.ficha{break-after:page;font-size:8.5pt;line-height:1.35;padding-top:60mm}
+.ficha p{text-indent:0;text-align:left;margin:0 0 3pt}
 </style></head><body>
 ${capa ? `<section class="capa"><div style="font-size:30pt;font-weight:bold;margin-bottom:12pt">${esc(book.titulo)}</div><p>${esc(book.autor)}</p></section>` : ""}
+${capa && book.ficha ? `<section class="ficha">${book.ficha.map(l => `<p>${esc(l)}</p>`).join("")}</section>` : ""}
 ${body}
 </body></html>`;
 }

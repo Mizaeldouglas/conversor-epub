@@ -1,5 +1,5 @@
 /* ---------- opções lembradas neste navegador ---------- */
-const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images", "tocpage", "device"];
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images", "tocpage", "device", "autometa"];
 const OPT_KEY = "conversor-epub:opcoes";
 function loadOptions(){
   try {
@@ -34,6 +34,7 @@ function applyDevice(){
 }
 $("#device").addEventListener("change", () => { applyDevice(); saveOptions(); });
 $("#images").addEventListener("change", () => { const d = DEVICES[deviceOf()]; if (d && $("#images").value !== d.images) { $("#device").value = "custom"; applyDevice(); saveOptions(); } });
+$("#autometaRow").hidden = !ON_SITE;   // o artefato não chega à internet
 loadOptions();
 applyDevice();
 OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });

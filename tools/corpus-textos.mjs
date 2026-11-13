@@ -5,6 +5,21 @@
 export const farol = {
   titulo: "O Farol Apagado",
   autor: "Helena Vasconcelos",
+  // página de créditos com ficha catalográfica (só no livro de exemplo), como num livro publicado no Brasil
+  ficha: [
+    "Copyright © 2026 Helena Vasconcelos",
+    "Revisão: Marta Quintela",
+    "Capa: Estúdio Ventania",
+    "Todos os direitos desta edição reservados à Editora Maré Alta Ltda.",
+    "Rua das Gaivotas, 120 — Florianópolis, SC",
+    "Dados Internacionais de Catalogação na Publicação (CIP)",
+    "V331f Vasconcelos, Helena",
+    "O farol apagado / Helena Vasconcelos. – 1. ed. – Florianópolis : Editora Maré Alta, 2026.",
+    "96 p.",
+    "ISBN 978-65-00-99876-4",
+    "1. Ficção brasileira. 2. Romance. I. Título.",
+    "CDD B869.3"
+  ],
   blocos: [
     { h1: "Capítulo 1 — A ilha" },
     { p: "A ilha de Ponta Seca tinha trinta e duas casas, uma igreja sem sino e um farol que ninguém lembrava de ter visto aceso. Os pescadores contavam que a luz se apagara numa noite de março, muitos anos antes, e que desde então os barcos voltavam guiados pelo cheiro do pão que a padaria do porto começava a assar às quatro da manhã." },

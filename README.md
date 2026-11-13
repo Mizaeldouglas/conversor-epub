@@ -16,6 +16,7 @@ Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capí
 - **Vários formatos.** Além de PDF e EPUB, abre DOCX, TXT, HTML, Markdown, FB2, MOBI/AZW3 sem proteção e CBZ.
 - **PDFs difíceis.** Usa o sumário interno do PDF, lê duas colunas na ordem certa e mantém tabelas, listas, links e versos.
 - **Correção na prévia.** Clique num parágrafo para reescrever; mude a ordem dos capítulos; desfaça a última alteração.
+- **Dados do livro sozinhos.** Autor, editora, ano, ISBN e gênero lidos da ficha catalográfica do PDF; o que faltar vem do Google Books ou da Open Library.
 - **Pronto para a biblioteca.** Capa com título e autor quando o PDF não tem uma, página de sumário no começo do livro, editora, ano e ISBN, e arquivo com o nome “Autor - Título.epub”.
 - **Do seu jeito.** Livros no Google Drive ou só no navegador; perfis para Kindle, Kobo e tablet; código de apostilas em bloco próprio, com o recuo.
 - **Mais:** livro de exemplo para experimentar, tempo restante e aviso quando a conversão termina, busca e ordem na estante, KEPUB para Kobo, imagens menores ou em tons de cinza, descrição das imagens, capa e sinopse da internet, notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.

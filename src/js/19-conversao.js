@@ -42,7 +42,7 @@ function notifyDone(job){
   } catch {}
 }
 const readOpts = () => ({ lang: defaultLang(), mode: $("#mode").value, headers: $("#headers").checked, notes: $("#notes").checked, cover: $("#cover").checked,
-  ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value, tocpage: $("#tocpage").checked });
+  ocr: $("#ocr").checked, showNums: $("#shownums").checked, author: $("#author").value.trim(), look: lookOf(), images: $("#images").value, tocpage: $("#tocpage").checked, autometa: $("#autometa").checked });
 const lookOf = () => ({ font: $("#lookFont").value, justify: $("#lookJustify").checked, indent: $("#lookIndent").value, lh: $("#lookLh").value });
 function stopIfCancelled(job){ if (job.ctrl && job.ctrl.signal.aborted) throw abortErr(); }
 function markCancelled(job){ queueDone(job); job.busy = false; job.cancelled = true; job.progress = ""; job.stage = null; render(job); }
@@ -128,6 +128,12 @@ async function runImport(job){
     if (res.meta) job.meta = { ...res.meta, ...(job.meta || {}) };
     job.coverOn = true; job.coverBlob = res.cover || null; job.coverAuto = false;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
+    // autor, editora, ano, ISBN, gênero e sinopse: do próprio PDF e, se faltar, da internet
+    if (!job.fixed) {
+      const online = ON_SITE && o.autometa;
+      if (online) { job.progress = "buscando os dados do livro"; paintProgress(job); }
+      await autoMeta(job, res, online);
+    }
     await buildPdf(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
@@ -162,6 +168,11 @@ async function runPdf(job){
     job.coverBlob = o.cover && res.cover ? res.cover.blob : null;
     if (!job.fixed) job.lang = detectLang(res.blocks) || job.lang;
     if (!job.fixed) job.autoFixed = applyRememberedFixes(job);
+    if (!job.fixed) {
+      const online = ON_SITE && o.autometa;
+      if (online) { job.progress = "buscando os dados do livro"; paintProgress(job); }
+      await autoMeta(job, res, online);
+    }
     await buildPdf(job);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);

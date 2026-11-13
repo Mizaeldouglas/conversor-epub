@@ -2226,5 +2226,33 @@
 "Os livros ficam só neste navegador.": [
 "Books stay only in this browser.",
 "Los libros quedan solo en este navegador."
+],
+"Autor, editora, ano, ISBN, gênero e sinopse que o PDF não traz vêm do Google Books ou da Open Library.": [
+"Author, publisher, year, ISBN, genre and synopsis the PDF doesn't have come from Google Books or Open Library.",
+"Autor, editorial, año, ISBN, género y sinopsis que el PDF no trae vienen de Google Books o de Open Library."
+],
+"Completar os dados do livro pela internet": [
+"Fill in the book details from the internet",
+"Completar los datos del libro por internet"
+],
+"Para completar os dados que o PDF não traz (editora, ano, gênero, sinopse), o Lombada envia só o ISBN, o título e o autor ao Google Books e, se ele não achar, à Open Library; dá para desligar em Ajustes.": [
+"To fill in details the PDF doesn't have (publisher, year, genre, synopsis), Lombada sends only the ISBN, title and author to Google Books and, if it finds nothing, to Open Library; you can turn this off in Settings.",
+"Para completar los datos que el PDF no trae (editorial, año, género, sinopsis), Lombada envía solo el ISBN, el título y el autor a Google Books y, si no lo encuentra, a Open Library; se puede desactivar en Ajustes."
+],
+"Só o ISBN, o título e o autor saem do aparelho.": [
+"Only the ISBN, title and author leave your device.",
+"Solo el ISBN, el título y el autor salen del dispositivo."
+],
+"buscando os dados do livro": [
+"looking up the book details",
+"buscando los datos del libro"
+],
+"“Buscar dados deste livro” usa os mesmos serviços para trazer outra capa.": [
+"“Look up this book's details” uses the same services to bring in another cover.",
+"“Buscar datos de este libro” usa los mismos servicios para traer otra portada."
+],
+"Confira em “Editar livro”.": [
+"Check them in “Edit book”.",
+"Revísalos en “Editar libro”."
 ]
 }

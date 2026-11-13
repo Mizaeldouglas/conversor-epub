@@ -1,5 +1,12 @@
 # Novidades
 
+## 3.9.0 — 13 nov 2026
+
+- Dados do livro preenchidos sozinhos: autor, editora, ano, ISBN e gênero saem da página de créditos e da ficha catalográfica do próprio PDF (e do autor gravado no arquivo). O que faltar, incluindo a sinopse, vem do Google Books pelo ISBN, que é exato, ou pelo título e autor, só quando o resultado é o mesmo livro; depois, da Open Library. A internet nunca troca o que o PDF já diz, e a busca pode ser desligada em Ajustes.
+- A fila diz quais dados foram preenchidos e de onde vieram.
+- Título tirado do arquivo perde o ponto final (“Você me matou primeiro.” vira “Você me matou primeiro”).
+- O livro de exemplo ganhou página de créditos com ficha catalográfica.
+
 ## 3.8.0 — 13 nov 2026
 
 - Você escolhe onde guardar os livros: no seu Google Drive ou só neste navegador, sem ocupar espaço no Drive. A pergunta aparece na primeira entrada e dá para mudar no menu da conta.

@@ -12,9 +12,13 @@ const I18N_NUM = /\d+(?:[.,]\d+)*/g;
 const I18N_SPLIT = /(?<=[\p{L}\d"”’)\]]{2}[.!?…]["”’)]?)\s+(?=[\p{Lu}“"(\d])/u;
 const I18N_SKIP = ".lp-shot .bt,.acct-name,.acct-mail,.acct-initial,.name,.byline,.spine,.book .t,.book .d,.pv-page,#pvToc,#pvTitle,details.diffs b,.fixmem b,.lk-list b,.lk-list .muted,script,style,textarea,#uiLang";
 // frases com um trecho que varia (nome de arquivo, título, mensagem do navegador): [expressão, inglês, espanhol]
+const I18N_FIELDS = { autor: ["author", "autor"], editora: ["publisher", "editorial"], ano: ["year", "año"], ISBN: ["ISBN", "ISBN"], "gênero": ["genre", "género"], sinopse: ["synopsis", "sinopsis"] };
+const i18nFields = (s, k) => s.replace(/autor|editora|ano|ISBN|gênero|sinopse/g, w => I18N_FIELDS[w][k]).replace(/ e /, k ? " y " : " and ");
 const I18N_PATS = [
   [/^Arquivo salvo: (.+)$/, "File saved: $1", "Archivo guardado: $1"],
   [/^(.+) não é de um formato que o Lombada abre e foi ignorado\.$/, "$1 is not in a format Lombada can open and was skipped.", "$1 no está en un formato que Lombada abra y se ignoró."],
+  [/^Dados do livro preenchidos: (.+) \((pela página de créditos do PDF e pela internet|pela página de créditos do PDF|pela internet)\)\.$/, m => "Book details filled in: " + i18nFields(m[1], 0) + " (" + ({ "pela página de créditos do PDF e pela internet": "from the PDF's copyright page and the internet", "pela página de créditos do PDF": "from the PDF's copyright page", "pela internet": "from the internet" })[m[2]] + ").",
+    m => "Datos del libro completados: " + i18nFields(m[1], 1) + " (" + ({ "pela página de créditos do PDF e pela internet": "por la página de créditos del PDF y por internet", "pela página de créditos do PDF": "por la página de créditos del PDF", "pela internet": "por internet" })[m[2]] + ")."],
   [/^Entre com o Google para converter (.+)\.$/, "Sign in with Google to convert $1.", "Entra con Google para convertir $1."],
   [/^(.+): EPUB pronto\.$/, "$1: EPUB ready.", "$1: EPUB listo."],
   [/^(.+?): ((?:Este|Não|Faltou|Senha|O ) ?.+)$/, "$1: $2", "$1: $2"],

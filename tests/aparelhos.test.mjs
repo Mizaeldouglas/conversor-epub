@@ -90,3 +90,67 @@ test("contagem desligada sem o código do GoatCounter", async () => {
   assert.deepEqual(hits, []);
   await app.ctx.close();
 });
+
+// Google Books simulado: responde pelo ISBN ou pelo título, e guarda o que foi perguntado
+const fakeBooks = asked => ctx => ctx.route(/googleapis\.com\/books\/v1\/volumes|openlibrary\.org/, r => {
+  const u = new URL(r.request().url()), q = u.searchParams.get("q") || u.search;
+  asked.push(q);
+  const item = v => ({ items: [{ volumeInfo: v }] });
+  if (/^isbn:9786500998764$/.test(q)) return r.fulfill({ json: item({ title: "O Farol Apagado", authors: ["Helena Vasconcelos"], publisher: "Outra Editora", publishedDate: "2027-01-01",
+    description: "<p>Uma faroleira chega a uma ilha onde a luz nunca acende.</p>", categories: ["Fiction"], industryIdentifiers: [{ type: "ISBN_13", identifier: "9786500998764" }] }) });
+  if (/intitle:capitulos/.test(q)) return r.fulfill({ json: item({ title: "Capítulos", authors: ["Rita Prado"], publisher: "Editora Exemplo", publishedDate: "2019",
+    description: "Um livro de teste.", industryIdentifiers: [{ type: "ISBN_13", identifier: "9786500123456" }] }) });
+  return r.fulfill({ json: { items: [] } });
+});
+const metaOf = (p, i) => p.evaluate(i => { const j = window.__app.jobs[i]; return { author: j.author, meta: j.meta || {}, auto: j.metaAuto }; }, i);
+
+test("dados do livro: a ficha catalográfica do PDF vem primeiro; a internet só completa o que falta, pelo ISBN", async () => {
+  const asked = [];
+  const app = await openApp(browser, server, { setup: fakeBooks(asked) }), p = app.page;
+  const { addFiles, epubOf } = await import("./helpers.mjs");
+  await addFiles(p, ["exemplo/o-farol-apagado.pdf"]); await waitJob(p, 0);
+  const m = await metaOf(p, 0);
+  assert.equal(m.author, "Helena Vasconcelos");
+  assert.equal(m.meta.publisher, "Editora Maré Alta", "a internet não troca o que o PDF já diz");
+  assert.equal(m.meta.year, "2026");
+  assert.equal(m.meta.isbn, "9786500998764");
+  assert.equal(m.meta.subject, "Ficção brasileira, Romance");
+  assert.equal(m.meta.description, "Uma faroleira chega a uma ilha onde a luz nunca acende.");
+  assert.deepEqual(asked, ["isbn:9786500998764"], "só o ISBN saiu do aparelho");
+  assert.match(await p.locator(".row").nth(0).textContent(), /Dados do livro preenchidos: autor, editora, ano, ISBN, gênero e sinopse \(pela página de créditos do PDF e pela internet\)/);
+  const opf = await (await epubOf(p, 0)).file("OEBPS/content.opf").async("string");
+  assert.match(opf, /<dc:creator[^>]*>Helena Vasconcelos<\/dc:creator>/);
+  assert.match(opf, /<dc:publisher>Editora Maré Alta<\/dc:publisher>/);
+  assert.match(opf, /<dc:description>Uma faroleira/);
+  // a ficha também aparece no formulário de edição
+  const row = p.locator(".row").nth(0);
+  await row.locator("details.edit > summary").click();
+  assert.equal(await row.locator('[data-e="publisher"]').inputValue(), "Editora Maré Alta");
+  assert.equal(await row.locator('[data-e="isbn"]').inputValue(), "9786500998764");
+  assert.deepEqual(app.errors, []);
+  await app.ctx.close();
+});
+
+test("dados do livro: sem ficha no PDF, busca pelo título e só aceita o mesmo livro; desligado, nada sai", async () => {
+  const asked = [];
+  const app = await openApp(browser, server, { setup: fakeBooks(asked) }), p = app.page;
+  const { addFiles } = await import("./helpers.mjs");
+  await addFiles(p, ["capitulos.pdf"]); await waitJob(p, 0);
+  const m = await metaOf(p, 0);
+  assert.equal(m.author, "Rita Prado");
+  assert.equal(m.meta.publisher, "Editora Exemplo");
+  assert.equal(m.meta.isbn, "9786500123456");
+  assert.deepEqual(m.auto.from, ["web"]);
+  assert.ok(asked.every(q => /intitle:capitulos/.test(q) || /title=capitulos/.test(q)), asked.join(" | "));
+  // título que não bate com nenhum resultado: nada é preenchido
+  await addFiles(p, ["estilos.pdf"]); await waitJob(p, 1);
+  assert.equal((await metaOf(p, 1)).auto, null);
+  // opção desligada: nenhuma busca
+  await p.click("#settingsBtn"); await p.uncheck("#autometa");
+  asked.length = 0;
+  await addFiles(p, ["capitulos.pdf"]); await waitJob(p, 2);
+  assert.deepEqual(asked, []);
+  assert.equal((await metaOf(p, 2)).author, "");
+  assert.deepEqual(app.errors, []);
+  await app.ctx.close();
+});

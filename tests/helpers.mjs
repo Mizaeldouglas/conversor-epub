@@ -55,6 +55,8 @@ export async function openApp(browser, server, { viewport = { width: 1200, heigh
   await ctx.route(/cdnjs\.cloudflare\.com\/.*\/(pdf\.min\.js|pdf\.worker\.min\.js|jszip\.min\.js)$/, (route, req) =>
     route.fulfill({ path: firstExisting(LIBS[req.url().split("/").pop()]), contentType: "text/javascript", headers: { "access-control-allow-origin": "*" } }));
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, route => route.fulfill({ status: 200, contentType: "text/css", body: "" }));
+  // a busca dos dados do livro na internet fica sem resposta, a não ser que o teste simule uma (rotas do setup valem antes)
+  await ctx.route(/googleapis\.com\/books|openlibrary\.org|covers\.openlibrary/, route => route.abort());
   if (setup) await setup(ctx);
   // o site só abre para quem entrou com o Google: os testes começam com uma conta já lembrada (sem acesso ao Drive)
   // e com a escolha de onde guardar já feita (store: null deixa a pergunta aparecer)

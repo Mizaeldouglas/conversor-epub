@@ -107,6 +107,10 @@ function render(job){
   const ligHtml = lig.length ? `<div class="verify neutral">Este PDF guarda as letras unidas (como “fi” e “fl”) com um código sem texto. Elas foram reconhecidas pelas palavras do próprio livro: ${lig.map(([k, n]) => `“${esc(k)}” ×${fmtN(n)}`).join(", ")}.</div>` : "";
   const ocrHtml = job.ocrPages ? `<div class="verify neutral">${job.ocrPages} página${job.ocrPages > 1 ? "s" : ""} escaneada${job.ocrPages > 1 ? "s" : ""} lida${job.ocrPages > 1 ? "s" : ""} por OCR. O reconhecimento pode trocar letras: confira na prévia, com o PDF ao lado.</div>`
     : job.ocrError ? `<div class="verify warn">O OCR não funcionou (${esc(job.ocrError)}). As páginas escaneadas entraram como imagem.${ON_SITE ? "" : ` Aqui o navegador bloqueia o download do leitor de OCR; use o site <a href="${SITE_URL}" target="_blank" rel="noopener">${esc(SITE_URL.replace(/^https:\/\/|\/$/g, ""))}</a>.`}</div>` : "";
+  const MA_NAMES = { author: "autor", publisher: "editora", year: "ano", isbn: "ISBN", subject: "gênero", description: "sinopse" };
+  const ma = job.metaAuto && job.epub ? job.metaAuto : null;
+  const maList = ma ? ma.fields.map(k => MA_NAMES[k]) : [];
+  const metaHtml = ma ? `<div class="verify neutral">Dados do livro preenchidos: ${esc(maList.length > 1 ? maList.slice(0, -1).join(", ") + " e " + maList[maList.length - 1] : maList[0])} (${ma.from.length > 1 ? "pela página de créditos do PDF e pela internet" : ma.from[0] === "pdf" ? "pela página de créditos do PDF" : "pela internet"}). Confira em “Editar livro”.</div>` : "";
   let verifyHtml = "";
   if (v) {
     const user = job.userTexts || [];
@@ -163,6 +167,7 @@ function render(job){
       ${job.cancelled ? `<div class="verify neutral">Conversão cancelada.</div>` : ""}
       ${verifyHtml}
       ${ocrHtml}
+      ${metaHtml}
       ${ligHtml}
       ${!job.busy && job.epub && job.driveState ? `<div class="drive-note${job.driveState === "err" ? " err" : job.driveState === "wait" ? " wait" : ""}">${job.driveState === "wait" ? `Ainda não está no Drive: a conexão expirou. <button class="linkbtn" data-a="driveLogin">Reconectar</button>` : job.driveState === "up" ? "Enviando ao Google Drive…" : job.driveState === "ok" ? `Guardado no seu Google Drive. <a class="linkbtn" href="${job.driveFileId ? "https://drive.google.com/file/d/" + encodeURIComponent(job.driveFileId) + "/view" : driveFolderUrl()}" target="_blank" rel="noopener">Ver no Drive</a>` : `Não consegui guardar no Drive. <button class="linkbtn" data-a="driveRetry">Tentar de novo</button>`}</div>` : ""}
       ${editPanelHtml(job)}
