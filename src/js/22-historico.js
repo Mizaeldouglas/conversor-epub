@@ -47,12 +47,14 @@ async function saveHistory(job){
 }
 // estante: os livros deste navegador e, com a conta Google conectada, os do Drive (sem repetir)
 async function renderHistory(){
+  const seq = renderHistory.seq = (renderHistory.seq || 0) + 1;
   const sec = $("#historySec"), box = $("#history");
   let local;
   try { local = await histAll(); } catch (e) {
     local = [];
     if (e && e.name === "DbBusy" && !renderHistory.warned) { renderHistory.warned = true; toast("A estante está presa por outra aba ou janela do Lombada aberta antes da atualização. Feche as outras e recarregue esta página.", 9000); }
   }
+  if (seq !== renderHistory.seq) return;   // outra chamada começou depois desta: só a última desenha
   const on = DRIVE_ON && driveConnected() && drv.list;
   const inDrive = new Map((on ? drv.list : []).map(d => [d.hid, d]));
   const items = local.map(r => ({ r, d: inDrive.get(r.id), date: r.date }));
@@ -73,10 +75,10 @@ async function renderHistory(){
   $("#shelfCount").textContent = items.length ? String(items.length) : "";
   const localOnly = on ? local.filter(r => !inDrive.has(r.id)).length : 0;
   $("#driveAllBtn").hidden = !localOnly;
-  const open = $("#driveOpen"); open.hidden = !(DRIVE_ON && driveRemembered()); open.href = driveFolderUrl();
+  const open = $("#driveOpen"); open.hidden = !(toDrive() && driveRemembered()); open.href = driveFolderUrl();
   $("#driveAllN").textContent = String(localOnly);
   $("#shelfNote").textContent = on ? "Guardados na pasta Lombada do seu Google Drive: aparecem em qualquer aparelho em que você entrar."
-    : DRIVE_ON ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
+    : toDrive() ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
     : "Os últimos 12 livros ficam guardados neste navegador.";
   box.innerHTML = "";
   if (!items.length && total) { const p = document.createElement("p"); p.className = "shelf-empty"; p.textContent = "Nenhum livro com esse título ou autor."; box.appendChild(p); }

@@ -1,5 +1,15 @@
 # Novidades
 
+## 3.8.0 — 13 nov 2026
+
+- Você escolhe onde guardar os livros: no seu Google Drive ou só neste navegador, sem ocupar espaço no Drive. A pergunta aparece na primeira entrada e dá para mudar no menu da conta.
+- Ajustes no Drive: quem guarda os livros no Drive tem as mesmas opções em todo aparelho.
+- “Onde você vai ler”: perfis para Kindle, Kobo (com “Baixar KEPUB” como botão principal) e Kindle Colorsoft, tablet ou celular, que acertam as imagens sozinhos.
+- Código em fonte de largura fixa vira bloco de código no EPUB, linha a linha e com o recuo original.
+- Com o app instalado no computador, o Lombada aparece em “Abrir com” para PDFs, EPUBs e os outros formatos. Arquivo compartilhado ou aberto antes do login espera a pessoa entrar.
+- Página de ajuda: como mandar o EPUB ao Kindle pelo site, por e-mail e pelo celular, o que fazer quando o livro não chega e quando o PDF sai ruim.
+- Contagem de visitas, conversões e tipos de erro pelo GoatCounter, sem cookies e sem nome de arquivo, título ou texto. Fica desligada até o código do GoatCounter ser posto em `package.json`.
+
 ## 3.7.0 — 13 nov 2026
 
 - Livro de exemplo: um botão na fila converte “O Farol Apagado” para quem quer ver o Lombada funcionando antes de usar um arquivo seu.

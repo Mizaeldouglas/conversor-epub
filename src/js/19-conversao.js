@@ -70,7 +70,7 @@ async function runEpub(job){
     for (const k of ["read", "pages", "epub", "check"]) if (!job.done.includes(k)) job.done.push(k);
     job.structure = await checkEpubStructure(res.blob);
     job.epub = res.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job); notifyDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job); goatCount("convertido/" + (job.fmt || job.kind), true);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -204,7 +204,7 @@ async function buildPdf(job){
     stopIfCancelled(job);
     job.structure = await checkEpubStructure(ep.blob);
     job.epub = ep.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job); notifyDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job); goatCount("convertido/" + (job.fmt || job.kind), true);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);

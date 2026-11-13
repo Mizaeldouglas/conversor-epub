@@ -10,7 +10,7 @@ let server, browser, app, n = 0;
 before(async () => { server = await startServer(); browser = await launch(); app = await openApp(browser, server); await app.page.check("#verify"); });
 after(async () => { await browser.close(); server.close(); });
 
-const norm = s => s.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/[•]/g, " ").replace(/\s+/g, " ").trim();
+const norm = s => s.replace(/<[^>]+>/g, " ").replace(/&quot;/g, "\"").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/[•]/g, " ").replace(/\s+/g, " ").trim();
 // trechos do texto original que o EPUB precisa conter
 function pieces(book){
   const out = [];
@@ -21,6 +21,7 @@ function pieces(book){
     else if (b.tabela) out.push(...b.tabela.flat());
     else if (b.poema) out.push(...b.poema.map(e => e.join(" ")));
     else if (b.colunas) out.push(...b.colunas);
+    else if (b.codigo) out.push(...b.codigo.map(l => l.trim()));
     else if (b.link) out.push(norm(b.p) + " " + b.link[0]);
     else if (b.p) out.push(norm(b.p));
   }
@@ -80,6 +81,15 @@ test("revista em duas colunas: lida uma coluna de cada vez", async () => {
   assert.doesNotMatch(html, /<table>/, "as colunas viraram tabela");
   const at = s => html.indexOf(s);
   assert.ok(at("três meses para sair do papel") < at("Os feirantes mais antigos") && at("quem sai da missa das nove") < at("Nem tudo foi fácil"));
+});
+
+test("apostila: código em bloco próprio, linha a linha e com o recuo", async () => {
+  const { html } = await convert("apostila-chrome.pdf", T.apostila);
+  const pre = /<pre class="codigo"><code>([\s\S]*?)<\/code><\/pre>/.exec(html);
+  assert.ok(pre, "o código não virou bloco de código");
+  const lines = pre[1].split("<br/>").map(l => l.replace(/\u00A0/g, " ").replace(/&gt;/g, ">").replace(/&quot;/g, '"'));
+  assert.deepEqual(lines, T.apostila.blocos.find(b => b.codigo).codigo);
+  assert.match(html, /<p>Repare que as linhas/);
 });
 
 test("nenhum erro de JavaScript", () => assert.deepEqual(app.errors, []));

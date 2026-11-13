@@ -80,6 +80,7 @@ function reconvHtml(job){
 }
 
 function render(job){
+  if (job.error && !job.errCounted) { job.errCounted = true; countError(job); }
   let row = job.el;
   if (!row) {
     row = document.createElement("div"); row.className = "row"; job.el = row;
@@ -143,11 +144,12 @@ function render(job){
       <div class="actions">
         ${busy ? `<button class="btn ghost sm" data-a="cancel">Cancelar</button>` : ""}
         ${job.cancelled || job.error ? `<button class="btn ghost sm" data-a="remove">Tirar da fila</button>` : ""}
-        ${job.epub ? `<button class="btn" data-a="epub">Baixar EPUB</button>
-        <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>
+        ${job.epub && deviceOf() === "kobo" ? `<button class="btn" data-a="kepub">Baixar KEPUB</button>` : ""}
+        ${job.epub ? `<button class="btn${deviceOf() === "kobo" ? " ghost" : ""}" data-a="epub">Baixar EPUB</button>
+        ${deviceOf() === "kobo" ? "" : `<a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>`}
         <button class="btn ghost" data-a="pv">Prévia</button>
         ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}
-        <button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>` : ""}
+        ${deviceOf() === "kobo" ? "" : `<button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>`}` : ""}
       </div>
     </div>
     <div class="row-status">

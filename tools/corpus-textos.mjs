@@ -75,3 +75,16 @@ export const revista = {
     ] }
   ]
 };
+
+export const apostila = {
+  titulo: "Programação para Iniciantes",
+  autor: "Oficina de Código da Vila",
+  blocos: [
+    { h1: "Aula 3 — Repetições" },
+    { p: "Quando a mesma tarefa precisa ser feita várias vezes, o programa usa uma repetição. O exemplo abaixo soma os preços de uma lista de compras e avisa quando o total passa do orçamento." },
+    { codigo: ["def total_da_compra(precos, orcamento):", "    total = 0", "    for preco in precos:", "        total = total + preco", "        if total > orcamento:", "            print(\"Passou do orçamento!\")", "    return total"] },
+    { p: "Repare que as linhas de dentro da repetição ficam mais para a direita. Em Python, esse recuo não é enfeite: é ele que diz ao computador quais linhas pertencem à repetição." },
+    { h2: "Exercício" },
+    { p: "Mude o programa para contar quantos itens custam mais de dez reais. Dica: crie uma variável chamada contador antes da repetição." }
+  ]
+};

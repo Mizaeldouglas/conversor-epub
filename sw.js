@@ -1,5 +1,5 @@
 // Lombada (PDF para EPUB): funciona sem internet e recebe arquivos pelo "Compartilhar" do celular
-const VERSION = "3.7.0";
+const VERSION = "3.8.0";
 const CACHE = "conversor-epub-" + VERSION;
 const SHARE = "conversor-epub-compartilhado";
 const CORE = [

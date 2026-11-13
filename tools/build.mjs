@@ -9,14 +9,14 @@ import { tmpdir } from "node:os";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = p => readFileSync(join(root, "src", p), "utf8");
-const { version, googleClientId = "" } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const { version, googleClientId = "", goatcounter = "" } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const SITE = "https://mizaeldouglas.github.io/conversor-epub/";
 
 const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><rect x="6" y="3" width="28" height="34" rx="5" fill="#2536c7"/><rect x="6" y="3" width="6" height="34" rx="3" fill="#1b279a"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="#ffd84a"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>`;
 
 const files = readdirSync(join(root, "src/js")).filter(f => f.endsWith(".js")).sort();
 const js = files.map(f => src("js/" + f).trimEnd()).join("\n\n")
-  .replaceAll("@@VERSION@@", version).replaceAll("@@SITE@@", SITE).replaceAll("@@GCLIENT@@", googleClientId);
+  .replaceAll("@@VERSION@@", version).replaceAll("@@SITE@@", SITE).replaceAll("@@GCLIENT@@", googleClientId).replaceAll("@@GOAT@@", goatcounter);
 
 // confere a sintaxe do JavaScript montado antes de gravar
 const tmp = mkdtempSync(join(tmpdir(), "build-"));

@@ -1,4 +1,17 @@
 /* ---------- app instalável (só no site; o artefato não aceita) ---------- */
+// arquivos que chegam de fora (Compartilhar no celular, "Abrir com" no computador): sem login, esperam a pessoa entrar
+let incoming = [];
+function openIncoming(files){
+  if (!files.length) return;
+  if (document.body.classList.contains("gated")) { incoming.push(...files); toast("Entre com o Google para converter " + (files.length === 1 ? files[0].name : files.length + " arquivos") + ".", 8000); return; }
+  addFiles(files);
+}
+function takeIncoming(){ if (incoming.length && !document.body.classList.contains("gated")) { const f = incoming; incoming = []; addFiles(f); } }
+// "Abrir com > Lombada" no computador, com o app instalado
+if ("launchQueue" in window) launchQueue.setConsumer(async p => {
+  if (!p.files || !p.files.length) return;
+  try { openIncoming(await Promise.all(p.files.map(h => h.getFile()))); } catch (e) { console.warn("abrir com", e); }
+});
 (async () => {
   if (!ON_SITE || location.protocol !== "https:" && location.hostname !== "localhost") return;
   const head = document.head;
@@ -29,7 +42,7 @@
         await c.delete(req);
       }
       history.replaceState(null, "", location.pathname);
-      if (files.length) addFiles(files);
+      openIncoming(files);
     } catch (e) { console.warn("compartilhado", e); }
   }
 })();

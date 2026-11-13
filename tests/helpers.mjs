@@ -46,7 +46,7 @@ export async function launch(){
 }
 
 // abre o app com as bibliotecas do CDN redirecionadas para o servidor local
-export async function openApp(browser, server, { viewport = { width: 1200, height: 1000 }, setup, loggedOut = false } = {}){
+export async function openApp(browser, server, { viewport = { width: 1200, height: 1000 }, setup, loggedOut = false, store = "drive" } = {}){
   const ctx = await browser.newContext({ viewport, locale: "pt-BR", acceptDownloads: true, serviceWorkers: "block" });
   const page = await ctx.newPage();
   const errors = [];
@@ -57,6 +57,8 @@ export async function openApp(browser, server, { viewport = { width: 1200, heigh
   await ctx.route(/fonts\.(googleapis|gstatic)\.com/, route => route.fulfill({ status: 200, contentType: "text/css", body: "" }));
   if (setup) await setup(ctx);
   // o site só abre para quem entrou com o Google: os testes começam com uma conta já lembrada (sem acesso ao Drive)
+  // e com a escolha de onde guardar já feita (store: null deixa a pergunta aparecer)
+  if (store) await ctx.addInitScript(s => { try { if (!sessionStorage.getItem("teste:saiu") && !localStorage.getItem("conversor-epub:guardar")) localStorage.setItem("conversor-epub:guardar", s); } catch {} }, store);
   if (!loggedOut) await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("teste:saiu")) localStorage.setItem("conversor-epub:drive", JSON.stringify({ name: "Ana Ribeiro", email: "ana@exemplo.org", photo: "" })); } catch {} });
   await page.goto(server.url);
   await page.evaluate(() => document.querySelectorAll(".side details").forEach(d => d.open = true));

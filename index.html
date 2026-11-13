@@ -479,6 +479,22 @@ body.noscroll{overflow:hidden}
   .modal{padding:0}.modal-box{height:100%;border-radius:0}
   .pv-main{flex-direction:column}.pv-pdf{border-left:0;border-bottom:1px solid var(--line-soft);order:-1;max-height:48%}
 }
+
+/* escolha de onde guardar os livros */
+.ask{border:0;border-radius:18px;padding:26px;width:min(520px,calc(100% - 32px));background:var(--surface);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.ask::backdrop{background:rgba(9,11,26,.62)}
+.ask h2{font:650 21px/1.25 var(--f-ui);margin:0 0 16px}
+.ask .muted{margin:14px 0 0;font-size:13.5px}
+.store-opts{display:grid;gap:10px}
+.store-opt{display:grid;gap:4px;text-align:left;font:inherit;color:inherit;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer}
+.store-opt b{font-size:16px;font-weight:650}
+.store-opt span{color:var(--muted);font-size:14px;line-height:1.45}
+.store-opt:hover,.store-opt:focus-visible{border-color:var(--accent);background:var(--accent-soft)}
+.store-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.acct-pop .acct-store{font-size:13px}
+.acct-pop .acct-store .linkbtn{display:inline;font-size:13px}
+.dev-note{font-size:12.5px;color:var(--muted);line-height:1.4;margin:-4px 0 4px}
+.ask h2:focus{outline:none}
 </style>
 </head>
 <body>
@@ -498,6 +514,7 @@ body.noscroll{overflow:hidden}
         <div class="acct-pop">
           <p>Conectado como <b class="acct-mail" id="acctMail"></b></p>
           <button class="btn sm" id="reconnectBtn" data-login hidden>Reconectar ao Drive</button>
+          <p class="acct-store"><span id="acctStore"></span> <button class="linkbtn" id="storeBtn">Mudar</button></p>
           <a class="btn ghost sm" id="acctFolder" href="https://drive.google.com" target="_blank" rel="noopener">Abrir a pasta no Drive</a>
           <button class="btn quiet sm" id="logoutBtn">Sair</button>
         </div>
@@ -515,7 +532,7 @@ body.noscroll{overflow:hidden}
   <section class="lp-cover">
     <div class="lp-copy">
       <h2 id="lpT">Seus PDFs viram livros de Kindle</h2>
-      <p class="lp-lead">O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive.</p>
+      <p class="lp-lead">O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive ou só no navegador, como você preferir.</p>
       <button class="btn lp-login" data-login><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Entrar com Google</span></button>
       <p class="lp-small">Grátis e sem cadastro: sua conta Google é o login. A conversão acontece no seu navegador.</p>
     </div>
@@ -559,7 +576,7 @@ body.noscroll{overflow:hidden}
         <div><dt>Capítulos e sumário de verdade</dt><dd>Usa o sumário interno do PDF ou reconhece os títulos, as partes, as notas de rodapé e as quebras de cena.</dd></div>
         <div><dt>Vários formatos</dt><dd>PDF, EPUB, DOCX, TXT, HTML, Markdown, FB2, MOBI e CBZ. PDF escaneado passa por OCR.</dd></div>
         <div><dt>Edição antes de baixar</dt><dd>Troque a capa, corrija o texto na prévia, renomeie e reordene capítulos, busque capa e sinopse.</dd></div>
-        <div><dt>Estante no seu Google Drive</dt><dd>Os livros prontos ficam numa pasta Lombada do seu Drive e aparecem em qualquer aparelho.</dd></div>
+        <div><dt>Estante onde você quiser</dt><dd>Numa pasta Lombada do seu Drive, para ver em qualquer aparelho, ou só neste navegador, sem ocupar espaço no Drive.</dd></div>
         <div><dt>Kindle, Kobo e outros</dt><dd>EPUB 3 conferido antes do download, KEPUB para Kobo e envio direto ao app Kindle no celular.</dd></div>
       </dl>
     </div>
@@ -598,7 +615,7 @@ body.noscroll{overflow:hidden}
     <h2 id="lpPriv">O que acontece com seus arquivos</h2>
     <ul>
       <li><b>A conversão é feita no seu navegador.</b> O PDF não é enviado a nenhum servidor do Lombada, porque o Lombada não tem servidor.</li>
-      <li><b>O EPUB pronto vai para o seu Drive.</b> Fica numa pasta Lombada, na sua conta, e só você tem acesso.</li>
+      <li><b>Você escolhe onde guardar.</b> Numa pasta Lombada do seu Drive, a que só você tem acesso, ou só neste navegador.</li>
       <li><b>O acesso é mínimo.</b> O Lombada só enxerga os arquivos que ele mesmo criou. Não vê o resto do seu Drive, seus e-mails nem seus contatos.</li>
       <li><b>Você sai quando quiser.</b> Ao sair, a conexão é desfeita e os livros continuam no seu Drive.</li>
     </ul>
@@ -683,6 +700,9 @@ body.noscroll{overflow:hidden}
         <div class="grp">
           <h3>Aparência do EPUB</h3>
           <div class="grp-body">
+            <label class="field" for="device"><span>Onde você vai ler</span>
+              <select id="device"><option value="kindle">Kindle</option><option value="kobo">Kobo</option><option value="color">Kindle Colorsoft, tablet ou celular</option><option value="custom" selected>Do meu jeito</option></select></label>
+            <p class="desc dev-note" id="deviceNote" hidden></p>
             <div class="cols">
               <label class="field" for="lookFont"><span>Fonte</span>
                 <select id="lookFont"><option value="serif" selected>Serifada</option><option value="sans">Sem serifa</option><option value="reader">A do leitor</option></select></label>
@@ -764,7 +784,8 @@ body.noscroll{overflow:hidden}
           <p>Sim. As palavras saem exatamente como estão no PDF, e o espaço só entra onde o PDF tem um espaço de verdade, então não aparecem quebras como “tam bem”. Palavras separadas só pela posição na página são juntadas de novo quando os pedaços formam palavras conhecidas.</p>
           <p>Itálico e negrito são mantidos. A letra capitular volta para a palavra (“M” + “ira” = “Mira”), e letras unidas como “fi” e “fl” são reconhecidas pelas palavras do próprio livro.</p></div></details>
         <details><summary>Como mando para o Kindle?</summary><div class="ans">
-          <p>No celular, “Enviar ao Kindle” abre o compartilhamento do sistema: escolha o app Kindle. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não deixa outros sites enviarem sozinhos, porque o envio exige o seu login.</p></div></details>
+          <p>No celular, “Enviar ao Kindle” abre o compartilhamento do sistema: escolha o app Kindle. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não deixa outros sites enviarem sozinhos, porque o envio exige o seu login.</p>
+          <p>O passo a passo, com o envio por e-mail e o que fazer quando o livro não chega, está na <a href="https://mizaeldouglas.github.io/conversor-epub/ajuda.html">página de ajuda</a>.</p></div></details>
         <details><summary>Para que serve a conferência palavra por palavra?</summary><div class="ans">
           <p>Antes de liberar o download, o EPUB pronto é aberto e cada palavra é comparada com o original. Se algo estiver diferente, a fila mostra a página e o trecho. “Ver no PDF” abre a página original ao lado, e “Corrigir” acerta o texto e gera o EPUB de novo.</p>
           <p>O que você corrige pode ficar lembrado e ser aplicado sozinho nos próximos livros.</p></div></details>
@@ -783,14 +804,14 @@ body.noscroll{overflow:hidden}
         <details><summary>Juntar volumes num livro só</summary><div class="ans">
           <p>Com dois ou mais PDFs convertidos na fila, “Juntar os PDFs num EPUB só” cria um livro com todos, na ordem do nome do arquivo. As páginas ficam como “1.12”, “2.12”…</p></div></details>
         <details><summary>Guardar os livros no Google Drive</summary><div class="ans">
-          <p>Cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.</p>
+          <p>Ao entrar pela primeira vez, você escolhe onde ficam os livros: no seu Google Drive ou só neste navegador (dá para mudar no menu da sua conta). No Drive, cada livro convertido vai para a pasta Lombada (junto com um arquivo pequeno com os seus Ajustes, que passam a valer em todo aparelho), e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.</p>
           <p>O Lombada pede só o acesso aos arquivos que ele mesmo cria: não vê nem mexe no resto do seu Drive. Tirar um livro da estante o manda para a lixeira do Drive, de onde dá para recuperar por 30 dias. Em “Sair”, a conexão é desfeita e os livros continuam no seu Drive.</p></div></details>
         <details><summary>Instalar no celular</summary><div class="ans">
           <p>No site, use “Instalar app” ou “Adicionar à tela inicial”. Instalado, funciona sem internet e, no Android, aparece no “Compartilhar” para receber PDFs direto de outros apps.</p></div></details>
         <details id="privacidade"><summary>Privacidade: o que acontece com meus arquivos?</summary><div class="ans">
           <p>O arquivo que você solta não sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
           <p>O navegador baixa apenas o próprio programa: as bibliotecas de leitura de PDF e ZIP (cdnjs), as fontes da página (Google Fonts) e, se você ligar o OCR, o leitor de texto (jsDelivr). Esses serviços veem o seu endereço de internet, como em qualquer site, mas não os seus arquivos.</p>
-          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. Os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
+          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. Se você escolher o Drive, os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
           <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar.</p>
           <p>O texto completo está na <a href="privacidade.html">Política de Privacidade</a>.</p>
           <p><button class="btn ghost sm" id="wipeBtn">Apagar tudo o que está guardado neste navegador</button></p></div></details>
@@ -805,7 +826,7 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">3.7.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a>, a <a href="#privacidade" data-open="privacidade">política de privacidade</a> e os <a href="termos.html">termos de uso</a>.</p>
+  <p>Lombada, versão <span id="appVersion">3.8.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a>, a <a href="https://mizaeldouglas.github.io/conversor-epub/ajuda.html">ajuda para mandar ao Kindle</a>, a <a href="#privacidade" data-open="privacidade">política de privacidade</a> e os <a href="https://mizaeldouglas.github.io/conversor-epub/termos.html">termos de uso</a>.</p>
 </footer>
 
 <div class="dropall" id="dropAll" hidden aria-hidden="true"><div><svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Solte para converter</b></div></div>
@@ -815,6 +836,15 @@ body.noscroll{overflow:hidden}
   <button class="btn sm" id="updateBtn">Atualizar agora</button>
   <button class="btn quiet sm" id="updateLater">Depois</button>
 </div>
+
+<dialog class="ask" id="storeAsk" aria-labelledby="storeT">
+  <h2 id="storeT" tabindex="-1" autofocus>Onde guardar os livros convertidos?</h2>
+  <div class="store-opts">
+    <button class="store-opt" data-store="drive"><b>No meu Google Drive</b><span>Os livros aparecem em qualquer aparelho em que você entrar. Ocupam espaço no seu Drive: um livro tem, em geral, de 1 a 5 MB.</span></button>
+    <button class="store-opt" data-store="local"><b>Só neste navegador</b><span>Não usa espaço do Drive. Os últimos 12 livros ficam aqui e somem se você limpar os dados do navegador.</span></button>
+  </div>
+  <p class="muted">Dá para mudar depois, no menu da sua conta.</p>
+</dialog>
 
 <div class="modal" id="preview" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
   <div class="modal-box">
@@ -864,7 +894,7 @@ const UI_LANG_KEY = "conversor-epub:idioma";
 let uiLang = "pt";
 try { uiLang = localStorage.getItem(UI_LANG_KEY) || (/^pt/i.test(navigator.language) ? "pt" : /^es/i.test(navigator.language) ? "es" : "en"); } catch {}
 const uiLocale = () => uiLang === "en" ? "en-US" : uiLang === "es" ? "es" : "pt-BR";
-const VERSION = "3.7.0";
+const VERSION = "3.8.0";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -1701,7 +1731,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const labelOf = p => ((pageLabels && pageLabels[p - 1] || "").trim() || String(p)).slice(0, 14);
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
-  const fontStyle = new Map();
+  const fontStyle = new Map(), fontMono = new Map();
   let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0, columnPages = 0;
   if (opts.words === undefined && /^pt/i.test(lang || "")) opts.words = await loadWordList().catch(() => null);
   let cover = null;
@@ -1766,6 +1796,19 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       } catch {}
       return st;
     };
+    // fonte de largura fixa (código): Courier, Consolas, "…Mono", "…Code"
+    const monoOfFont = name => {
+      if (!name) return false;
+      if (fontMono.has(name)) return fontMono.get(name);
+      let m = false;
+      try {
+        const f = page.commonObjs.has(name) ? page.commonObjs.get(name) : null;
+        const n = String((f && f.name) || "").replace(/^[A-Z]{6}\+/, "");
+        m = /mono|courier|consol|menlo|inconsolata|\bcode|code\b|sourcecode|firacode|lucidaconsole|andale/i.test(n) || !!(f && f.isMonospace);
+        if (f) fontMono.set(name, m);
+      } catch {}
+      return m;
+    };
     // letra capitular: letra grande no começo do parágrafo, desenhada à parte do resto da palavra
     const caps = [];
     {
@@ -1796,7 +1839,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       let ln = pl.find(l => l.col === col && Math.abs(l.y - y) < lineTol(size, l.size));
       if (!ln) { if (blank) continue; ln = { y, size, items: [], col }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
-      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName),
+      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName), mono: !blank && monoOfFont(it.fontName),
         lk: blank || !links.length ? "" : linkAt(x + iw / 2, y + size * 0.3) });
     }
     const pageItems = []; let pageChars = 0;
@@ -1838,7 +1881,12 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (!plainOf(text).trim()) continue;
       pageChars += chars;
       const firstReal = ln.items.find(i => !i.blank) || ln.items[0];
-      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
+      // linha toda em fonte de largura fixa: código; o recuo é medido pela largura de uma letra
+      const realIts = ln.items.filter(i => !i.blank && i.str.trim());
+      const mono = realIts.length > 0 && realIts.every(i => i.mono);
+      const cw = mono ? Math.max(1, realIts.reduce((a, i) => a + i.w, 0) / Math.max(1, realIts.reduce((a, i) => a + i.str.length, 0))) : 0;
+      if (mono) cells = null;
+      pageItems.push({ mono, cw, page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
         cells: cells && cells.length === cellX.length ? cells : null, cellX });
     }
     // capitular volta para o começo da primeira linha do parágrafo ("M" + "ira tinha" = "Mira tinha")
@@ -2026,7 +2074,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       run = [];
     };
     for (const l of filtered) {
-      const ok = l.kind === "line" && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
+      const ok = l.kind === "line" && !l.mono && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
       const last = run[run.length - 1];
       if (!ok || (last && (last.page !== l.page || last.col !== l.col || last.y - l.y <= 0 || last.y - l.y > lineGap * 1.5))) flush();
       if (ok) run.push(l);
@@ -2054,6 +2102,14 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
     const gg = geo[gk(l)] || { left: l.x0, right: l.x1 };
+    // código: cada linha continua sendo uma linha, com o recuo de antes
+    if (l.mono && l.size < body * 1.15) {
+      const cont = cur && cur.type === "code" && prev && (prev.page === l.page ? prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 2.6 : l.page === prev.page + 1);
+      if (!cont) { cur = { type: "code", x0: l.x0, cw: l.cw, text: "", page: l.page, last: l.page }; blocks.push(cur); }
+      const ind = Math.max(0, Math.min(40, Math.round((l.x0 - cur.x0) / cur.cw)));
+      cur.text += (cont ? BR : "") + mark + "\u00A0".repeat(ind) + l.text; cur.last = l.page;
+      prev = { ...l, isHead: false }; continue;
+    }
     // quebra de cena: linha só com sinais ("* * *", "#", "⁂")
     const sc = l.plain.trim();
     if (sc.length <= 20 && /^[\s*•·#~◆◇❖✦✧⁂§_=—–♦❦❧✶✱✳⁎-]+$/u.test(sc)) {
@@ -2219,7 +2275,7 @@ async function blocksToDocx(blocks, title, author){
   };
   const para = (style, text) =>
     `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs(text)}</w:p>`;
-  const styleOf = { h1: "Heading1", h2: "Heading2", p: "", li: "Lista", verse: "Verso" };
+  const styleOf = { h1: "Heading1", h2: "Heading2", p: "", li: "Lista", verse: "Verso", code: "Codigo" };
   const cell = t => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p>${runs(t)}</w:p></w:tc>`;
   const bd = k => `<w:${k} w:val="single" w:sz="4" w:space="0" w:color="888888"/>`;
   const table = rows => `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders>${["top", "left", "bottom", "right", "insideH", "insideV"].map(bd).join("")}</w:tblBorders></w:tblPr>${rows.map(r => `<w:tr>${r.map(cell).join("")}</w:tr>`).join("")}</w:tbl><w:p/>`;
@@ -2260,6 +2316,7 @@ async function blocksToDocx(blocks, title, author){
 <w:style w:type="paragraph" w:styleId="Cena"><w:name w:val="Quebra de cena"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="200"/><w:jc w:val="center"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="NotaRodape"><w:name w:val="Nota de rodapé"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Lista"><w:name w:val="Item de lista"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:after="60"/><w:ind w:left="567" w:hanging="283"/><w:jc w:val="left"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Codigo"><w:name w:val="Codigo"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120" w:line="240" w:lineRule="auto"/><w:jc w:val="left"/></w:pPr><w:rPr><w:rFonts w:ascii="Courier New" w:hAnsi="Courier New" w:cs="Courier New"/><w:sz w:val="18"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Verso"><w:name w:val="Verso"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="120" w:after="120"/><w:ind w:left="567"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/><w:qFormat/><w:pPr><w:keepNext/><w:spacing w:before="240" w:after="120"/><w:jc w:val="left"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:b/><w:sz w:val="28"/></w:rPr></w:style>
 </w:styles>`;
@@ -2403,7 +2460,7 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
         text += n.textContent;
       }
       else if (n.localName === "tab") text += " ";
-      else if (n.localName === "br") text += /^(Heading|Parte$|Verso$)/.test(style) ? BR : " ";
+      else if (n.localName === "br") text += /^(Heading|Parte$|Verso$|Codigo$)/.test(style) ? BR : " ";
       else if (n.localName === "bookmarkStart") {
         const nm = n.getAttributeNS(W, "name") || n.getAttribute("w:name") || ""; let m;
         if ((m = /^note(\d+)_([0-9a-f]*)$/.exec(nm))) { text += "\uE002" + m[1] + "|" + hexDec(m[2]) + "\uE003"; skipSup = true; }
@@ -2474,6 +2531,7 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     if (!splitStyle && ch.weight >= 60) newCh("Parte " + (chapters.length + 1));
     if (p.style === "img") { ch.items.push({ tag: "img", src: p.src, full: p.full, alt: p.alt }); ch.weight += 5; continue; }
     if (p.style === "table") { ch.items.push({ tag: "table", rows: p.rows }); ch.weight += p.rows.length; continue; }
+    if (p.style === "Codigo") { ch.items.push({ tag: "code", text: p.text }); ch.weight += 1; continue; }
     if (p.style === "Lista" || p.style === "Verso") { ch.items.push({ tag: p.style === "Lista" ? "li" : "verse", text: p.text }); ch.weight += 1; continue; }
     const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : p.style === "Heading3" ? "h2" : "p";
     ch.items.push({ tag, text: p.text }); ch.weight += 1;
@@ -2530,6 +2588,8 @@ p.cena+p,hr.cena+p{text-indent:0}
 ul.lista{list-style:none;margin:.6em 0;padding:0}
 ul.lista li{margin:0 0 .3em 1.6em;text-indent:-1em;text-align:left}
 p.verso{text-indent:0;text-align:left;margin:.8em 0 .8em 1.6em}
+pre.codigo{font-family:"Courier New",Courier,monospace;font-size:.82em;line-height:1.35;white-space:pre-wrap;text-align:left;margin:1em 0;padding:.5em .7em;border-left:3px solid #999}
+pre.codigo code{font-family:inherit}
 table{border-collapse:collapse;margin:1em auto;font-size:.9em}
 td{border:1px solid #888;padding:.25em .5em;text-align:left;vertical-align:top}
 a{color:inherit}
@@ -2598,6 +2658,7 @@ a{color:inherit}
         : it.tag === "table" ? `<table>${it.rows.map(r => `<tr>${r.map(t => `<td>${rich(t, fn)}</td>`).join("")}</tr>`).join("")}</table>`
         : it.tag === "li" ? `${(c.items[k - 1] || {}).tag === "li" ? "" : '<ul class="lista">'}<li>${rich(it.text, fn)}</li>${(c.items[k + 1] || {}).tag === "li" ? "" : "</ul>"}`
         : it.tag === "verse" ? `<p class="verso">${rich(it.text, fn)}</p>`
+        : it.tag === "code" ? `<pre class="codigo"><code>${rich(it.text, fn)}</code></pre>`
         : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
     const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
     chapterDocs.push([fn, xhtml(c.title, `<section epub:type="${c.part ? "part" : "chapter"}"${c.part ? ' class="parte"' : ""}>${inner}</section>${notes ? "\n" + notes : ""}`)]);
@@ -3728,6 +3789,7 @@ function reconvHtml(job){
 }
 
 function render(job){
+  if (job.error && !job.errCounted) { job.errCounted = true; countError(job); }
   let row = job.el;
   if (!row) {
     row = document.createElement("div"); row.className = "row"; job.el = row;
@@ -3791,11 +3853,12 @@ function render(job){
       <div class="actions">
         ${busy ? `<button class="btn ghost sm" data-a="cancel">Cancelar</button>` : ""}
         ${job.cancelled || job.error ? `<button class="btn ghost sm" data-a="remove">Tirar da fila</button>` : ""}
-        ${job.epub ? `<button class="btn" data-a="epub">Baixar EPUB</button>
-        <a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>
+        ${job.epub && deviceOf() === "kobo" ? `<button class="btn" data-a="kepub">Baixar KEPUB</button>` : ""}
+        ${job.epub ? `<button class="btn${deviceOf() === "kobo" ? " ghost" : ""}" data-a="epub">Baixar EPUB</button>
+        ${deviceOf() === "kobo" ? "" : `<a class="btn ghost kindle" data-a="kindle" href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">Enviar ao Kindle</a>`}
         <button class="btn ghost" data-a="pv">Prévia</button>
         ${job.kind === "pdf" && job.docx ? `<button class="btn quiet sm" data-a="docx">DOCX</button>` : ""}
-        <button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>` : ""}
+        ${deviceOf() === "kobo" ? "" : `<button class="btn quiet sm" data-a="kepub" title="Para leitores Kobo">KEPUB</button>`}` : ""}
       </div>
     </div>
     <div class="row-status">
@@ -4261,7 +4324,7 @@ async function runEpub(job){
     for (const k of ["read", "pages", "epub", "check"]) if (!job.done.includes(k)) job.done.push(k);
     job.structure = await checkEpubStructure(res.blob);
     job.epub = res.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job); notifyDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job); goatCount("convertido/" + (job.fmt || job.kind), true);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -4395,7 +4458,7 @@ async function buildPdf(job){
     stopIfCancelled(job);
     job.structure = await checkEpubStructure(ep.blob);
     job.epub = ep.blob; job.stage = null; job.progress = ""; job.busy = false; render(job);
-    saveHistory(job); queueDone(job); notifyDone(job);
+    saveHistory(job); queueDone(job); notifyDone(job); goatCount("convertido/" + (job.fmt || job.kind), true);
   } catch (e) {
     if (e && e.name === "AbortError") return markCancelled(job);
     console.error(e);
@@ -4771,12 +4834,14 @@ async function saveHistory(job){
 }
 // estante: os livros deste navegador e, com a conta Google conectada, os do Drive (sem repetir)
 async function renderHistory(){
+  const seq = renderHistory.seq = (renderHistory.seq || 0) + 1;
   const sec = $("#historySec"), box = $("#history");
   let local;
   try { local = await histAll(); } catch (e) {
     local = [];
     if (e && e.name === "DbBusy" && !renderHistory.warned) { renderHistory.warned = true; toast("A estante está presa por outra aba ou janela do Lombada aberta antes da atualização. Feche as outras e recarregue esta página.", 9000); }
   }
+  if (seq !== renderHistory.seq) return;   // outra chamada começou depois desta: só a última desenha
   const on = DRIVE_ON && driveConnected() && drv.list;
   const inDrive = new Map((on ? drv.list : []).map(d => [d.hid, d]));
   const items = local.map(r => ({ r, d: inDrive.get(r.id), date: r.date }));
@@ -4797,10 +4862,10 @@ async function renderHistory(){
   $("#shelfCount").textContent = items.length ? String(items.length) : "";
   const localOnly = on ? local.filter(r => !inDrive.has(r.id)).length : 0;
   $("#driveAllBtn").hidden = !localOnly;
-  const open = $("#driveOpen"); open.hidden = !(DRIVE_ON && driveRemembered()); open.href = driveFolderUrl();
+  const open = $("#driveOpen"); open.hidden = !(toDrive() && driveRemembered()); open.href = driveFolderUrl();
   $("#driveAllN").textContent = String(localOnly);
   $("#shelfNote").textContent = on ? "Guardados na pasta Lombada do seu Google Drive: aparecem em qualquer aparelho em que você entrar."
-    : DRIVE_ON ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
+    : toDrive() ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
     : "Os últimos 12 livros ficam guardados neste navegador.";
   box.innerHTML = "";
   if (!items.length && total) { const p = document.createElement("p"); p.className = "shelf-empty"; p.textContent = "Nenhum livro com esse título ou autor."; box.appendChild(p); }
@@ -4848,6 +4913,10 @@ const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const DRIVE_API = "https://www.googleapis.com/drive/v3/", DRIVE_UP = "https://www.googleapis.com/upload/drive/v3/files";
 const DRIVE_ACCT = "conversor-epub:drive", DRIVE_TOKEN = "conversor-epub:drive-token";
 const drv = { token: null, exp: 0, user: null, folder: null, covers: null, list: null, coverBlobs: new Map(), pending: new Set(), client: null };
+// onde a pessoa quer os livros: "drive" (pasta Lombada do Drive) ou "local" (só este navegador); sem resposta, pergunta
+const STORE_KEY = "conversor-epub:guardar";
+const storeMode = () => { try { return localStorage.getItem(STORE_KEY); } catch { return null; } };
+const toDrive = () => DRIVE_ON && storeMode() === "drive";
 const driveConnected = () => !!(drv.token && Date.now() < drv.exp - 60000);
 const driveErr = (msg, name) => Object.assign(new Error(msg), { name });
 
@@ -4886,15 +4955,35 @@ async function driveLogin(){
     const first = document.body.classList.contains("gated");
     applyGate(); renderAccount();
     if (first) scrollTo(0, 0);
-    toast("Conectado ao Google Drive.");
+    takeIncoming();
+    toast(toDrive() ? "Conectado ao Google Drive." : "Você entrou com o Google.");
+    if (!storeMode()) askStore();
     await driveRefresh();
-    // livros que ficaram esperando a conexão (convertidos com ela expirada)
-    for (const hid of [...drv.pending]) { const j = jobs.find(j => j.histId === hid); if (j && j.epub) driveSaveJob(j); }
-    drv.pending.clear();
+    flushPending();
   } catch (e) {
     console.warn("login google", e);
     toast(loginErrorText(e), 12000);
   } finally { loginBtns(true); }
+}
+// livros que ficaram esperando a conexão (convertidos com ela expirada) ou a escolha de onde guardar
+function flushPending(){
+  if (!toDrive() || !driveConnected()) return;
+  for (const hid of [...drv.pending]) { const j = jobs.find(j => j.histId === hid); if (j && j.epub) driveSaveJob(j); }
+  drv.pending.clear();
+}
+function askStore(){ const d = $("#storeAsk"); if (!d.open) d.showModal(); }
+function setStore(mode){
+  try { localStorage.setItem(STORE_KEY, mode); } catch {}
+  $("#storeAsk").close();
+  renderAccount();
+  if (mode === "drive") {
+    if (driveConnected()) { toast("Os livros vão para a pasta Lombada do seu Drive."); driveRefresh(); flushPending(); }
+    else { toast("Os livros vão para o seu Drive. Reconecte para começar.", 7000); renderHistory(); }
+  } else {
+    for (const hid of drv.pending) { const j = jobs.find(j => j.histId === hid); if (j) { j.driveState = null; render(j); } }
+    drv.pending.clear(); drv.list = null; renderHistory();
+    toast("Os livros ficam só neste navegador.");
+  }
 }
 // diz o que impediu a entrada e o que fazer
 function loginErrorText(e){
@@ -4908,19 +4997,19 @@ function loginErrorText(e){
   return "Não consegui entrar com o Google (" + (t || "erro desconhecido") + "). Tente de novo.";
 }
 function driveLogout(){
-  const tok = drv.token;
+  const tok = drv.token, wasDrive = toDrive();
   Object.assign(drv, { token: null, exp: 0, user: null, folder: null, covers: null, list: null }); drv.coverBlobs.clear();
-  try { sessionStorage.removeItem(DRIVE_TOKEN); localStorage.removeItem(DRIVE_ACCT); } catch {}
+  try { sessionStorage.removeItem(DRIVE_TOKEN); localStorage.removeItem(DRIVE_ACCT); localStorage.removeItem(STORE_KEY); } catch {}
   try { if (tok && window.google && google.accounts) google.accounts.oauth2.revoke(tok, () => {}); } catch {}
   applyGate(); renderAccount(); renderHistory(); scrollTo(0, 0);
-  toast("Você saiu da conta Google. Os livros continuam no seu Drive.");
+  toast(wasDrive ? "Você saiu da conta Google. Os livros continuam no seu Drive." : "Você saiu da conta Google.");
 }
 function driveExpired(){
   if (!drv.token) return;
   drv.token = null; drv.exp = 0;
   try { sessionStorage.removeItem(DRIVE_TOKEN); } catch {}
   renderAccount(); renderHistory();
-  toast("A conexão com o Drive expirou. Use “Reconectar” para continuar guardando os livros.", 8000);
+  if (toDrive()) toast("A conexão com o Drive expirou. Use “Reconectar” para continuar guardando os livros.", 8000);
 }
 
 // chamada à API do Drive com o acesso da pessoa
@@ -4979,7 +5068,8 @@ async function driveSaveRecord(r){
   return f;
 }
 async function driveSaveJob(job){
-  if (!DRIVE_ON) return;
+  if (!DRIVE_ON || storeMode() === "local") return;
+  if (!storeMode()) { drv.pending.add(job.histId); askStore(); return; }
   if (!driveConnected()) { if (loggedIn()) { drv.pending.add(job.histId); job.driveState = "wait"; render(job); renderAccount(); } return; }
   job.driveState = "up"; render(job);
   try {
@@ -4996,9 +5086,42 @@ async function driveSaveJob(job){
   }
   render(job);
 }
+// ajustes (Ajustes do app) num arquivo da pasta Lombada: quem guarda no Drive tem as mesmas opções em todo aparelho.
+// Vale o mais novo: o do Drive troca o daqui, e o daqui sobe quando a pessoa muda alguma opção.
+const OPT_T = "conversor-epub:opcoes-quando";
+const optTime = () => { try { return +localStorage.getItem(OPT_T) || 0; } catch { return 0; } };
+const prefsFile = async () => { await driveFolders(); return ((await gapi("files?" + qs({ q: `trashed=false and ${qStr(drv.folder)} in parents and appProperties has { key='lombada' and value='ajustes' }`, fields: "files(id,modifiedTime)", pageSize: 1 }))).files || [])[0]; };
+async function drivePullPrefs(){
+  if (!toDrive() || !driveConnected()) return;
+  try {
+    const f = await prefsFile();
+    const remote = f ? Date.parse(f.modifiedTime) || 0 : 0;
+    if (f && remote > optTime()) {
+      const o = await (await gapi(`files/${f.id}?alt=media`, {}, true)).json();
+      localStorage.setItem(OPT_KEY, JSON.stringify(o)); localStorage.setItem(OPT_T, String(remote));
+      loadOptions(); applyDevice(); updateOptSum();
+    } else if (localStorage.getItem(OPT_KEY) && (!f || optTime() > remote)) await drivePushPrefs(f ? f.id : null);
+  } catch (e) { console.warn("ajustes no drive", e); }
+}
+async function drivePushPrefs(id){
+  if (!toDrive() || !driveConnected()) return;
+  try {
+    if (id === undefined) { const f = await prefsFile(); id = f && f.id; }
+    const blob = new Blob([localStorage.getItem(OPT_KEY) || "{}"], { type: "application/json" });
+    const r = await driveUpload(id, id ? {} : { name: "ajustes do Lombada.json", parents: [drv.folder], appProperties: { lombada: "ajustes" } }, blob);
+    if (r && r.modifiedTime) localStorage.setItem(OPT_T, String(Date.parse(r.modifiedTime)));
+  } catch (e) { console.warn("ajustes no drive", e); }
+}
+let prefsTimer = 0;
+function prefsChanged(){
+  try { localStorage.setItem(OPT_T, String(Date.now())); } catch {}
+  clearTimeout(prefsTimer); prefsTimer = setTimeout(() => drivePushPrefs(), 1500);
+}
 // lista dos livros guardados no Drive
 async function driveRefresh(){
+  if (!toDrive()) { drv.list = null; renderHistory(); return; }
   if (!driveConnected()) return;
+  await drivePullPrefs();
   try {
     await driveFolders();
     const res = await gapi("files?" + qs({ q: `${qStr(drv.folder)} in parents and trashed=false and appProperties has { key='lombada' and value='livro' }`,
@@ -5057,7 +5180,7 @@ function renderAccount(){
   box.hidden = !DRIVE_ON;
   if (!DRIVE_ON) return;
   // quem já entrou continua com a conta no topo; o acesso ao Drive dura uma hora e é refeito em "Reconectar"
-  const user = drv.user || driveRemembered(), on = driveConnected();
+  const user = drv.user || driveRemembered(), on = driveConnected() || !toDrive();
   $("#loginBtn").hidden = true;
   $("#acctMenu").hidden = !user;
   $("#acctMenu").classList.toggle("off", !on);
@@ -5068,16 +5191,21 @@ function renderAccount(){
     $("#acctName").textContent = (user.name || user.email || "").split(" ")[0];
     $("#acctMail").textContent = user.email || "";
     $("#reconnectBtn").hidden = on;
-    $("#acctFolder").href = driveFolderUrl();
+    $("#acctFolder").href = driveFolderUrl(); $("#acctFolder").hidden = !toDrive();
+    $("#acctStore").textContent = toDrive() ? "Livros guardados no seu Drive." : storeMode() === "local" ? "Livros só neste navegador." : "Você ainda não escolheu onde guardar os livros.";
   }
 }
 document.querySelectorAll("[data-login]").forEach(b => { b.onclick = () => { $("#acctMenu").open = false; driveLogin(); }; });
 
+$("#storeBtn").onclick = () => { $("#acctMenu").open = false; askStore(); };
+document.querySelectorAll("[data-store]").forEach(b => { b.onclick = () => setStore(b.dataset.store); });
+$("#storeAsk").addEventListener("cancel", e => { if (!storeMode()) e.preventDefault(); });   // a primeira vez precisa de uma resposta
 $("#logoutBtn").onclick = () => { $("#acctMenu").open = false; driveLogout(); };
 $("#driveAllBtn").onclick = driveSaveAll;
 document.addEventListener("click", e => { const m = $("#acctMenu"); if (m.open && !m.contains(e.target)) m.open = false; });
 applyGate(); renderAccount();
 if (driveConnected()) driveRefresh();
+if (DRIVE_ON && loggedIn() && !storeMode()) askStore();
 
 /* ---------- tema, instalação e resumo das opções ---------- */
 const THEME_KEY = "conversor-epub:tema";
@@ -5113,7 +5241,7 @@ document.querySelectorAll(".side input, .side select").forEach(el => el.addEvent
 $("#settingsBtn").onclick = () => { const p = $("#optPanel"); p.open = true; p.scrollIntoView({ block: "start", behavior: "smooth" }); p.querySelector("summary").focus({ preventScroll: true }); };
 
 /* ---------- opções lembradas neste navegador ---------- */
-const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images", "tocpage"];
+const OPT_IDS = ["verify", "shownums", "headers", "cover", "notes", "ocr", "keeppages", "totalpages", "cpp", "lookFont", "lookJustify", "lookIndent", "lookLh", "images", "tocpage", "device"];
 const OPT_KEY = "conversor-epub:opcoes";
 function loadOptions(){
   try {
@@ -5131,8 +5259,25 @@ function saveOptions(){
     for (const id of OPT_IDS) { const el = document.getElementById(id); if (el) o[id] = el.type === "checkbox" ? el.checked : el.value; }
     localStorage.setItem(OPT_KEY, JSON.stringify(o));
   } catch {}
+  if (DRIVE_ON) prefsChanged();
 }
+// perfis de leitor: ajustam as imagens e o formato que vem primeiro no download
+const DEVICES = {
+  kindle: { images: "gray", note: "Imagens menores e em tons de cinza, como a tela do Kindle mostra." },
+  kobo: { images: "gray", note: "Imagens em tons de cinza e o botão “Baixar KEPUB”, o formato que guarda a posição de leitura no Kobo." },
+  color: { images: "small", note: "Imagens coloridas, um pouco menores para o arquivo ficar leve." }
+};
+function deviceOf(){ const el = document.getElementById("device"); return el ? el.value : "custom"; }
+function applyDevice(){
+  const d = DEVICES[deviceOf()], note = $("#deviceNote");
+  note.hidden = !d; if (d) note.textContent = d.note;
+  if (d) $("#images").value = d.images;
+  jobs.forEach(j => j.epub && render(j));
+}
+$("#device").addEventListener("change", () => { applyDevice(); saveOptions(); });
+$("#images").addEventListener("change", () => { const d = DEVICES[deviceOf()]; if (d && $("#images").value !== d.images) { $("#device").value = "custom"; applyDevice(); saveOptions(); } });
 loadOptions();
+applyDevice();
 OPT_IDS.forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener("change", saveOptions); });
 renderHistory();
 queueRestore();
@@ -5156,6 +5301,7 @@ const I18N_SKIP = ".lp-shot .bt,.acct-name,.acct-mail,.acct-initial,.name,.bylin
 const I18N_PATS = [
   [/^Arquivo salvo: (.+)$/, "File saved: $1", "Archivo guardado: $1"],
   [/^(.+) não é de um formato que o Lombada abre e foi ignorado\.$/, "$1 is not in a format Lombada can open and was skipped.", "$1 no está en un formato que Lombada abra y se ignoró."],
+  [/^Entre com o Google para converter (.+)\.$/, "Sign in with Google to convert $1.", "Entra con Google para convertir $1."],
   [/^(.+): EPUB pronto\.$/, "$1: EPUB ready.", "$1: EPUB listo."],
   [/^(.+?): ((?:Este|Não|Faltou|Senha|O ) ?.+)$/, "$1: $2", "$1: $2"],
   [/^Tema (automático|claro|escuro)$/, m => "Theme: " + ({ automático: "automatic", claro: "light", escuro: "dark" })[m[1]], m => "Tema " + ({ automático: "automático", claro: "claro", escuro: "oscuro" })[m[1]]],
@@ -5251,7 +5397,50 @@ new MutationObserver(list => {
 $("#uiLang").onchange = e => setUiLang(e.target.value, true);
 setUiLang(uiLang, false);
 
+/* ---------- contagem de visitas e de erros (GoatCounter, sem cookies) ----------
+   Só no site e só com o código do GoatCounter em package.json ("goatcounter"). Nunca sai nome de arquivo,
+   título, autor ou texto do livro: só a página aberta, o formato convertido e o tipo do erro. */
+// var: render() pode chamar antes deste trecho rodar, e aí a contagem só fica desligada
+var GOAT = window.__lombadaGoat || "";
+var GOAT_ON = ON_SITE && /^[a-z0-9-]+$/.test(GOAT) && navigator.doNotTrack !== "1";
+function goatCount(path, event){
+  if (!GOAT_ON) return;
+  try {
+    const q = { p: path, rnd: Math.random().toString(36).slice(2) };
+    if (event) q.e = "true";
+    else { q.r = document.referrer || ""; q.s = [screen.width, screen.height, devicePixelRatio || 1].join(","); }
+    new Image().src = `https://${GOAT}.goatcounter.com/count?` + Object.entries(q).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+  } catch {}
+}
+// tira do texto do erro o que pode ser do usuário: o que vem entre parênteses ou aspas, nomes de arquivo e números
+function errKind(msg){ return String(msg || "erro").replace(/\(.*?\)|“.*?”|".*?"|'.*?'/g, "").replace(/\S+\.(pdf|epub|docx?|txt|html?|md|fb2|mobi|azw3?|cbz)\b/gi, "")
+  .replace(/\d+/g, "N").replace(/\s+/g, " ").trim().slice(0, 70); }
+function countError(job){
+  if (!GOAT_ON) return;
+  const names = [job.title, job.file && job.file.name].filter(Boolean);
+  let m = errKind(job.error);
+  for (const n of names) if (n.length > 2) m = m.split(n).join("");
+  goatCount("erro/" + (job.fmt || job.kind) + "/" + m, true);
+}
+const jsSeen = new Set();
+window.addEventListener("error", e => { const k = errKind(e.message) + "@" + (e.lineno || 0); if (jsSeen.size < 5 && !jsSeen.has(k)) { jsSeen.add(k); goatCount("erro/js/" + k, true); } });
+window.addEventListener("unhandledrejection", e => { const k = errKind(e.reason && (e.reason.message || e.reason)); if (jsSeen.size < 5 && !jsSeen.has(k)) { jsSeen.add(k); goatCount("erro/js/" + k, true); } });
+goatCount(document.body.classList.contains("gated") ? "/entrada" : "/app");
+
 /* ---------- app instalável (só no site; o artefato não aceita) ---------- */
+// arquivos que chegam de fora (Compartilhar no celular, "Abrir com" no computador): sem login, esperam a pessoa entrar
+let incoming = [];
+function openIncoming(files){
+  if (!files.length) return;
+  if (document.body.classList.contains("gated")) { incoming.push(...files); toast("Entre com o Google para converter " + (files.length === 1 ? files[0].name : files.length + " arquivos") + ".", 8000); return; }
+  addFiles(files);
+}
+function takeIncoming(){ if (incoming.length && !document.body.classList.contains("gated")) { const f = incoming; incoming = []; addFiles(f); } }
+// "Abrir com > Lombada" no computador, com o app instalado
+if ("launchQueue" in window) launchQueue.setConsumer(async p => {
+  if (!p.files || !p.files.length) return;
+  try { openIncoming(await Promise.all(p.files.map(h => h.getFile()))); } catch (e) { console.warn("abrir com", e); }
+});
 (async () => {
   if (!ON_SITE || location.protocol !== "https:" && location.hostname !== "localhost") return;
   const head = document.head;
@@ -5282,7 +5471,7 @@ setUiLang(uiLang, false);
         await c.delete(req);
       }
       history.replaceState(null, "", location.pathname);
-      if (files.length) addFiles(files);
+      openIncoming(files);
     } catch (e) { console.warn("compartilhado", e); }
   }
 })();

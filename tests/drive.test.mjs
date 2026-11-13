@@ -49,6 +49,7 @@ test("entrar com Google: o livro convertido vai para a pasta Lombada do Drive, c
   assert.ok(epub.equals(books[0].data), "o arquivo no Drive é o EPUB gerado");
   assert.equal(live("capa").length, 1);
   assert.match(await p.locator(".row .drive-note").textContent(), /Guardado no seu Google Drive/);
+  await p.waitForSelector("#history .book .cloud");   // a estante é redesenhada sem esperar
   assert.equal(await p.locator("#history .book .cloud").count(), 1);
   assert.equal(await p.getAttribute("#driveOpen", "href"), "https://drive.google.com/drive/folders/" + live("pasta")[0].id);
   assert.equal(await p.getAttribute(".row .drive-note a", "href"), "https://drive.google.com/file/d/" + books[0].id + "/view");
@@ -96,6 +97,7 @@ test("livros convertidos antes de entrar: botão para guardar no Drive", async (
   // conta lembrada, mas sem acesso ao Drive: o livro fica só no navegador até reconectar
   const C = await openApp(browser, server, { setup: fakeGoogle }), p = C.page;
   await addFiles(p, ["grudado.pdf"]); await waitJob(p, 0);
+  await p.waitForSelector("#history .book");   // espera o livro ser gravado na estante antes de recarregar
   await p.evaluate(() => window.__app.jobs.length = 0);   // tira da fila: sobra só na estante
   await p.reload();
   await p.click("#acctMenu > summary"); await p.click("#reconnectBtn");
@@ -117,6 +119,51 @@ test("sair: volta para a página de apresentação e os livros ficam no Drive", 
   assert.equal(await p.locator("#drop").isVisible(), false);
   assert.equal(live("livro").length, 2);
   assert.equal(await p.evaluate(() => localStorage.getItem("conversor-epub:drive")), null);
+});
+
+test("quem escolhe guardar só no navegador não ocupa espaço no Drive, e pode mudar depois", async () => {
+  const D = await openApp(browser, server, { setup: fakeGoogle, loggedOut: true, store: null }), p = D.page;
+  const before = drive.files.size;
+  await p.locator("[data-login]:visible").first().click();
+  await p.waitForSelector("#storeAsk[open]");
+  await p.keyboard.press("Escape");   // a primeira vez precisa de resposta
+  assert.equal(await p.locator("#storeAsk").isVisible(), true);
+  await p.click('[data-store="local"]');
+  assert.equal(await p.locator("#storeAsk").isVisible(), false);
+  await addFiles(p, ["capitulos.pdf"]); await waitJob(p, 0);
+  await p.waitForFunction(() => document.querySelectorAll("#history .book").length === 1);
+  await p.waitForTimeout(300);
+  assert.equal(drive.files.size, before, "algo foi para o Drive");
+  assert.equal(await p.locator(".row .drive-note").count(), 0);
+  assert.equal(await p.locator("#driveOpen").isVisible(), false);
+  assert.match(await p.textContent("#shelfNote"), /neste navegador/);
+  await p.click("#acctMenu > summary");
+  assert.equal(await p.textContent("#acctStore"), "Livros só neste navegador.");
+  // mudou de ideia: o livro da estante pode ir para o Drive
+  await p.click("#storeBtn"); await p.click('[data-store="drive"]');
+  await p.waitForSelector("#driveAllBtn:not([hidden])");
+  await p.click("#acctMenu > summary");
+  assert.equal(await p.textContent("#acctStore"), "Livros guardados no seu Drive.");
+  assert.deepEqual(D.errors, []);
+  await D.ctx.close();
+});
+
+test("ajustes no Drive: a opção mudada num aparelho aparece no outro", async () => {
+  const E = await device(), p = E.page;
+  await login(p);
+  await p.click("#settingsBtn");
+  await p.selectOption("#device", "kobo");
+  const t0 = Date.now();
+  while (!live("ajustes").length && Date.now() - t0 < 6000) await p.waitForTimeout(200);
+  assert.equal(live("ajustes").length, 1, "os ajustes não foram para o Drive");
+  assert.equal(JSON.parse(live("ajustes")[0].data.toString()).device, "kobo");
+  const F = await device(), q = F.page;
+  assert.equal(await q.inputValue("#device"), "custom");
+  await login(q);
+  await q.waitForFunction(() => document.querySelector("#device").value === "kobo");
+  assert.equal(await q.inputValue("#images"), "gray");
+  assert.deepEqual([...E.errors, ...F.errors], []);
+  await E.ctx.close(); await F.ctx.close();
 });
 
 test("nenhum erro de JavaScript", () => { assert.deepEqual(A.errors, []); });

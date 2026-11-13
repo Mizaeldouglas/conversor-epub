@@ -17,6 +17,7 @@ Converte PDF, DOCX, MOBI e outros formatos em EPUB para ler no Kindle, com capí
 - **PDFs difíceis.** Usa o sumário interno do PDF, lê duas colunas na ordem certa e mantém tabelas, listas, links e versos.
 - **Correção na prévia.** Clique num parágrafo para reescrever; mude a ordem dos capítulos; desfaça a última alteração.
 - **Pronto para a biblioteca.** Capa com título e autor quando o PDF não tem uma, página de sumário no começo do livro, editora, ano e ISBN, e arquivo com o nome “Autor - Título.epub”.
+- **Do seu jeito.** Livros no Google Drive ou só no navegador; perfis para Kindle, Kobo e tablet; código de apostilas em bloco próprio, com o recuo.
 - **Mais:** livro de exemplo para experimentar, tempo restante e aviso quando a conversão termina, busca e ordem na estante, KEPUB para Kobo, imagens menores ou em tons de cinza, descrição das imagens, capa e sinopse da internet, notas de rodapé clicáveis, quebras de cena, números de página no padrão EPUB 3, OCR para páginas escaneadas, quadrinhos e mangá em página fixa, juntar volumes, numerar páginas de um EPUB pronto, estante com os últimos livros e app instalável que funciona sem internet.
 
 | Prévia com o sumário | Capítulos e partes |
@@ -35,6 +36,10 @@ A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navega
 - Páginas com texto em várias colunas (créditos, índices) podem sair na ordem das colunas lidas de cima para baixo.
 - O OCR pode trocar letras; confira na prévia com o PDF ao lado.
 - O Kindle mostra posições, não páginas. Use “Número da página no texto” se quiser ver o número lá.
+
+## Contagem de visitas
+
+Para ver quantas pessoas usam o site, crie uma conta grátis no [GoatCounter](https://www.goatcounter.com) e ponha o código do site (a parte antes de `.goatcounter.com`) em `goatcounter`, no `package.json`. Sem o código, nada é contado. A contagem não usa cookies e nunca envia nome de arquivo, título ou texto do livro.
 
 ## Login com Google
 

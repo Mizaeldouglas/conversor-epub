@@ -15,6 +15,7 @@ const I18N_SKIP = ".lp-shot .bt,.acct-name,.acct-mail,.acct-initial,.name,.bylin
 const I18N_PATS = [
   [/^Arquivo salvo: (.+)$/, "File saved: $1", "Archivo guardado: $1"],
   [/^(.+) não é de um formato que o Lombada abre e foi ignorado\.$/, "$1 is not in a format Lombada can open and was skipped.", "$1 no está en un formato que Lombada abra y se ignoró."],
+  [/^Entre com o Google para converter (.+)\.$/, "Sign in with Google to convert $1.", "Entra con Google para convertir $1."],
   [/^(.+): EPUB pronto\.$/, "$1: EPUB ready.", "$1: EPUB listo."],
   [/^(.+?): ((?:Este|Não|Faltou|Senha|O ) ?.+)$/, "$1: $2", "$1: $2"],
   [/^Tema (automático|claro|escuro)$/, m => "Theme: " + ({ automático: "automatic", claro: "light", escuro: "dark" })[m[1]], m => "Tema " + ({ automático: "automático", claro: "claro", escuro: "oscuro" })[m[1]]],

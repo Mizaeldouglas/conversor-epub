@@ -28,6 +28,7 @@ function html(book, { capa = false } = {}){
     if (b.ol) return `<ol>${b.ol.map(i => `<li>${esc(i)}</li>`).join("")}</ol>`;
     if (b.tabela) return `<table>${b.tabela.map((r, i) => `<tr>${r.map(c => i ? `<td>${esc(c)}</td>` : `<th>${esc(c)}</th>`).join("")}</tr>`).join("")}</table>`;
     if (b.poema) return b.poema.map(e => `<p class="estrofe">${e.map(esc).join("<br>")}</p>`).join("");
+    if (b.codigo) return `<pre>${b.codigo.map(esc).join("\n")}</pre>`;
     if (b.colunas) return `<div class="colunas">${b.colunas.map(p => `<p>${esc(p)}</p>`).join("")}</div>`;
     if (b.link) return `<p>${inline(b.p)} <a href="${b.link[1]}">${esc(b.link[0])}</a>.</p>`;
     return `<p>${inline(b.p)}</p>`;
@@ -48,6 +49,7 @@ table{border-collapse:collapse;margin:8pt 0 10pt}
 th,td{border:0.6pt solid #555;padding:3pt 7pt;text-align:left;font-size:10pt}
 .estrofe{text-indent:0;text-align:left;margin:0 0 10pt 22pt}
 .colunas{column-count:2;column-gap:9mm}
+pre{font:9.5pt/1.35 "Liberation Mono","DejaVu Sans Mono",monospace;margin:8pt 0 10pt;padding:6pt 8pt;background:#f2f2f2;white-space:pre-wrap}
 .colunas p{text-indent:0;margin:0 0 7pt}
 .capa{break-after:page;height:150mm;display:flex;flex-direction:column;justify-content:center;text-align:center}
 .capa h1{font-size:30pt;break-before:auto;margin:0 0 12pt}
@@ -72,6 +74,7 @@ await chromePdf(T.farol, join(OUT, "farol-chrome.pdf"));
 await chromePdf(T.bicicleta, join(OUT, "bicicleta-chrome.pdf"));
 await chromePdf(T.poemas, join(OUT, "poemas-chrome.pdf"));
 await chromePdf(T.revista, join(OUT, "revista-chrome.pdf"));
+await chromePdf(T.apostila, join(OUT, "apostila-chrome.pdf"));
 await chromePdf(T.farol, join(EX, "o-farol-apagado.pdf"), { capa: true });
 await browser.close();
 

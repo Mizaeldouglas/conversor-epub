@@ -455,3 +455,19 @@ body.noscroll{overflow:hidden}
   .modal{padding:0}.modal-box{height:100%;border-radius:0}
   .pv-main{flex-direction:column}.pv-pdf{border-left:0;border-bottom:1px solid var(--line-soft);order:-1;max-height:48%}
 }
+
+/* escolha de onde guardar os livros */
+.ask{border:0;border-radius:18px;padding:26px;width:min(520px,calc(100% - 32px));background:var(--surface);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.ask::backdrop{background:rgba(9,11,26,.62)}
+.ask h2{font:650 21px/1.25 var(--f-ui);margin:0 0 16px}
+.ask .muted{margin:14px 0 0;font-size:13.5px}
+.store-opts{display:grid;gap:10px}
+.store-opt{display:grid;gap:4px;text-align:left;font:inherit;color:inherit;background:var(--bg);border:1.5px solid var(--line);border-radius:var(--r);padding:14px 16px;cursor:pointer}
+.store-opt b{font-size:16px;font-weight:650}
+.store-opt span{color:var(--muted);font-size:14px;line-height:1.45}
+.store-opt:hover,.store-opt:focus-visible{border-color:var(--accent);background:var(--accent-soft)}
+.store-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.acct-pop .acct-store{font-size:13px}
+.acct-pop .acct-store .linkbtn{display:inline;font-size:13px}
+.dev-note{font-size:12.5px;color:var(--muted);line-height:1.4;margin:-4px 0 4px}
+.ask h2:focus{outline:none}

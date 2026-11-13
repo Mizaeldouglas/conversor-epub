@@ -2082,5 +2082,149 @@
 "Capa automática com o título": [
 "Automatic cover with the title",
 "Portada automática con el título"
+],
+"Ao entrar pela primeira vez, você escolhe onde ficam os livros: no seu Google Drive ou só neste navegador (dá para mudar no menu da sua conta).": [
+"The first time you sign in, you choose where your books are kept: in your Google Drive or only in this browser (you can change it in your account menu).",
+"La primera vez que entras, eliges dónde se guardan los libros: en tu Google Drive o solo en este navegador (puedes cambiarlo en el menú de tu cuenta)."
+],
+"Do meu jeito": [
+"My own settings",
+"A mi manera"
+],
+"Dá para mudar depois, no menu da sua conta.": [
+"You can change this later in your account menu.",
+"Puedes cambiarlo después en el menú de tu cuenta."
+],
+"Estante onde você quiser": [
+"A shelf wherever you like",
+"Estantería donde quieras"
+],
+"Kindle Colorsoft, tablet ou celular": [
+"Kindle Colorsoft, tablet or phone",
+"Kindle Colorsoft, tableta o celular"
+],
+"Kobo": [
+"Kobo",
+"Kobo"
+],
+"Kindle": [
+"Kindle",
+"Kindle"
+],
+"Livros guardados no seu Drive.": [
+"Books saved to your Drive.",
+"Libros guardados en tu Drive."
+],
+"Livros só neste navegador.": [
+"Books kept only in this browser.",
+"Libros solo en este navegador."
+],
+"Você ainda não escolheu onde guardar os livros.": [
+"You haven't chosen where to keep your books yet.",
+"Todavía no elegiste dónde guardar los libros."
+],
+"Mudar": [
+"Change",
+"Cambiar"
+],
+"No Drive, cada livro convertido vai para a pasta Lombada (junto com um arquivo pequeno com os seus Ajustes, que passam a valer em todo aparelho), e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta.": [
+"In Drive, each converted book goes to the Lombada folder (along with a small file holding your Settings, which then apply on every device), and the shelf shows those books on any device where you sign in with the same account.",
+"En Drive, cada libro convertido va a la carpeta Lombada (junto con un archivo pequeño con tus Ajustes, que pasan a valer en todos los dispositivos), y la estantería muestra esos libros en cualquier dispositivo donde entres con la misma cuenta."
+],
+"No meu Google Drive": [
+"In my Google Drive",
+"En mi Google Drive"
+],
+"Numa pasta Lombada do seu Drive, a que só você tem acesso, ou só neste navegador.": [
+"In a Lombada folder in your Drive that only you can access, or only in this browser.",
+"En una carpeta Lombada de tu Drive, a la que solo tú tienes acceso, o solo en este navegador."
+],
+"Numa pasta Lombada do seu Drive, para ver em qualquer aparelho, ou só neste navegador, sem ocupar espaço no Drive.": [
+"In a Lombada folder in your Drive, to see them on any device, or only in this browser, without using Drive space.",
+"En una carpeta Lombada de tu Drive, para verlos en cualquier dispositivo, o solo en este navegador, sin ocupar espacio en Drive."
+],
+"Não usa espaço do Drive.": [
+"Uses no Drive space.",
+"No usa espacio de Drive."
+],
+"O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive ou só no navegador, como você preferir.": [
+"Lombada converts PDF, DOCX, MOBI and other formats into EPUB with chapters, a table of contents and notes, and keeps each finished book in your Google Drive or only in your browser, as you prefer.",
+"Lombada convierte PDF, DOCX, MOBI y otros formatos en EPUB con capítulos, índice y notas, y guarda cada libro listo en tu Google Drive o solo en el navegador, como prefieras."
+],
+"O passo a passo, com o envio por e-mail e o que fazer quando o livro não chega, está na": [
+"The step-by-step guide, including sending by email and what to do when the book doesn't arrive, is on the",
+"El paso a paso, con el envío por correo y qué hacer cuando el libro no llega, está en la"
+],
+"Ocupam espaço no seu Drive: um livro tem, em geral, de {0} a {1} MB.": [
+"They use space in your Drive: a book is usually {0} to {1} MB.",
+"Ocupan espacio en tu Drive: un libro suele tener de {0} a {1} MB."
+],
+"Onde guardar os livros convertidos?": [
+"Where should converted books be kept?",
+"¿Dónde guardar los libros convertidos?"
+],
+"Onde você vai ler": [
+"Where you'll read",
+"Dónde vas a leer"
+],
+"Os livros aparecem em qualquer aparelho em que você entrar.": [
+"Your books show up on any device where you sign in.",
+"Los libros aparecen en cualquier dispositivo donde entres."
+],
+"Os últimos {0} livros ficam aqui e somem se você limpar os dados do navegador.": [
+"The last {0} books stay here and disappear if you clear the browser's data.",
+"Los últimos {0} libros quedan aquí y desaparecen si borras los datos del navegador."
+],
+"Se você escolher o Drive, os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.": [
+"If you choose Drive, finished EPUBs are saved in a Lombada folder in your own Google Drive; Lombada has no server and never receives your books.",
+"Si eliges Drive, los EPUB listos se guardan en una carpeta Lombada de tu propio Google Drive; Lombada no tiene servidor y no recibe los libros."
+],
+"Só neste navegador": [
+"Only in this browser",
+"Solo en este navegador"
+],
+"Você escolhe onde guardar.": [
+"You choose where to keep them.",
+"Tú eliges dónde guardarlos."
+],
+"ajuda para mandar ao Kindle": [
+"help for sending to Kindle (in Portuguese)",
+"ayuda para enviar al Kindle (en portugués)"
+],
+"página de ajuda": [
+"help page (in Portuguese)",
+"página de ayuda (en portugués)"
+],
+"Baixar KEPUB": [
+"Download KEPUB",
+"Descargar KEPUB"
+],
+"Imagens menores e em tons de cinza, como a tela do Kindle mostra.": [
+"Smaller, grayscale images, the way the Kindle screen shows them.",
+"Imágenes más pequeñas y en escala de grises, como las muestra la pantalla del Kindle."
+],
+"Imagens em tons de cinza e o botão “Baixar KEPUB”, o formato que guarda a posição de leitura no Kobo.": [
+"Grayscale images and a “Download KEPUB” button, the format that keeps your reading position on Kobo.",
+"Imágenes en escala de grises y el botón “Descargar KEPUB”, el formato que guarda la posición de lectura en el Kobo."
+],
+"Imagens coloridas, um pouco menores para o arquivo ficar leve.": [
+"Color images, a little smaller so the file stays light.",
+"Imágenes a color, un poco más pequeñas para que el archivo sea liviano."
+],
+"Você entrou com o Google.": [
+"You're signed in with Google.",
+"Entraste con Google."
+],
+"Os livros vão para a pasta Lombada do seu Drive.": [
+"Books will go to the Lombada folder in your Drive.",
+"Los libros irán a la carpeta Lombada de tu Drive."
+],
+"Os livros vão para o seu Drive. Reconecte para começar.": [
+"Books will go to your Drive. Reconnect to start.",
+"Los libros irán a tu Drive. Vuelve a conectar para empezar."
+],
+"Os livros ficam só neste navegador.": [
+"Books stay only in this browser.",
+"Los libros quedan solo en este navegador."
 ]
 }

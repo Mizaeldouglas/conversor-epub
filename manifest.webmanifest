@@ -48,6 +48,49 @@
       ]
     }
   },
+  "file_handlers": [
+    {
+      "action": "./",
+      "accept": {
+        "application/pdf": [
+          ".pdf"
+        ],
+        "application/epub+zip": [
+          ".epub"
+        ],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+          ".docx"
+        ],
+        "text/plain": [
+          ".txt"
+        ],
+        "text/markdown": [
+          ".md"
+        ],
+        "application/x-fictionbook+xml": [
+          ".fb2"
+        ],
+        "application/x-mobipocket-ebook": [
+          ".mobi",
+          ".azw3"
+        ],
+        "application/vnd.comicbook+zip": [
+          ".cbz"
+        ]
+      },
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "multiple-clients"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "id": "./",
   "categories": [
     "books",

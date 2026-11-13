@@ -92,6 +92,7 @@ test("estante com mais de 6 livros: busca por título ou autor e ordem", async (
   await p.waitForSelector(".shelf-empty");
   await p.fill("#shelfFind", "");
   await p.selectOption("#shelfSort", "title");
+  await p.waitForFunction(() => document.querySelector("#history .book .t")?.textContent === "capitulos");   // a estante é redesenhada sem esperar
   const sorted = await p.$$eval("#history .book .t", a => a.map(x => x.textContent));
   assert.deepEqual(sorted, [...sorted].sort((a, b) => a.localeCompare(b, "pt", { sensitivity: "base", numeric: true })));
 });

@@ -7,6 +7,10 @@ const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const DRIVE_API = "https://www.googleapis.com/drive/v3/", DRIVE_UP = "https://www.googleapis.com/upload/drive/v3/files";
 const DRIVE_ACCT = "conversor-epub:drive", DRIVE_TOKEN = "conversor-epub:drive-token";
 const drv = { token: null, exp: 0, user: null, folder: null, covers: null, list: null, coverBlobs: new Map(), pending: new Set(), client: null };
+// onde a pessoa quer os livros: "drive" (pasta Lombada do Drive) ou "local" (só este navegador); sem resposta, pergunta
+const STORE_KEY = "conversor-epub:guardar";
+const storeMode = () => { try { return localStorage.getItem(STORE_KEY); } catch { return null; } };
+const toDrive = () => DRIVE_ON && storeMode() === "drive";
 const driveConnected = () => !!(drv.token && Date.now() < drv.exp - 60000);
 const driveErr = (msg, name) => Object.assign(new Error(msg), { name });
 
@@ -45,15 +49,35 @@ async function driveLogin(){
     const first = document.body.classList.contains("gated");
     applyGate(); renderAccount();
     if (first) scrollTo(0, 0);
-    toast("Conectado ao Google Drive.");
+    takeIncoming();
+    toast(toDrive() ? "Conectado ao Google Drive." : "Você entrou com o Google.");
+    if (!storeMode()) askStore();
     await driveRefresh();
-    // livros que ficaram esperando a conexão (convertidos com ela expirada)
-    for (const hid of [...drv.pending]) { const j = jobs.find(j => j.histId === hid); if (j && j.epub) driveSaveJob(j); }
-    drv.pending.clear();
+    flushPending();
   } catch (e) {
     console.warn("login google", e);
     toast(loginErrorText(e), 12000);
   } finally { loginBtns(true); }
+}
+// livros que ficaram esperando a conexão (convertidos com ela expirada) ou a escolha de onde guardar
+function flushPending(){
+  if (!toDrive() || !driveConnected()) return;
+  for (const hid of [...drv.pending]) { const j = jobs.find(j => j.histId === hid); if (j && j.epub) driveSaveJob(j); }
+  drv.pending.clear();
+}
+function askStore(){ const d = $("#storeAsk"); if (!d.open) d.showModal(); }
+function setStore(mode){
+  try { localStorage.setItem(STORE_KEY, mode); } catch {}
+  $("#storeAsk").close();
+  renderAccount();
+  if (mode === "drive") {
+    if (driveConnected()) { toast("Os livros vão para a pasta Lombada do seu Drive."); driveRefresh(); flushPending(); }
+    else { toast("Os livros vão para o seu Drive. Reconecte para começar.", 7000); renderHistory(); }
+  } else {
+    for (const hid of drv.pending) { const j = jobs.find(j => j.histId === hid); if (j) { j.driveState = null; render(j); } }
+    drv.pending.clear(); drv.list = null; renderHistory();
+    toast("Os livros ficam só neste navegador.");
+  }
 }
 // diz o que impediu a entrada e o que fazer
 function loginErrorText(e){
@@ -67,19 +91,19 @@ function loginErrorText(e){
   return "Não consegui entrar com o Google (" + (t || "erro desconhecido") + "). Tente de novo.";
 }
 function driveLogout(){
-  const tok = drv.token;
+  const tok = drv.token, wasDrive = toDrive();
   Object.assign(drv, { token: null, exp: 0, user: null, folder: null, covers: null, list: null }); drv.coverBlobs.clear();
-  try { sessionStorage.removeItem(DRIVE_TOKEN); localStorage.removeItem(DRIVE_ACCT); } catch {}
+  try { sessionStorage.removeItem(DRIVE_TOKEN); localStorage.removeItem(DRIVE_ACCT); localStorage.removeItem(STORE_KEY); } catch {}
   try { if (tok && window.google && google.accounts) google.accounts.oauth2.revoke(tok, () => {}); } catch {}
   applyGate(); renderAccount(); renderHistory(); scrollTo(0, 0);
-  toast("Você saiu da conta Google. Os livros continuam no seu Drive.");
+  toast(wasDrive ? "Você saiu da conta Google. Os livros continuam no seu Drive." : "Você saiu da conta Google.");
 }
 function driveExpired(){
   if (!drv.token) return;
   drv.token = null; drv.exp = 0;
   try { sessionStorage.removeItem(DRIVE_TOKEN); } catch {}
   renderAccount(); renderHistory();
-  toast("A conexão com o Drive expirou. Use “Reconectar” para continuar guardando os livros.", 8000);
+  if (toDrive()) toast("A conexão com o Drive expirou. Use “Reconectar” para continuar guardando os livros.", 8000);
 }
 
 // chamada à API do Drive com o acesso da pessoa
@@ -138,7 +162,8 @@ async function driveSaveRecord(r){
   return f;
 }
 async function driveSaveJob(job){
-  if (!DRIVE_ON) return;
+  if (!DRIVE_ON || storeMode() === "local") return;
+  if (!storeMode()) { drv.pending.add(job.histId); askStore(); return; }
   if (!driveConnected()) { if (loggedIn()) { drv.pending.add(job.histId); job.driveState = "wait"; render(job); renderAccount(); } return; }
   job.driveState = "up"; render(job);
   try {
@@ -155,9 +180,42 @@ async function driveSaveJob(job){
   }
   render(job);
 }
+// ajustes (Ajustes do app) num arquivo da pasta Lombada: quem guarda no Drive tem as mesmas opções em todo aparelho.
+// Vale o mais novo: o do Drive troca o daqui, e o daqui sobe quando a pessoa muda alguma opção.
+const OPT_T = "conversor-epub:opcoes-quando";
+const optTime = () => { try { return +localStorage.getItem(OPT_T) || 0; } catch { return 0; } };
+const prefsFile = async () => { await driveFolders(); return ((await gapi("files?" + qs({ q: `trashed=false and ${qStr(drv.folder)} in parents and appProperties has { key='lombada' and value='ajustes' }`, fields: "files(id,modifiedTime)", pageSize: 1 }))).files || [])[0]; };
+async function drivePullPrefs(){
+  if (!toDrive() || !driveConnected()) return;
+  try {
+    const f = await prefsFile();
+    const remote = f ? Date.parse(f.modifiedTime) || 0 : 0;
+    if (f && remote > optTime()) {
+      const o = await (await gapi(`files/${f.id}?alt=media`, {}, true)).json();
+      localStorage.setItem(OPT_KEY, JSON.stringify(o)); localStorage.setItem(OPT_T, String(remote));
+      loadOptions(); applyDevice(); updateOptSum();
+    } else if (localStorage.getItem(OPT_KEY) && (!f || optTime() > remote)) await drivePushPrefs(f ? f.id : null);
+  } catch (e) { console.warn("ajustes no drive", e); }
+}
+async function drivePushPrefs(id){
+  if (!toDrive() || !driveConnected()) return;
+  try {
+    if (id === undefined) { const f = await prefsFile(); id = f && f.id; }
+    const blob = new Blob([localStorage.getItem(OPT_KEY) || "{}"], { type: "application/json" });
+    const r = await driveUpload(id, id ? {} : { name: "ajustes do Lombada.json", parents: [drv.folder], appProperties: { lombada: "ajustes" } }, blob);
+    if (r && r.modifiedTime) localStorage.setItem(OPT_T, String(Date.parse(r.modifiedTime)));
+  } catch (e) { console.warn("ajustes no drive", e); }
+}
+let prefsTimer = 0;
+function prefsChanged(){
+  try { localStorage.setItem(OPT_T, String(Date.now())); } catch {}
+  clearTimeout(prefsTimer); prefsTimer = setTimeout(() => drivePushPrefs(), 1500);
+}
 // lista dos livros guardados no Drive
 async function driveRefresh(){
+  if (!toDrive()) { drv.list = null; renderHistory(); return; }
   if (!driveConnected()) return;
+  await drivePullPrefs();
   try {
     await driveFolders();
     const res = await gapi("files?" + qs({ q: `${qStr(drv.folder)} in parents and trashed=false and appProperties has { key='lombada' and value='livro' }`,
@@ -216,7 +274,7 @@ function renderAccount(){
   box.hidden = !DRIVE_ON;
   if (!DRIVE_ON) return;
   // quem já entrou continua com a conta no topo; o acesso ao Drive dura uma hora e é refeito em "Reconectar"
-  const user = drv.user || driveRemembered(), on = driveConnected();
+  const user = drv.user || driveRemembered(), on = driveConnected() || !toDrive();
   $("#loginBtn").hidden = true;
   $("#acctMenu").hidden = !user;
   $("#acctMenu").classList.toggle("off", !on);
@@ -227,13 +285,18 @@ function renderAccount(){
     $("#acctName").textContent = (user.name || user.email || "").split(" ")[0];
     $("#acctMail").textContent = user.email || "";
     $("#reconnectBtn").hidden = on;
-    $("#acctFolder").href = driveFolderUrl();
+    $("#acctFolder").href = driveFolderUrl(); $("#acctFolder").hidden = !toDrive();
+    $("#acctStore").textContent = toDrive() ? "Livros guardados no seu Drive." : storeMode() === "local" ? "Livros só neste navegador." : "Você ainda não escolheu onde guardar os livros.";
   }
 }
 document.querySelectorAll("[data-login]").forEach(b => { b.onclick = () => { $("#acctMenu").open = false; driveLogin(); }; });
 
+$("#storeBtn").onclick = () => { $("#acctMenu").open = false; askStore(); };
+document.querySelectorAll("[data-store]").forEach(b => { b.onclick = () => setStore(b.dataset.store); });
+$("#storeAsk").addEventListener("cancel", e => { if (!storeMode()) e.preventDefault(); });   // a primeira vez precisa de uma resposta
 $("#logoutBtn").onclick = () => { $("#acctMenu").open = false; driveLogout(); };
 $("#driveAllBtn").onclick = driveSaveAll;
 document.addEventListener("click", e => { const m = $("#acctMenu"); if (m.open && !m.contains(e.target)) m.open = false; });
 applyGate(); renderAccount();
 if (driveConnected()) driveRefresh();
+if (DRIVE_ON && loggedIn() && !storeMode()) askStore();

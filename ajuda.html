@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ajuda do Lombada: como mandar o EPUB para o Kindle</title>
+<meta name="description" content="Como mandar o EPUB para o Kindle pelo site, pelo e-mail ou pelo celular, e o que fazer quando um PDF sai ruim.">
+<link rel="canonical" href="https://mizaeldouglas.github.io/conversor-epub/ajuda.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap">
+<style>
+/* mesma identidade do app: azul-ultramar, amarelo de marca-texto, texto em coluna de leitura */
+:root{--bg:#f1f2f6;--surface:#fff;--ink:#131833;--muted:#565d7e;--line:#d3d7e6;--cover:#2536c7;--cover-deep:#1b279a;--mark:#ffd84a;--accent:#2536c7;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1020;--surface:#161a30;--ink:#e9ebf7;--muted:#a0a7c8;--line:#2e3456;--accent:#a6b0ff;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:2px}
+header{max-width:760px;margin:0 auto;padding:20px 20px 0;display:flex;align-items:center;gap:12px}
+header a{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;font-weight:800;font-size:1.3rem;letter-spacing:-.02em}
+main{max-width:760px;margin:0 auto;padding:28px 20px 56px}
+h1{font-weight:800;font-size:clamp(1.9rem,5vw,2.7rem);line-height:1.05;letter-spacing:-.025em;margin:0 0 8px;text-wrap:balance}
+.date{color:var(--muted);font-size:14px;margin:0 0 28px}
+h2{font-weight:750;font-size:1.3rem;letter-spacing:-.015em;margin:36px 0 8px}
+p,li{color:var(--muted)}
+p{margin:0 0 12px}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:6px}
+b{color:var(--ink);font-weight:700}
+.lead{border-left:3px solid var(--mark);padding-left:16px;color:var(--ink);font-size:17px}
+footer{max-width:760px;margin:0 auto;padding:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+ol{margin:0 0 12px;padding-left:22px}
+ol li{margin-bottom:8px}
+code{font:14px/1.4 ui-monospace,Consolas,monospace;background:var(--surface);border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:var(--ink)}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin:0 0 8px}
+nav.toc ul{margin:0;padding-left:18px}
+nav.toc li{margin:2px 0}
+</style>
+</head>
+<body>
+<header>
+  <a href="./"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="3" width="28" height="34" rx="5" fill="#2536c7"/><rect x="6" y="3" width="6" height="34" rx="3" fill="#1b279a"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="#ffd84a"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Lombada</a>
+</header>
+<main>
+  <h1>Ajuda</h1>
+  <p class="date">Atualizada em 13 de novembro de 2026</p>
+  <p class="lead">O Kindle aceita EPUB, mas não pelo cabo USB: o livro precisa passar pelo Send to Kindle, o serviço da Amazon que coloca o arquivo na sua biblioteca. Há três jeitos de usar.</p>
+  <nav class="toc" aria-label="Nesta página"><ul>
+    <li><a href="#site">Pelo site da Amazon (o mais fácil)</a></li>
+    <li><a href="#email">Por e-mail</a></li>
+    <li><a href="#celular">Pelo celular</a></li>
+    <li><a href="#nao-chegou">O livro não chegou</a></li>
+    <li><a href="#pdf-ruim">O PDF saiu ruim</a></li>
+    <li><a href="#kobo">Kobo e outros leitores</a></li>
+  </ul></nav>
+
+  <h2 id="site">Pelo site da Amazon</h2>
+  <ol>
+    <li>No Lombada, clique em <b>Enviar ao Kindle</b>, ao lado do livro. No computador, ele baixa o EPUB e abre <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> em outra aba.</li>
+    <li>Entre com a mesma conta da Amazon do seu Kindle.</li>
+    <li>Arraste o EPUB para a página e confirme. Arquivos de até 200 MB passam por aqui.</li>
+    <li>Em alguns minutos o livro aparece no Kindle, com a rede Wi-Fi ligada.</li>
+  </ol>
+
+  <h2 id="email">Por e-mail</h2>
+  <p>Todo Kindle tem um endereço de e-mail próprio, terminado em <code>@kindle.com</code>. Para usar:</p>
+  <ol>
+    <li>Na Amazon, vá em <b>Conta e listas › Gerenciar conteúdo e dispositivos › Preferências › Configurações de documentos pessoais</b>.</li>
+    <li>Anote o e-mail do seu Kindle, que aparece nessa página.</li>
+    <li>Na mesma página, em <b>Lista de e-mails aprovados para documentos pessoais</b>, adicione o e-mail de onde você vai mandar o livro. A Amazon recusa o que vem de qualquer outro endereço.</li>
+    <li>Mande o EPUB como anexo para o e-mail do Kindle. O assunto pode ficar em branco.</li>
+  </ol>
+  <p>Cada e-mail aceita até 25 anexos e 50 MB no total. Para livros maiores, use o site.</p>
+
+  <h2 id="celular">Pelo celular</h2>
+  <p>Com o app Kindle instalado no celular, toque em <b>Enviar ao Kindle</b> no Lombada e escolha o app Kindle. O livro vai para a sua biblioteca e aparece no aparelho.</p>
+  <p>No Android, com o Lombada instalado, também dá para fazer o caminho contrário: abra um PDF no WhatsApp, no Drive ou nos Arquivos, toque em <b>Compartilhar › Lombada</b>, e ele já começa a converter.</p>
+
+  <h2 id="nao-chegou">O livro não chegou</h2>
+  <ul>
+    <li><b>Confira o e-mail da Amazon.</b> Quando um envio falha, a Amazon manda um aviso para o seu e-mail com o motivo.</li>
+    <li><b>Por e-mail, o remetente precisa estar aprovado.</b> Veja o passo 3 acima. É o motivo mais comum.</li>
+    <li><b>Ligue o Wi-Fi do Kindle</b> e, no menu, toque em <b>Sincronizar</b>.</li>
+    <li><b>O livro aparece em “Documentos”,</b> não na loja: na biblioteca do Kindle, use o filtro de documentos.</li>
+  </ul>
+
+  <h2 id="pdf-ruim">O PDF saiu ruim</h2>
+  <ul>
+    <li><b>Veja a prévia antes de mandar.</b> Ela mostra o livro como o Kindle vai mostrar, com o sumário. Um clique num parágrafo deixa corrigir o texto.</li>
+    <li><b>Capítulos errados:</b> em <b>Editar livro</b>, junte, separe ou renomeie capítulos, e transforme qualquer parágrafo em capítulo.</li>
+    <li><b>Texto com diferenças:</b> ligue <b>Conferir palavra por palavra</b> nos Ajustes. As diferenças aparecem com a página, e dá para abrir o PDF ao lado e corrigir.</li>
+    <li><b>Página escaneada (foto do papel):</b> ligue <b>OCR em páginas escaneadas</b> nos Ajustes e converta de novo.</li>
+    <li><b>Quadrinhos, mangá, partituras ou PDFs cheios de diagramas:</b> em <b>Opções deste livro</b>, escolha <b>Página como imagem</b>, <b>Quadrinhos</b> ou <b>Mangá</b>. Cada página vira uma imagem, como no original.</li>
+    <li><b>Ainda ruim?</b> Conte o que aconteceu na página de <a href="https://github.com/Mizaeldouglas/conversor-epub/issues">questões do projeto</a>. Se puder, diga de onde veio o PDF; não mande o arquivo se ele não for seu para compartilhar.</li>
+  </ul>
+
+  <h2 id="kobo">Kobo e outros leitores</h2>
+  <p>Nos Ajustes do Lombada, em <b>Onde você vai ler</b>, escolha <b>Kobo</b>: o botão principal passa a baixar o <b>KEPUB</b>, o formato que guarda a posição de leitura e as estatísticas no Kobo. Copie o arquivo pelo cabo USB para o Kobo. Apple Books, Google Play Livros, Kobo, PocketBook e o app Thorium abrem o EPUB direto.</p>
+</main>
+<footer><a href="./">Voltar ao Lombada</a> · <a href="ajuda.html">Ajuda</a> · <a href="privacidade.html">Política de Privacidade</a> · <a href="termos.html">Termos de Uso</a></footer>
+</body>
+</html>

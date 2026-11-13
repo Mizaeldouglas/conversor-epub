@@ -101,7 +101,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
   const labelOf = p => ((pageLabels && pageLabels[p - 1] || "").trim() || String(p)).slice(0, 14);
   const items = [], ref = []; let realPages = 0, textPages = 0, hiddenChars = 0;
   const liga = newLigatureState();
-  const fontStyle = new Map();
+  const fontStyle = new Map(), fontMono = new Map();
   let ocrW = null, ocrPages = 0, ocrError = null, imagePages = 0, columnPages = 0;
   if (opts.words === undefined && /^pt/i.test(lang || "")) opts.words = await loadWordList().catch(() => null);
   let cover = null;
@@ -166,6 +166,19 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       } catch {}
       return st;
     };
+    // fonte de largura fixa (código): Courier, Consolas, "…Mono", "…Code"
+    const monoOfFont = name => {
+      if (!name) return false;
+      if (fontMono.has(name)) return fontMono.get(name);
+      let m = false;
+      try {
+        const f = page.commonObjs.has(name) ? page.commonObjs.get(name) : null;
+        const n = String((f && f.name) || "").replace(/^[A-Z]{6}\+/, "");
+        m = /mono|courier|consol|menlo|inconsolata|\bcode|code\b|sourcecode|firacode|lucidaconsole|andale/i.test(n) || !!(f && f.isMonospace);
+        if (f) fontMono.set(name, m);
+      } catch {}
+      return m;
+    };
     // letra capitular: letra grande no começo do parágrafo, desenhada à parte do resto da palavra
     const caps = [];
     {
@@ -196,7 +209,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       let ln = pl.find(l => l.col === col && Math.abs(l.y - y) < lineTol(size, l.size));
       if (!ln) { if (blank) continue; ln = { y, size, items: [], col }; pl.push(ln); }
       if (!blank) ln.size = Math.max(ln.size, size);
-      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName),
+      ln.items.push({ x, y, w: it.width || 0, str: blank ? " " : it.str, size, blank, firstIdx: it.firstIdx ?? -1, lastIdx: it.lastIdx ?? -1, st: blank ? 0 : styleOfFont(it.fontName), mono: !blank && monoOfFont(it.fontName),
         lk: blank || !links.length ? "" : linkAt(x + iw / 2, y + size * 0.3) });
     }
     const pageItems = []; let pageChars = 0;
@@ -238,7 +251,12 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       if (!plainOf(text).trim()) continue;
       pageChars += chars;
       const firstReal = ln.items.find(i => !i.blank) || ln.items[0];
-      pageItems.push({ page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
+      // linha toda em fonte de largura fixa: código; o recuo é medido pela largura de uma letra
+      const realIts = ln.items.filter(i => !i.blank && i.str.trim());
+      const mono = realIts.length > 0 && realIts.every(i => i.mono);
+      const cw = mono ? Math.max(1, realIts.reduce((a, i) => a + i.w, 0) / Math.max(1, realIts.reduce((a, i) => a + i.str.length, 0))) : 0;
+      if (mono) cells = null;
+      pageItems.push({ mono, cw, page: p, kind: "line", y: ln.y, x0: firstReal.x, x1: end, size: chars ? sizeSum / chars : ln.size, text, plain: plainOf(text), chars, pageH, col: ln.col,
         cells: cells && cells.length === cellX.length ? cells : null, cellX });
     }
     // capitular volta para o começo da primeira linha do parágrafo ("M" + "ira tinha" = "Mira tinha")
@@ -426,7 +444,7 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       run = [];
     };
     for (const l of filtered) {
-      const ok = l.kind === "line" && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
+      const ok = l.kind === "line" && !l.mono && Math.abs(l.size - body) < body * 0.12 && !PAGE_NUM_RE.test(l.plain) && !BUL_RE.test(l.plain);
       const last = run[run.length - 1];
       if (!ok || (last && (last.page !== l.page || last.col !== l.col || last.y - l.y <= 0 || last.y - l.y > lineGap * 1.5))) flush();
       if (ok) run.push(l);
@@ -454,6 +472,14 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     let mark = "";
     if (l.page !== lastPage) { mark = pgMark(labelOf(l.page)); lastPage = l.page; }
     const gg = geo[gk(l)] || { left: l.x0, right: l.x1 };
+    // código: cada linha continua sendo uma linha, com o recuo de antes
+    if (l.mono && l.size < body * 1.15) {
+      const cont = cur && cur.type === "code" && prev && (prev.page === l.page ? prev.col === l.col && prev.y - l.y > 0 && prev.y - l.y < lineGap * 2.6 : l.page === prev.page + 1);
+      if (!cont) { cur = { type: "code", x0: l.x0, cw: l.cw, text: "", page: l.page, last: l.page }; blocks.push(cur); }
+      const ind = Math.max(0, Math.min(40, Math.round((l.x0 - cur.x0) / cur.cw)));
+      cur.text += (cont ? BR : "") + mark + "\u00A0".repeat(ind) + l.text; cur.last = l.page;
+      prev = { ...l, isHead: false }; continue;
+    }
     // quebra de cena: linha só com sinais ("* * *", "#", "⁂")
     const sc = l.plain.trim();
     if (sc.length <= 20 && /^[\s*•·#~◆◇❖✦✧⁂§_=—–♦❦❧✶✱✳⁎-]+$/u.test(sc)) {

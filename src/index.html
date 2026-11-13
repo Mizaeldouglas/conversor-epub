@@ -42,6 +42,7 @@
         <div class="acct-pop">
           <p>Conectado como <b class="acct-mail" id="acctMail"></b></p>
           <button class="btn sm" id="reconnectBtn" data-login hidden>Reconectar ao Drive</button>
+          <p class="acct-store"><span id="acctStore"></span> <button class="linkbtn" id="storeBtn">Mudar</button></p>
           <a class="btn ghost sm" id="acctFolder" href="https://drive.google.com" target="_blank" rel="noopener">Abrir a pasta no Drive</a>
           <button class="btn quiet sm" id="logoutBtn">Sair</button>
         </div>
@@ -59,7 +60,7 @@
   <section class="lp-cover">
     <div class="lp-copy">
       <h2 id="lpT">Seus PDFs viram livros de Kindle</h2>
-      <p class="lp-lead">O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive.</p>
+      <p class="lp-lead">O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive ou só no navegador, como você preferir.</p>
       <button class="btn lp-login" data-login><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Entrar com Google</span></button>
       <p class="lp-small">Grátis e sem cadastro: sua conta Google é o login. A conversão acontece no seu navegador.</p>
     </div>
@@ -103,7 +104,7 @@
         <div><dt>Capítulos e sumário de verdade</dt><dd>Usa o sumário interno do PDF ou reconhece os títulos, as partes, as notas de rodapé e as quebras de cena.</dd></div>
         <div><dt>Vários formatos</dt><dd>PDF, EPUB, DOCX, TXT, HTML, Markdown, FB2, MOBI e CBZ. PDF escaneado passa por OCR.</dd></div>
         <div><dt>Edição antes de baixar</dt><dd>Troque a capa, corrija o texto na prévia, renomeie e reordene capítulos, busque capa e sinopse.</dd></div>
-        <div><dt>Estante no seu Google Drive</dt><dd>Os livros prontos ficam numa pasta Lombada do seu Drive e aparecem em qualquer aparelho.</dd></div>
+        <div><dt>Estante onde você quiser</dt><dd>Numa pasta Lombada do seu Drive, para ver em qualquer aparelho, ou só neste navegador, sem ocupar espaço no Drive.</dd></div>
         <div><dt>Kindle, Kobo e outros</dt><dd>EPUB 3 conferido antes do download, KEPUB para Kobo e envio direto ao app Kindle no celular.</dd></div>
       </dl>
     </div>
@@ -142,7 +143,7 @@
     <h2 id="lpPriv">O que acontece com seus arquivos</h2>
     <ul>
       <li><b>A conversão é feita no seu navegador.</b> O PDF não é enviado a nenhum servidor do Lombada, porque o Lombada não tem servidor.</li>
-      <li><b>O EPUB pronto vai para o seu Drive.</b> Fica numa pasta Lombada, na sua conta, e só você tem acesso.</li>
+      <li><b>Você escolhe onde guardar.</b> Numa pasta Lombada do seu Drive, a que só você tem acesso, ou só neste navegador.</li>
       <li><b>O acesso é mínimo.</b> O Lombada só enxerga os arquivos que ele mesmo criou. Não vê o resto do seu Drive, seus e-mails nem seus contatos.</li>
       <li><b>Você sai quando quiser.</b> Ao sair, a conexão é desfeita e os livros continuam no seu Drive.</li>
     </ul>
@@ -227,6 +228,9 @@
         <div class="grp">
           <h3>Aparência do EPUB</h3>
           <div class="grp-body">
+            <label class="field" for="device"><span>Onde você vai ler</span>
+              <select id="device"><option value="kindle">Kindle</option><option value="kobo">Kobo</option><option value="color">Kindle Colorsoft, tablet ou celular</option><option value="custom" selected>Do meu jeito</option></select></label>
+            <p class="desc dev-note" id="deviceNote" hidden></p>
             <div class="cols">
               <label class="field" for="lookFont"><span>Fonte</span>
                 <select id="lookFont"><option value="serif" selected>Serifada</option><option value="sans">Sem serifa</option><option value="reader">A do leitor</option></select></label>
@@ -308,7 +312,8 @@
           <p>Sim. As palavras saem exatamente como estão no PDF, e o espaço só entra onde o PDF tem um espaço de verdade, então não aparecem quebras como “tam bem”. Palavras separadas só pela posição na página são juntadas de novo quando os pedaços formam palavras conhecidas.</p>
           <p>Itálico e negrito são mantidos. A letra capitular volta para a palavra (“M” + “ira” = “Mira”), e letras unidas como “fi” e “fl” são reconhecidas pelas palavras do próprio livro.</p></div></details>
         <details><summary>Como mando para o Kindle?</summary><div class="ans">
-          <p>No celular, “Enviar ao Kindle” abre o compartilhamento do sistema: escolha o app Kindle. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não deixa outros sites enviarem sozinhos, porque o envio exige o seu login.</p></div></details>
+          <p>No celular, “Enviar ao Kindle” abre o compartilhamento do sistema: escolha o app Kindle. No computador, o EPUB é baixado e a página <a href="https://www.amazon.com.br/sendtokindle" target="_blank" rel="noopener">amazon.com.br/sendtokindle</a> abre em outra aba; é só arrastar o arquivo para lá. A Amazon não deixa outros sites enviarem sozinhos, porque o envio exige o seu login.</p>
+          <p>O passo a passo, com o envio por e-mail e o que fazer quando o livro não chega, está na <a href="@@SITE@@ajuda.html">página de ajuda</a>.</p></div></details>
         <details><summary>Para que serve a conferência palavra por palavra?</summary><div class="ans">
           <p>Antes de liberar o download, o EPUB pronto é aberto e cada palavra é comparada com o original. Se algo estiver diferente, a fila mostra a página e o trecho. “Ver no PDF” abre a página original ao lado, e “Corrigir” acerta o texto e gera o EPUB de novo.</p>
           <p>O que você corrige pode ficar lembrado e ser aplicado sozinho nos próximos livros.</p></div></details>
@@ -327,14 +332,14 @@
         <details><summary>Juntar volumes num livro só</summary><div class="ans">
           <p>Com dois ou mais PDFs convertidos na fila, “Juntar os PDFs num EPUB só” cria um livro com todos, na ordem do nome do arquivo. As páginas ficam como “1.12”, “2.12”…</p></div></details>
         <details><summary>Guardar os livros no Google Drive</summary><div class="ans">
-          <p>Cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.</p>
+          <p>Ao entrar pela primeira vez, você escolhe onde ficam os livros: no seu Google Drive ou só neste navegador (dá para mudar no menu da sua conta). No Drive, cada livro convertido vai para a pasta Lombada (junto com um arquivo pequeno com os seus Ajustes, que passam a valer em todo aparelho), e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.</p>
           <p>O Lombada pede só o acesso aos arquivos que ele mesmo cria: não vê nem mexe no resto do seu Drive. Tirar um livro da estante o manda para a lixeira do Drive, de onde dá para recuperar por 30 dias. Em “Sair”, a conexão é desfeita e os livros continuam no seu Drive.</p></div></details>
         <details><summary>Instalar no celular</summary><div class="ans">
           <p>No site, use “Instalar app” ou “Adicionar à tela inicial”. Instalado, funciona sem internet e, no Android, aparece no “Compartilhar” para receber PDFs direto de outros apps.</p></div></details>
         <details id="privacidade"><summary>Privacidade: o que acontece com meus arquivos?</summary><div class="ans">
           <p>O arquivo que você solta não sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
           <p>O navegador baixa apenas o próprio programa: as bibliotecas de leitura de PDF e ZIP (cdnjs), as fontes da página (Google Fonts) e, se você ligar o OCR, o leitor de texto (jsDelivr). Esses serviços veem o seu endereço de internet, como em qualquer site, mas não os seus arquivos.</p>
-          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. Os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
+          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. Se você escolher o Drive, os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
           <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar.</p>
           <p>O texto completo está na <a href="privacidade.html">Política de Privacidade</a>.</p>
           <p><button class="btn ghost sm" id="wipeBtn">Apagar tudo o que está guardado neste navegador</button></p></div></details>
@@ -349,7 +354,7 @@
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">@@VERSION@@</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a>, a <a href="#privacidade" data-open="privacidade">política de privacidade</a> e os <a href="termos.html">termos de uso</a>.</p>
+  <p>Lombada, versão <span id="appVersion">@@VERSION@@</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a>, a <a href="@@SITE@@ajuda.html">ajuda para mandar ao Kindle</a>, a <a href="#privacidade" data-open="privacidade">política de privacidade</a> e os <a href="@@SITE@@termos.html">termos de uso</a>.</p>
 </footer>
 
 <div class="dropall" id="dropAll" hidden aria-hidden="true"><div><svg width="56" height="56" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Solte para converter</b></div></div>
@@ -359,6 +364,15 @@
   <button class="btn sm" id="updateBtn">Atualizar agora</button>
   <button class="btn quiet sm" id="updateLater">Depois</button>
 </div>
+
+<dialog class="ask" id="storeAsk" aria-labelledby="storeT">
+  <h2 id="storeT" tabindex="-1" autofocus>Onde guardar os livros convertidos?</h2>
+  <div class="store-opts">
+    <button class="store-opt" data-store="drive"><b>No meu Google Drive</b><span>Os livros aparecem em qualquer aparelho em que você entrar. Ocupam espaço no seu Drive: um livro tem, em geral, de 1 a 5 MB.</span></button>
+    <button class="store-opt" data-store="local"><b>Só neste navegador</b><span>Não usa espaço do Drive. Os últimos 12 livros ficam aqui e somem se você limpar os dados do navegador.</span></button>
+  </div>
+  <p class="muted">Dá para mudar depois, no menu da sua conta.</p>
+</dialog>
 
 <div class="modal" id="preview" hidden role="dialog" aria-modal="true" aria-labelledby="pvTitle">
   <div class="modal-box">
