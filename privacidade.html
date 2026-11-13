@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Política de Privacidade do Lombada</title>
+<meta name="description" content="O que o Lombada faz com seus arquivos e com sua conta Google.">
+<link rel="canonical" href="https://mizaeldouglas.github.io/conversor-epub/privacidade.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap">
+<style>
+/* mesma identidade do app: azul-ultramar, amarelo de marca-texto, texto em coluna de leitura */
+:root{--bg:#f1f2f6;--surface:#fff;--ink:#131833;--muted:#565d7e;--line:#d3d7e6;--cover:#2536c7;--cover-deep:#1b279a;--mark:#ffd84a;--accent:#2536c7;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0d1020;--surface:#161a30;--ink:#e9ebf7;--muted:#a0a7c8;--line:#2e3456;--accent:#a6b0ff;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Bricolage Grotesque","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:2px}
+header{max-width:760px;margin:0 auto;padding:20px 20px 0;display:flex;align-items:center;gap:12px}
+header a{display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none;font-weight:800;font-size:1.3rem;letter-spacing:-.02em}
+main{max-width:760px;margin:0 auto;padding:28px 20px 56px}
+h1{font-weight:800;font-size:clamp(1.9rem,5vw,2.7rem);line-height:1.05;letter-spacing:-.025em;margin:0 0 8px;text-wrap:balance}
+.date{color:var(--muted);font-size:14px;margin:0 0 28px}
+h2{font-weight:750;font-size:1.3rem;letter-spacing:-.015em;margin:36px 0 8px}
+p,li{color:var(--muted)}
+p{margin:0 0 12px}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:6px}
+b{color:var(--ink);font-weight:700}
+.lead{border-left:3px solid var(--mark);padding-left:16px;color:var(--ink);font-size:17px}
+footer{max-width:760px;margin:0 auto;padding:20px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <a href="./"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="3" width="28" height="34" rx="5" fill="#2536c7"/><rect x="6" y="3" width="6" height="34" rx="3" fill="#1b279a"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="#ffd84a"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>Lombada</a>
+</header>
+<main>
+  <h1>Política de Privacidade</h1>
+  <p class="date">Atualizada em 12 de novembro de 2026</p>
+  <p class="lead">O Lombada converte PDF e outros formatos em EPUB dentro do seu navegador. Ele não tem servidor próprio: não recebe, não guarda e não vê os seus arquivos.</p>
+
+  <h2>Quem é o responsável</h2>
+  <p>O Lombada é um projeto pessoal e gratuito de Mizael Douglas, com código aberto em <a href="https://github.com/Mizaeldouglas/conversor-epub">github.com/Mizaeldouglas/conversor-epub</a>. Dúvidas sobre esta política podem ser enviadas pela página de <a href="https://github.com/Mizaeldouglas/conversor-epub/issues">questões do projeto</a>.</p>
+
+  <h2>Seus arquivos</h2>
+  <ul>
+    <li><b>O arquivo que você solta não sai do seu aparelho.</b> A leitura, a conversão, a conferência do texto e o OCR rodam no navegador.</li>
+    <li><b>O EPUB pronto é guardado no seu Google Drive.</b> Fica numa pasta chamada Lombada, na sua própria conta. Só você tem acesso a ela.</li>
+    <li><b>Uma cópia fica neste navegador.</b> Os últimos 12 livros, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar ficam guardados só no navegador que você usou.</li>
+  </ul>
+
+  <h2>Sua conta Google</h2>
+  <p>O Lombada usa o login do Google para identificar a sua estante. Ao entrar, ele pede uma única permissão: <b>ver, criar e apagar apenas os arquivos do Google Drive que o próprio Lombada criou</b> (escopo <code>drive.file</code>).</p>
+  <ul>
+    <li>Ele <b>não</b> vê nem altera os outros arquivos do seu Drive.</li>
+    <li>Ele <b>não</b> lê e-mails, contatos nem a agenda.</li>
+    <li>Seu nome, e-mail e foto de perfil são usados só para mostrar a conta no topo da página e ficam guardados só no seu navegador.</li>
+    <li>O acesso ao Drive vale por cerca de uma hora e fica guardado só na aba aberta.</li>
+  </ul>
+  <p>Os dados da sua conta Google não são enviados a nenhum servidor do Lombada, não são compartilhados com terceiros, não são vendidos e não são usados para publicidade nem para treinar modelos de inteligência artificial. O uso desses dados segue a <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de Dados do Usuário dos Serviços de API do Google</a>, inclusive os requisitos de uso limitado.</p>
+
+  <h2>Outros serviços que o navegador acessa</h2>
+  <ul>
+    <li><b>GitHub Pages</b> hospeda a página.</li>
+    <li><b>cdnjs</b>, <b>Google Fonts</b> e <b>jsDelivr</b> fornecem as bibliotecas de PDF e ZIP, as fontes e, se você ligar o OCR, o leitor de texto.</li>
+    <li><b>Open Library</b> e <b>Google Books</b> recebem o título e o autor do livro, só quando você clica em “Buscar dados deste livro”.</li>
+  </ul>
+  <p>Esses serviços veem o seu endereço de internet, como acontece em qualquer site, mas não recebem os seus arquivos. O Lombada não usa cookies de rastreamento nem contadores de visita.</p>
+
+  <h2>Como apagar seus dados</h2>
+  <ul>
+    <li><b>No navegador:</b> em “Como funciona &gt; Privacidade”, o botão “Apagar tudo o que está guardado neste navegador” remove a estante local, as opções e o login.</li>
+    <li><b>No Google Drive:</b> apague a pasta Lombada, ou tire os livros da estante (eles vão para a lixeira do Drive).</li>
+    <li><b>A permissão:</b> “Sair”, no menu da conta, desfaz a conexão. Você também pode removê-la em <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+  </ul>
+
+  <h2>Mudanças nesta política</h2>
+  <p>Se esta política mudar, a nova versão será publicada nesta página, com a data no topo.</p>
+</main>
+<footer><a href="./">Voltar ao Lombada</a></footer>
+</body>
+</html>

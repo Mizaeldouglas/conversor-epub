@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.5.1 — 12 nov 2026
+
+- Página própria com a Política de Privacidade (`privacidade.html`), exigida pelo Google para liberar o login a todos.
+
 ## 3.5.0 — 12 nov 2026
 
 - Tela de entrada: quem ainda não entrou vê a página de apresentação do Lombada, com o botão “Entrar com Google”. O app abre depois do login e continua aberto nas visitas seguintes, até a pessoa sair.
