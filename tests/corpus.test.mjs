@@ -50,6 +50,7 @@ test("romance pelo Chromium: hifenização, cabeçalho e número de página some
   assert.match(html, /<em>não adianta<\/em>/);
   assert.match(html, /class="cena"/);
   assert.ok(z.file("OEBPS/text/sumario.xhtml"), "falta o sumário no começo do livro");
+  assert.doesNotMatch(html, /<h1 class="centro/, "título alinhado à esquerda no PDF saiu centralizado");
 });
 
 test("romance pelo LibreOffice: capítulos pelo sumário interno do PDF", async () => {
@@ -94,7 +95,7 @@ test("apostila: código em bloco próprio, linha a linha e com o recuo", async (
 
 test("índice do próprio PDF: uma entrada por linha, com o recuo e o link, sem sumário repetido", async () => {
   const { html, z } = await convert("farol-indice-chrome.pdf", T.farol);
-  const idx = /<h1>[^]*?Índice<\/h1>([^]*?)<\/section>/.exec(html);
+  const idx = /<h1[^>]*>[^]*?Índice<\/h1>([^]*?)<\/section>/.exec(html);
   assert.ok(idx, "a página de índice sumiu");
   const entries = [...idx[1].matchAll(/<p class="toc-pdf n(\d)"><a href="(ch\d+\.xhtml#pg\d+)">([^<]+)<\/a><\/p>/g)].map(m => [+m[1], m[3], m[2]]);
   assert.deepEqual(entries.map(e => [e[0], e[1]]), [[0, "Parte um — A chegada"], [1, "Capítulo 1 — A ilha"], [1, "Capítulo 2 — O caderno verde"],
@@ -104,6 +105,8 @@ test("índice do próprio PDF: uma entrada por linha, com o recuo e o link, sem 
     assert.ok(doc.includes(`id="${id}"`), "link quebrado: " + t);
   }
   assert.equal(z.file("OEBPS/text/sumario.xhtml"), null, "o livro ficou com dois sumários");
+  // capítulos centralizados e começando mais abaixo, como no PDF
+  assert.equal((html.match(/<h1 class="centro abertura">/g) || []).length, 4);
 });
 
 test("nenhum erro de JavaScript", () => assert.deepEqual(app.errors, []));

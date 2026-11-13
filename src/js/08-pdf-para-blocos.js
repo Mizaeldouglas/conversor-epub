@@ -521,7 +521,14 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       const cont = last && (last.type === "h" + level || last.lineLevel === level);
       if (last && (cont || numOnly) && prev && prev.page === l.page && prev.isHead && prev.y - l.y < Math.max(l.size, prev.size) * 2.2)
         { last.text += (numOnly ? BR : " ") + mark + l.plain; last.last = l.page; if (numOnly) last.lineLevel = level; }
-      else blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page });
+      else {
+        // como o título está na página: centralizado na coluna, e se começa bem abaixo do topo (abertura de capítulo)
+        const mid = (l.x0 + l.x1) / 2, colMid = (gg.left + gg.right) / 2, colW = gg.right - gg.left;
+        const center = Math.abs(mid - colMid) < Math.max(body * 1.2, colW * 0.04) && l.x1 - l.x0 < colW * 0.85 && l.x0 > gg.left + body * 1.5;
+        const firstOnPage = !blocks.some(b => b.page === l.page && b.type !== "img");
+        const sink = firstOnPage && l.pageH && (l.pageH - l.y) > l.pageH * 0.22;
+        blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page, center, sink });
+      }
       cur = null; prev = { ...l, isHead: true }; continue;
     }
     const g = gg;

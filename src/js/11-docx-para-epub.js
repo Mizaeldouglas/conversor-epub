@@ -111,7 +111,10 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     if (style === "NotaRodape" && noteBody) { paras.push({ style: "note", id: noteBody, label: noteLabel, text }); continue; }
     if (!text) continue;
     if (!stripPg(text)) { for (const m of text.matchAll(PG_RE)) paras.push({ style: "pg", label: m[1] }); continue; }
-    paras.push({ style, text });
+    const jc = p.getElementsByTagNameNS(W, "jc")[0], spc = p.getElementsByTagNameNS(W, "spacing")[0];
+    const center = !!jc && /^center$/.test(jc.getAttributeNS(W, "val") || jc.getAttribute("w:val") || "");
+    const sink = !!spc && +(spc.getAttributeNS(W, "before") || spc.getAttribute("w:before") || 0) >= 1000;
+    paras.push({ style, text, center, sink });
   }
   if (!title) { const t = paras.find(p => p.style === "Title"); title = t ? t.text : "Sem título"; }
   const content = paras.filter(p => p.style !== "Title");
@@ -122,11 +125,13 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
   const splitStyle = hasH1 ? "Heading1" : hasH2 ? "Heading2" : hasPart ? "Parte" : null;
   const chapters = [];
   let ch = null;
+  // título centralizado e abertura de capítulo mais abaixo, como estavam no PDF
+  const headCls = it => { const c = [it.center && "centro", it.sink && "abertura"].filter(Boolean); return c.length ? ` class="${c.join(" ")}"` : ""; };
   const newCh = (name, part) => { ch = { title: name, items: [], weight: 0, notes: [], part: !!part }; chapters.push(ch); };
   const titleOf = t => stripPg(t.replace(NOTE_RE, "").replace(/\.?\s*\uE008\s*/g, ". "));
   for (const p of content) {
-    if (p.style === "Parte") { newCh(titleOf(p.text), true); ch.items.push({ tag: "h1", text: p.text }); continue; }
-    if (splitStyle && p.style === splitStyle) { newCh(titleOf(p.text)); ch.items.push({ tag: "h1", text: p.text }); continue; }
+    if (p.style === "Parte") { newCh(titleOf(p.text), true); ch.items.push({ tag: "h1", text: p.text, center: p.center, sink: p.sink }); continue; }
+    if (splitStyle && p.style === splitStyle) { newCh(titleOf(p.text)); ch.items.push({ tag: "h1", text: p.text, center: p.center, sink: p.sink }); continue; }
     if (!ch) newCh(splitStyle ? "Início" : "Parte 1");
     if (p.style === "note") { ch.notes.push(p); continue; }
     if (p.style === "pg") { ch.items.push({ tag: "pg", label: p.label }); continue; }
@@ -138,7 +143,7 @@ async function docxToEpub(docxBlob, author, lang, showNums, extra = {}){
     if (p.style === "Codigo") { ch.items.push({ tag: "code", text: p.text }); ch.weight += 1; continue; }
     if (p.style === "Lista" || p.style === "Verso") { ch.items.push({ tag: p.style === "Lista" ? "li" : "verse", text: p.text }); ch.weight += 1; continue; }
     const tag = p.style === "Heading1" ? "h2" : p.style === "Heading2" ? (splitStyle === "Heading2" ? "h1" : "h2") : p.style === "Heading3" ? "h2" : "p";
-    ch.items.push({ tag, text: p.text }); ch.weight += 1;
+    ch.items.push(tag === "p" ? { tag, text: p.text } : { tag, text: p.text, center: p.center }); ch.weight += 1;
   }
   if (!chapters.length) newCh("Texto");
   // cada nota fica no capítulo que a chama (em alguns formatos as notas vêm todas no fim do arquivo)
@@ -194,6 +199,8 @@ ul.lista li{margin:0 0 .3em 1.6em;text-indent:-1em;text-align:left}
 p.verso{text-indent:0;text-align:left;margin:.8em 0 .8em 1.6em}
 pre.codigo{font-family:"Courier New",Courier,monospace;font-size:.82em;line-height:1.35;white-space:pre-wrap;text-align:left;margin:1em 0;padding:.5em .7em;border-left:3px solid #999}
 pre.codigo code{font-family:inherit}
+h1.centro,h2.centro,h3.centro{text-align:center}
+h1.abertura{padding-top:2.5em}
 p.toc-pdf{text-indent:0;text-align:left;margin:0 0 .35em}
 p.toc-pdf.n1{margin-left:1.5em}
 p.toc-pdf.n2{margin-left:3em}
@@ -268,7 +275,7 @@ a{color:inherit}
         : it.tag === "verse" ? `<p class="verso">${rich(it.text, fn)}</p>`
         : it.tag === "tocline" ? `<p class="toc-pdf n${it.level}">${rich(it.text, fn)}</p>`
         : it.tag === "code" ? `<pre class="codigo"><code>${rich(it.text, fn)}</code></pre>`
-        : `<${it.tag}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
+        : `<${it.tag}${headCls(it)}>${rich(it.text, fn)}</${it.tag}>`).join("\n");
     const notes = c.notes.map(n => `<aside epub:type="footnote" role="doc-footnote" id="fn${n.id}"><p class="nota"><a href="#fnref${n.id}">${esc(n.label)}</a> ${rich(n.text, fn)}</p></aside>`).join("\n");
     chapterDocs.push([fn, xhtml(c.title, `<section epub:type="${c.part ? "part" : "chapter"}"${c.part ? ' class="parte"' : ""}>${inner}</section>${notes ? "\n" + notes : ""}`)]);
   });

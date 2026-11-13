@@ -19,7 +19,7 @@ mkdirSync(OUT, { recursive: true }); mkdirSync(EX, { recursive: true });
 const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const inline = s => esc(s).replace(/&lt;(\/?)i&gt;/g, "<$1i>");
 
-function html(book, { capa = false, indice = null } = {}){
+function html(book, { capa = false, indice = null, centro = false } = {}){
   let hn = 0;
   const body = book.blocos.map(b => {
     if (b.h1) return `<h1 id="c${++hn}">${esc(b.h1)}</h1>`;
@@ -61,6 +61,7 @@ pre{font:9.5pt/1.35 "Liberation Mono","DejaVu Sans Mono",monospace;margin:8pt 0 
 .indice a{color:#123;text-decoration:none}
 .ficha{break-after:page;font-size:8.5pt;line-height:1.35;padding-top:60mm}
 .ficha p{text-indent:0;text-align:left;margin:0 0 3pt}
+${centro ? "h1{text-align:center;padding-top:38mm;font-weight:normal;margin-bottom:22pt}\n.indice h1{padding-top:0}" : ""}
 </style></head><body>
 ${capa ? `<section class="capa"><div style="font-size:30pt;font-weight:bold;margin-bottom:12pt">${esc(book.titulo)}</div><p>${esc(book.autor)}</p></section>` : ""}
 ${capa && book.ficha ? `<section class="ficha">${book.ficha.map(l => `<p>${esc(l)}</p>`).join("")}</section>` : ""}
@@ -85,7 +86,7 @@ await chromePdf(T.poemas, join(OUT, "poemas-chrome.pdf"));
 await chromePdf(T.revista, join(OUT, "revista-chrome.pdf"));
 await chromePdf(T.apostila, join(OUT, "apostila-chrome.pdf"));
 // romance com página de índice clicável, com partes e capítulos recuados, como os livros de editora
-await chromePdf(T.farol, join(OUT, "farol-indice-chrome.pdf"), { indice: [[0, "Parte um — A chegada", 1], [1, "Capítulo 1 — A ilha", 1], [1, "Capítulo 2 — O caderno verde", 2], [0, "Parte dois — A luz que voltou a girar sobre o mar nas noites de nevoeiro da ilha de Ponta Seca", 3], [1, "Capítulo 3 — O guardião", 3], [1, "Capítulo 4 — A luz", 4]] });
+await chromePdf(T.farol, join(OUT, "farol-indice-chrome.pdf"), { indice: [[0, "Parte um — A chegada", 1], [1, "Capítulo 1 — A ilha", 1], [1, "Capítulo 2 — O caderno verde", 2], [0, "Parte dois — A luz que voltou a girar sobre o mar nas noites de nevoeiro da ilha de Ponta Seca", 3], [1, "Capítulo 3 — O guardião", 3], [1, "Capítulo 4 — A luz", 4]], centro: true });
 await chromePdf(T.farol, join(EX, "o-farol-apagado.pdf"), { capa: true });
 await browser.close();
 

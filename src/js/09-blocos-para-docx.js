@@ -35,8 +35,11 @@ async function blocksToDocx(blocks, title, author){
     }).join("");
     return out + (lk ? "</w:hyperlink>" : "");
   };
-  const para = (style, text) =>
-    `<w:p>${style ? `<w:pPr><w:pStyle w:val="${style}"/></w:pPr>` : ""}${runs(text)}</w:p>`;
+  // título centralizado (jc) e que abre a página mais abaixo (espaço antes), como no PDF
+  const para = (style, text, b) => {
+    const extra = b ? (b.sink ? `<w:spacing w:before="1440"/>` : "") + (b.center ? `<w:jc w:val="center"/>` : "") : "";
+    return `<w:p>${style || extra ? `<w:pPr>${style ? `<w:pStyle w:val="${style}"/>` : ""}${extra}</w:pPr>` : ""}${runs(text)}</w:p>`;
+  };
   const styleOf = { h1: "Heading1", h2: "Heading2", p: "", li: "Lista", verse: "Verso", code: "Codigo" };
   const cell = t => `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p>${runs(t)}</w:p></w:tc>`;
   const bd = k => `<w:${k} w:val="single" w:sz="4" w:space="0" w:color="888888"/>`;
@@ -54,7 +57,7 @@ async function blocksToDocx(blocks, title, author){
     if (b.type === "scene") { parts.push(para("Cena", b.text)); continue; }
     if (b.type === "table") { parts.push(table(b.rows)); continue; }
     if (b.type === "toc") { parts.push(para("SumarioPdf" + (b.level || 0), b.text)); continue; }
-    if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : b.part && /^h[12]$/.test(b.type) ? "Parte" : styleOf[b.type], b.text)); continue; }
+    if (b.type !== "img") { parts.push(para(b.demote && /^h[12]$/.test(b.type) ? "Heading3" : b.part && /^h[12]$/.test(b.type) ? "Parte" : styleOf[b.type], b.text, /^h[123]$/.test(b.type) ? b : null)); continue; }
     n++;
     const file = `image${n}.jpg`;
     z.file("word/media/" + file, b.blob);

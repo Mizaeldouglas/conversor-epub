@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.9.2 — 13 nov 2026
+
+- Título de capítulo centralizado no PDF sai centralizado no EPUB, e a abertura de capítulo que começa mais abaixo na página ganha o mesmo espaço em cima. Título alinhado à esquerda continua à esquerda. Vale também para o DOCX.
+
 ## 3.9.1 — 13 nov 2026
 
 - O índice do próprio PDF sai igual ao do PDF: uma entrada por linha, com o recuo de partes e capítulos e o link para o capítulo. Antes, as entradas se juntavam em parágrafos. Entrada que quebra em duas linhas volta a ser uma, sem o hífen do meio. Quando o PDF já tem índice, o Lombada não acrescenta o sumário dele no começo, para o livro não ficar com dois.
