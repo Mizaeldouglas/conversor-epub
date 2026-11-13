@@ -37,7 +37,7 @@ A leitura do PDF, a montagem do EPUB, a conferência e o OCR acontecem no navega
 
 ## Login com Google
 
-O botão “Entrar com Google” só aparece quando `googleClientId`, no `package.json`, tem o ID de um cliente OAuth do Google (termina em `.apps.googleusercontent.com`). O ID não é segredo: ele fica visível na página. O app pede só o escopo `drive.file`, que dá acesso apenas aos arquivos criados pelo próprio Lombada. Os testes usam um Google simulado (`tests/fake-google.mjs`).
+No site, o app só abre depois de entrar com o Google; antes disso aparece a página de apresentação. Esse bloqueio é feito no navegador (o site não tem servidor), então serve para organizar a estante de cada pessoa, não como proteção. O login só existe quando `googleClientId`, no `package.json`, tem o ID de um cliente OAuth do Google (termina em `.apps.googleusercontent.com`). O ID não é segredo: ele fica visível na página. O app pede só o escopo `drive.file`, que dá acesso apenas aos arquivos criados pelo próprio Lombada. Os testes usam um Google simulado (`tests/fake-google.mjs`).
 
 ## Desenvolvimento
 

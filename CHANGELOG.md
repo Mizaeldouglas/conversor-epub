@@ -1,5 +1,10 @@
 # Novidades
 
+## 3.5.0 — 12 nov 2026
+
+- Tela de entrada: quem ainda não entrou vê a página de apresentação do Lombada, com o botão “Entrar com Google”. O app abre depois do login e continua aberto nas visitas seguintes, até a pessoa sair.
+- Conta no topo mesmo quando o acesso ao Drive expira (cerca de uma hora), com “Reconectar ao Drive” no menu e no cartão do livro.
+
 ## 3.4.1 — 12 nov 2026
 
 - O botão “Entrar com Google” passa a aparecer no site.

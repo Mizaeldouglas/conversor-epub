@@ -22,8 +22,12 @@ const loadGis = () => gisP ||= new Promise((res, rej) => {
   document.head.appendChild(s);
 });
 
+// o site só abre para quem entrou: sem conta lembrada, aparece a página de apresentação
+const loggedIn = () => !!driveRemembered();
+function applyGate(){ document.body.classList.toggle("gated", DRIVE_ON && !loggedIn()); }
+const loginBtns = on => document.querySelectorAll("[data-login]").forEach(b => { b.disabled = !on; });
 async function driveLogin(){
-  const btn = $("#loginBtn"); btn.disabled = true;
+  loginBtns(false);
   try {
     await loadGis();
     const resp = await new Promise((res, rej) => {
@@ -38,7 +42,9 @@ async function driveLogin(){
     const about = await gapi("about?fields=user(displayName,emailAddress,photoLink)");
     drv.user = { name: about.user.displayName || "", email: about.user.emailAddress || "", photo: about.user.photoLink || "" };
     try { localStorage.setItem(DRIVE_ACCT, JSON.stringify(drv.user)); } catch {}
-    renderAccount();
+    const first = document.body.classList.contains("gated");
+    applyGate(); renderAccount();
+    if (first) scrollTo(0, 0);
     toast("Conectado ao Google Drive.");
     await driveRefresh();
     // livros que ficaram esperando a conexão (convertidos com ela expirada)
@@ -47,22 +53,22 @@ async function driveLogin(){
   } catch (e) {
     console.warn("login google", e);
     if (!(e && /popup_closed|access_denied/.test(e.type || e.message || ""))) toast("Não consegui entrar com o Google. Tente de novo.");
-  } finally { btn.disabled = false; }
+  } finally { loginBtns(true); }
 }
 function driveLogout(){
   const tok = drv.token;
   Object.assign(drv, { token: null, exp: 0, user: null, folder: null, covers: null, list: null }); drv.coverBlobs.clear();
   try { sessionStorage.removeItem(DRIVE_TOKEN); localStorage.removeItem(DRIVE_ACCT); } catch {}
   try { if (tok && window.google && google.accounts) google.accounts.oauth2.revoke(tok, () => {}); } catch {}
-  renderAccount(); renderHistory();
+  applyGate(); renderAccount(); renderHistory(); scrollTo(0, 0);
   toast("Você saiu da conta Google. Os livros continuam no seu Drive.");
 }
 function driveExpired(){
   if (!drv.token) return;
   drv.token = null; drv.exp = 0;
   try { sessionStorage.removeItem(DRIVE_TOKEN); } catch {}
-  renderAccount();
-  toast("A conexão com o Google expirou. Entre de novo para continuar guardando no Drive.", 8000);
+  renderAccount(); renderHistory();
+  toast("A conexão com o Drive expirou. Use “Reconectar” para continuar guardando os livros.", 8000);
 }
 
 // chamada à API do Drive com o acesso da pessoa
@@ -115,7 +121,7 @@ async function driveSaveRecord(r){
 }
 async function driveSaveJob(job){
   if (!DRIVE_ON) return;
-  if (!driveConnected()) { if (drv.user || driveRemembered()) drv.pending.add(job.histId); return; }
+  if (!driveConnected()) { if (loggedIn()) { drv.pending.add(job.histId); job.driveState = "wait"; render(job); renderAccount(); } return; }
   job.driveState = "up"; render(job);
   try {
     const rec = await idbReq("readonly", st => st.get(job.histId));
@@ -125,7 +131,7 @@ async function driveSaveJob(job){
     driveRefresh();
   } catch (e) {
     console.warn("drive", e);
-    job.driveState = e && e.name === "DriveAuth" ? null : "err";
+    job.driveState = e && e.name === "DriveAuth" ? "wait" : "err";
     if (e && e.name === "DriveAuth") drv.pending.add(job.histId);
   }
   render(job);
@@ -188,21 +194,26 @@ function renderAccount(){
   const box = $("#acct");
   box.hidden = !DRIVE_ON;
   if (!DRIVE_ON) return;
-  const on = driveConnected() && drv.user;
-  $("#loginBtn").hidden = !!on;
-  $("#acctMenu").hidden = !on;
-  if (on) {
+  // quem já entrou continua com a conta no topo; o acesso ao Drive dura uma hora e é refeito em "Reconectar"
+  const user = drv.user || driveRemembered(), on = driveConnected();
+  $("#loginBtn").hidden = true;
+  $("#acctMenu").hidden = !user;
+  $("#acctMenu").classList.toggle("off", !on);
+  if (user) {
     const img = $("#acctPhoto");
-    img.hidden = !drv.user.photo; if (drv.user.photo) img.src = drv.user.photo;
-    $("#acctInitial").hidden = !!drv.user.photo; $("#acctInitial").textContent = (drv.user.name || drv.user.email || "?").trim().charAt(0).toUpperCase();
-    $("#acctName").textContent = (drv.user.name || drv.user.email).split(" ")[0];
-    $("#acctMail").textContent = drv.user.email;
+    img.hidden = !user.photo; if (user.photo) img.src = user.photo;
+    $("#acctInitial").hidden = !!user.photo; $("#acctInitial").textContent = (user.name || user.email || "?").trim().charAt(0).toUpperCase();
+    $("#acctName").textContent = (user.name || user.email || "").split(" ")[0];
+    $("#acctMail").textContent = user.email || "";
+    $("#reconnectBtn").hidden = on;
+    $("#acctFolder").hidden = !on;
     $("#acctFolder").href = drv.folder ? "https://drive.google.com/drive/folders/" + drv.folder : "https://drive.google.com/drive/my-drive";
   }
 }
-$("#loginBtn").onclick = driveLogin;
+document.querySelectorAll("[data-login]").forEach(b => { b.onclick = () => { $("#acctMenu").open = false; driveLogin(); }; });
+
 $("#logoutBtn").onclick = () => { $("#acctMenu").open = false; driveLogout(); };
 $("#driveAllBtn").onclick = driveSaveAll;
 document.addEventListener("click", e => { const m = $("#acctMenu"); if (m.open && !m.contains(e.target)) m.open = false; });
-renderAccount();
+applyGate(); renderAccount();
 if (driveConnected()) driveRefresh();

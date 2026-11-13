@@ -65,7 +65,7 @@ async function renderHistory(){
   $("#driveAllBtn").hidden = !localOnly;
   $("#driveAllN").textContent = String(localOnly);
   $("#shelfNote").textContent = on ? "Guardados na pasta Lombada do seu Google Drive: aparecem em qualquer aparelho em que você entrar."
-    : DRIVE_ON ? "Os últimos 12 livros ficam neste navegador. Entre com o Google para guardar no seu Drive e ver em outros aparelhos."
+    : DRIVE_ON ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."
     : "Os últimos 12 livros ficam guardados neste navegador.";
   box.innerHTML = "";
   for (const it of items) {

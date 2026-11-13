@@ -54,7 +54,7 @@ function i18nText(s){
   return lead + parts.map(p => { const t = i18nLookup(p); if (t == null) I18N_MISSING.add(i18nKey(p)); return t ?? p; }).join(" ") + trail;
 }
 const i18nSrc = new WeakMap(), i18nSet = new WeakMap();   // texto original e o último texto que esta camada escreveu
-const I18N_ATTRS = ["placeholder", "title", "aria-label"];
+const I18N_ATTRS = ["placeholder", "title", "aria-label", "alt"];
 function i18nNode(n){
   if (n.nodeType === 3) {
     const p = n.parentElement;

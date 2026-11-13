@@ -43,7 +43,10 @@ $("#updateBtn").onclick = () => {
 $("#updateLater").onclick = () => { $("#updateBar").hidden = true; };
 
 // link "política de privacidade": abre a pergunta certa
-document.querySelectorAll("[data-open]").forEach(a => a.addEventListener("click", () => { const d = document.getElementById(a.dataset.open); if (d) d.open = true; }));
+document.querySelectorAll("[data-open]").forEach(a => a.addEventListener("click", e => {
+  if (document.body.classList.contains("gated")) { e.preventDefault(); $("#lp-privacidade").scrollIntoView({ behavior: "smooth" }); return; }
+  const d = document.getElementById(a.dataset.open); if (d) d.open = true;
+}));
 if (location.hash === "#privacidade") $("#privacidade").open = true;
 
 // apagar tudo o que fica guardado neste navegador
@@ -56,6 +59,7 @@ $("#wipeBtn").onclick = async () => {
   try { if ("caches" in window) await caches.delete("conversor-epub-compartilhado"); } catch {}
   delete b.dataset.sure; b.textContent = "Apagar tudo o que está guardado neste navegador";
   renderHistory(); renderFixes();
+  if (DRIVE_ON) { applyGate(); renderAccount(); scrollTo(0, 0); }   // apagar tudo também desfaz o login
   toast("Pronto: nada do Lombada ficou guardado neste navegador.");
 };
 

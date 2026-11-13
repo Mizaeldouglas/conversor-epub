@@ -11,25 +11,34 @@ const live = tag => [...drive.files.values()].filter(f => !f.trashed && (f.appPr
 let server, browser, A;
 before(async () => { server = await startServer(); browser = await launch(); });
 after(async () => { await browser.close(); server.close(); });
-const device = () => openApp(browser, server, { setup: fakeGoogle });
-const login = async p => { await p.click("#loginBtn"); await p.waitForSelector("#acctMenu:not([hidden])"); };
+const device = () => openApp(browser, server, { setup: fakeGoogle, loggedOut: true });
+const login = async p => { await p.locator("[data-login]:visible").first().click(); await p.waitForFunction(() => !document.body.classList.contains("gated") && !document.querySelector("#acctMenu").classList.contains("off")); };
 
-test("antes de clicar em entrar, nada do Google é carregado", async () => {
-  const app = await openApp(browser, server);
+test("sem entrar: só a página de apresentação, e nada do Google é carregado", async () => {
+  const app = await openApp(browser, server, { loggedOut: true }), p = app.page;
   const seen = [];
-  app.page.on("request", r => { if (/accounts\.google\.com|googleapis\.com\/(drive|upload)/.test(r.url())) seen.push(r.url()); });
-  await app.page.reload();
-  await app.page.waitForSelector("#loginBtn");
-  await app.page.waitForTimeout(500);
-  assert.equal(await app.page.locator("#loginBtn").isVisible(), true);
+  p.on("request", r => { if (/accounts\.google\.com|googleapis\.com\/(drive|upload)/.test(r.url())) seen.push(r.url()); });
+  await p.reload();
+  await p.waitForSelector("#landing h2");
+  assert.equal(await p.textContent("#landing h2"), "Seus PDFs viram livros de Kindle");
+  assert.equal(await p.locator("#landing [data-login]").first().isVisible(), true);
+  for (const sel of ["#drop", "#optPanel", "#settingsBtn", "#ajuda", "#acct"]) assert.equal(await p.locator(sel).isVisible(), false, sel + " aparece sem login");
+  await p.waitForTimeout(400);
   assert.deepEqual(seen, []);
+  assert.deepEqual(app.errors, []);
   await app.ctx.close();
 });
 
 test("entrar com Google: o livro convertido vai para a pasta Lombada do Drive, com a capa", async () => {
   A = await device(); const p = A.page;
+  assert.equal(await p.locator("#drop").isVisible(), false);
   await login(p);
+  assert.equal(await p.locator("#landing").isVisible(), false);
+  assert.equal(await p.locator("#drop").isVisible(), true);
   assert.equal(await p.textContent("#acctName"), "Ana");
+  await p.reload();   // quem entrou continua dentro ao recarregar
+  await p.waitForSelector("#drop");
+  assert.equal(await p.locator("#drop").isVisible(), true);
   await addFiles(p, ["capitulos.pdf"]); await waitJob(p, 0);
   await p.waitForFunction(() => window.__app.jobs[0].driveState === "ok");
   const books = live("livro");
@@ -51,7 +60,6 @@ test("entrar com Google: o livro convertido vai para a pasta Lombada do Drive, c
 
 test("outro aparelho: a estante mostra o livro do Drive e baixa o arquivo", async () => {
   const B = await device(), p = B.page;
-  assert.equal(await p.locator("#history .book").count(), 0);
   await login(p);
   await p.waitForFunction(() => document.querySelectorAll("#history .book").length === 1);
   assert.equal(await p.textContent("#history .book .t"), "capitulos");
@@ -72,18 +80,24 @@ test("acesso expirado: avisa, e o livro vai para o Drive ao entrar de novo", asy
   const p = A.page;
   drive.fail401 = 1;
   await addFiles(p, ["estilos.pdf"]); await waitJob(p, 1);
-  await p.waitForSelector("#loginBtn:not([hidden])");
+  await p.waitForSelector('.row [data-a="driveLogin"]');
   assert.match(await p.textContent("#toast"), /expirou/);
   assert.equal(live("livro").length, 0);
-  await login(p);
+  assert.equal(await p.locator("#drop").isVisible(), true, "a conexão expirada não tira a pessoa do app");
+  await p.locator(".row").nth(1).locator('[data-a="driveLogin"]').click();
+  await p.waitForFunction(() => !document.querySelector("#acctMenu").classList.contains("off"));
   await p.waitForFunction(() => window.__app.jobs[1].driveState === "ok");
   assert.deepEqual(live("livro").map(f => f.name), ["estilos.epub"]);
 });
 
 test("livros convertidos antes de entrar: botão para guardar no Drive", async () => {
-  const C = await device(), p = C.page;
+  // conta lembrada, mas sem acesso ao Drive: o livro fica só no navegador até reconectar
+  const C = await openApp(browser, server, { setup: fakeGoogle }), p = C.page;
   await addFiles(p, ["grudado.pdf"]); await waitJob(p, 0);
-  await login(p);
+  await p.evaluate(() => window.__app.jobs.length = 0);   // tira da fila: sobra só na estante
+  await p.reload();
+  await p.click("#acctMenu > summary"); await p.click("#reconnectBtn");
+  await p.waitForFunction(() => !document.querySelector("#acctMenu").classList.contains("off"));
   await p.waitForSelector("#driveAllBtn:not([hidden])");
   assert.equal(await p.textContent("#driveAllN"), "1");
   await p.click("#driveAllBtn");
@@ -93,12 +107,12 @@ test("livros convertidos antes de entrar: botão para guardar no Drive", async (
   await C.ctx.close();
 });
 
-test("sair: a estante volta a ser só deste navegador e os livros ficam no Drive", async () => {
+test("sair: volta para a página de apresentação e os livros ficam no Drive", async () => {
   const p = A.page;
   await p.click("#acctMenu > summary"); await p.click("#logoutBtn");
-  await p.waitForSelector("#loginBtn:not([hidden])");
-  await p.waitForFunction(() => /Entre com o Google/.test(document.querySelector("#shelfNote").textContent));
-  assert.equal(await p.locator("#history .book .cloud").count(), 0);
+  await p.waitForFunction(() => document.body.classList.contains("gated"));
+  assert.equal(await p.locator("#landing [data-login]").first().isVisible(), true);
+  assert.equal(await p.locator("#drop").isVisible(), false);
   assert.equal(live("livro").length, 2);
   assert.equal(await p.evaluate(() => localStorage.getItem("conversor-epub:drive")), null);
 });

@@ -26,6 +26,7 @@
 </style>
 </head>
 <body>
+<script>try{if(window.top===window&&/^https?:$/.test(location.protocol)&&!/claude|anthropic/i.test(location.hostname)&&/\.apps\.googleusercontent\.com$/.test(window.__lombadaGClient||"@@GCLIENT@@")&&!localStorage.getItem("conversor-epub:drive"))document.body.classList.add("gated")}catch(e){}</script>
 <header class="top">
   <div class="brand">
     <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><rect x="6" y="3" width="28" height="34" rx="5" fill="var(--cover)"/><rect x="6" y="3" width="6" height="34" rx="3" fill="var(--cover-deep)"/><path d="M22 3h7.5v15.5L25.75 15 22 18.5z" fill="var(--mark)"/><path d="M16 25h13M16 30h8" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>
@@ -35,11 +36,12 @@
     <select id="uiLang" aria-label="Idioma da interface"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option></select>
     <button class="btn ghost sm" id="installBtn" hidden>Instalar app</button>
     <div class="acct" id="acct" hidden>
-      <button class="btn ghost sm" id="loginBtn"><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span class="login-txt">Entrar com Google</span></button>
+      <button class="btn ghost sm" id="loginBtn" data-login><svg width="16" height="16" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span class="login-txt">Entrar com Google</span></button>
       <details class="acct-menu" id="acctMenu" hidden>
         <summary aria-label="Conta Google"><img id="acctPhoto" alt="" referrerpolicy="no-referrer" hidden><span class="acct-initial" id="acctInitial"></span><span class="acct-name" id="acctName"></span></summary>
         <div class="acct-pop">
           <p>Conectado como <b class="acct-mail" id="acctMail"></b></p>
+          <button class="btn sm" id="reconnectBtn" data-login hidden>Reconectar ao Drive</button>
           <a class="btn ghost sm" id="acctFolder" href="https://drive.google.com" target="_blank" rel="noopener">Abrir a pasta no Drive</a>
           <button class="btn quiet sm" id="logoutBtn">Sair</button>
         </div>
@@ -53,6 +55,73 @@
   </div>
 </header>
 
+<main id="landing" class="lp" aria-labelledby="lpT">
+  <section class="lp-cover">
+    <div class="lp-copy">
+      <h2 id="lpT">Seus PDFs viram livros de Kindle</h2>
+      <p class="lp-lead">O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive.</p>
+      <button class="btn lp-login" data-login><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Entrar com Google</span></button>
+      <p class="lp-small">Grátis e sem cadastro: sua conta Google é o login. A conversão acontece no seu navegador.</p>
+    </div>
+    <svg class="drop-art lp-art" viewBox="0 0 310 236" aria-hidden="true">
+      <g class="sheet">
+        <path d="M14 30a6 6 0 0 1 6-6h92l26 26v150a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#fff"/>
+        <path d="M112 24v20a6 6 0 0 0 6 6h20z" fill="#c7cdf2"/>
+        <rect x="30" y="76" width="56" height="13" rx="3" fill="#ffd84a"/>
+        <path d="M30 62h66M34 82h48M94 82h28M30 102h92M30 122h92M30 142h70M30 162h92" stroke="#aab1dd" stroke-width="5" stroke-linecap="round"/>
+        <path d="M34 82h48" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <path d="M68 186h16" stroke="#aab1dd" stroke-width="4" stroke-linecap="round"/>
+      </g>
+      <g class="reader">
+        <rect x="150" y="8" width="150" height="220" rx="18" fill="#131833"/>
+        <rect x="162" y="22" width="126" height="178" rx="5" fill="#f6f5ee"/>
+        <text x="176" y="62" font-family="Literata,Georgia,serif" font-size="30" font-weight="700" fill="#131833">1</text>
+        <path d="M176 78h70" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <rect x="186" y="96" width="60" height="13" rx="3" fill="#ffd84a"/>
+        <path d="M188 102h56" stroke="#131833" stroke-width="5" stroke-linecap="round"/>
+        <path d="M254 102h20M176 122h98M176 142h98M176 162h62" stroke="#b4b8cc" stroke-width="5" stroke-linecap="round"/>
+        <path d="M208 186h34" stroke="#c9ccda" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="225" cy="214" r="3.5" fill="#3a4170"/>
+      </g>
+    </svg>
+  </section>
+
+  <section class="lp-sec" aria-labelledby="lpComo">
+    <h2 id="lpComo">Do arquivo ao Kindle em três passos</h2>
+    <ol class="path lp-path">
+      <li><span class="n">1</span><b>Entre com o Google</b><span>É a sua conta que guarda a estante. Não há senha nova para criar.</span></li>
+      <li><span class="n">2</span><b>Solte o arquivo</b><span>O livro é convertido na hora, com capítulos, sumário e notas clicáveis.</span></li>
+      <li><span class="n">3</span><b>Leia no Kindle</b><span>Baixe o EPUB, mande ao aparelho ou abra depois em outro computador.</span></li>
+    </ol>
+  </section>
+
+  <section class="lp-sec lp-split" aria-labelledby="lpFaz">
+    <div>
+      <h2 id="lpFaz">O que o Lombada faz</h2>
+      <dl class="lp-feats">
+        <div><dt>Texto igual ao original</dt><dd>Cada palavra do EPUB é comparada com o PDF. O que sair diferente aparece com a página, para você corrigir.</dd></div>
+        <div><dt>Capítulos e sumário de verdade</dt><dd>Usa o sumário interno do PDF ou reconhece os títulos, as partes, as notas de rodapé e as quebras de cena.</dd></div>
+        <div><dt>Vários formatos</dt><dd>PDF, EPUB, DOCX, TXT, HTML, Markdown, FB2, MOBI e CBZ. PDF escaneado passa por OCR.</dd></div>
+        <div><dt>Edição antes de baixar</dt><dd>Troque a capa, corrija o texto na prévia, renomeie e reordene capítulos, busque capa e sinopse.</dd></div>
+        <div><dt>Estante no seu Google Drive</dt><dd>Os livros prontos ficam numa pasta Lombada do seu Drive e aparecem em qualquer aparelho.</dd></div>
+        <div><dt>Kindle, Kobo e outros</dt><dd>EPUB 3 conferido antes do download, KEPUB para Kobo e envio direto ao app Kindle no celular.</dd></div>
+      </dl>
+    </div>
+    <figure class="lp-shot"><img src="docs/tela.png" alt="Tela do Lombada com um livro convertido e pronto para o Kindle" width="1280" height="860" loading="lazy"></figure>
+  </section>
+
+  <section class="lp-sec lp-priv" id="lp-privacidade" aria-labelledby="lpPriv">
+    <h2 id="lpPriv">O que acontece com seus arquivos</h2>
+    <ul>
+      <li><b>A conversão é feita no seu navegador.</b> O PDF não é enviado a nenhum servidor do Lombada, porque o Lombada não tem servidor.</li>
+      <li><b>O EPUB pronto vai para o seu Drive.</b> Fica numa pasta Lombada, na sua conta, e só você tem acesso.</li>
+      <li><b>O acesso é mínimo.</b> O Lombada só enxerga os arquivos que ele mesmo criou. Não vê o resto do seu Drive, seus e-mails nem seus contatos.</li>
+      <li><b>Você sai quando quiser.</b> Ao sair, a conexão é desfeita e os livros continuam no seu Drive.</li>
+    </ul>
+    <button class="btn lp-login" data-login><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg><span>Entrar com Google</span></button>
+  </section>
+</main>
+
 <div class="hero">
   <div class="drop" id="drop" tabindex="0" role="button" aria-label="Escolher arquivos para converter">
     <div class="drop-copy">
@@ -60,7 +129,7 @@
       <p class="what">Solte aqui PDFs ou EPUBs, quantos quiser. O PDF sai como EPUB com capítulos, sumário e notas, e cada palavra é conferida com o original. O EPUB pronto ganha números de página. Também abre DOCX, TXT, HTML, Markdown, FB2, MOBI e CBZ.</p>
       <div class="drop-row">
         <span class="btn mark">Escolher arquivos</span>
-        <span class="privacy"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>Os arquivos não saem do seu aparelho</span>
+        <span class="privacy"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>A conversão é feita no seu navegador</span>
       </div>
     </div>
     <svg class="drop-art" viewBox="0 0 310 236" aria-hidden="true">
@@ -222,14 +291,14 @@
         <details><summary>Juntar volumes num livro só</summary><div class="ans">
           <p>Com dois ou mais PDFs convertidos na fila, “Juntar os PDFs num EPUB só” cria um livro com todos, na ordem do nome do arquivo. As páginas ficam como “1.12”, “2.12”…</p></div></details>
         <details><summary>Guardar os livros no Google Drive</summary><div class="ans">
-          <p>Com “Entrar com Google”, cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. Sem entrar, a estante fica só neste navegador.</p>
+          <p>Cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta. O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.</p>
           <p>O Lombada pede só o acesso aos arquivos que ele mesmo cria: não vê nem mexe no resto do seu Drive. Tirar um livro da estante o manda para a lixeira do Drive, de onde dá para recuperar por 30 dias. Em “Sair”, a conexão é desfeita e os livros continuam no seu Drive.</p></div></details>
         <details><summary>Instalar no celular</summary><div class="ans">
           <p>No site, use “Instalar app” ou “Adicionar à tela inicial”. Instalado, funciona sem internet e, no Android, aparece no “Compartilhar” para receber PDFs direto de outros apps.</p></div></details>
         <details id="privacidade"><summary>Privacidade: o que acontece com meus arquivos?</summary><div class="ans">
-          <p>Nada sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
+          <p>O arquivo que você solta não sai do seu aparelho. A leitura do PDF, a montagem do EPUB, a conferência e o OCR rodam dentro do navegador; nenhum arquivo é enviado para servidor, e o site não usa cookies nem contadores de visita.</p>
           <p>O navegador baixa apenas o próprio programa: as bibliotecas de leitura de PDF e ZIP (cdnjs), as fontes da página (Google Fonts) e, se você ligar o OCR, o leitor de texto (jsDelivr). Esses serviços veem o seu endereço de internet, como em qualquer site, mas não os seus arquivos.</p>
-          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. “Entrar com Google” guarda os EPUBs prontos numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
+          <p>Duas funções mandam algo para fora, e só quando você pede. “Buscar dados deste livro” envia o título e o autor à Open Library e, se ela não achar, ao Google Books, para trazer capa e sinopse. Os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.</p>
           <p>Ficam guardados só neste navegador: os últimos 12 livros da estante, os arquivos que ainda estão na fila, as opções escolhidas e as correções que você pediu para lembrar.</p>
           <p><button class="btn ghost sm" id="wipeBtn">Apagar tudo o que está guardado neste navegador</button></p></div></details>
         <details><summary>Kobo e outros leitores</summary><div class="ans">

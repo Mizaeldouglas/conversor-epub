@@ -1718,5 +1718,201 @@
 "{0} livros guardados no seu Drive.": [
 "{0} books saved to your Drive.",
 "{0} libros guardados en tu Drive."
+],
+"Reconectar ao Drive": [
+"Reconnect to Drive",
+"Reconectar a Drive"
+],
+"Reconectar": [
+"Reconnect",
+"Reconectar"
+],
+"Seus PDFs viram livros de Kindle": [
+"Your PDFs become Kindle books",
+"Tus PDFs se vuelven libros de Kindle"
+],
+"O Lombada converte PDF, DOCX, MOBI e outros formatos em EPUB com capítulos, sumário e notas, e guarda cada livro pronto no seu Google Drive.": [
+"Lombada converts PDF, DOCX, MOBI and other formats into EPUB with chapters, a table of contents and notes, and saves every finished book to your Google Drive.",
+"Lombada convierte PDF, DOCX, MOBI y otros formatos en EPUB con capítulos, índice y notas, y guarda cada libro listo en tu Google Drive."
+],
+"Grátis e sem cadastro: sua conta Google é o login.": [
+"Free, with no sign-up: your Google account is the login.",
+"Gratis y sin registro: tu cuenta de Google es el acceso."
+],
+"A conversão acontece no seu navegador.": [
+"The conversion happens in your browser.",
+"La conversión ocurre en tu navegador."
+],
+"Do arquivo ao Kindle em três passos": [
+"From file to Kindle in three steps",
+"Del archivo al Kindle en tres pasos"
+],
+"Entre com o Google": [
+"Sign in with Google",
+"Entra con Google"
+],
+"É a sua conta que guarda a estante.": [
+"Your account is what keeps your shelf.",
+"Tu cuenta es la que guarda el estante."
+],
+"Não há senha nova para criar.": [
+"There is no new password to create.",
+"No hay contraseña nueva que crear."
+],
+"O livro é convertido na hora, com capítulos, sumário e notas clicáveis.": [
+"The book is converted on the spot, with chapters, a table of contents and clickable notes.",
+"El libro se convierte al momento, con capítulos, índice y notas con enlace."
+],
+"Leia no Kindle": [
+"Read on your Kindle",
+"Lee en el Kindle"
+],
+"Baixe o EPUB, mande ao aparelho ou abra depois em outro computador.": [
+"Download the EPUB, send it to the device or open it later on another computer.",
+"Descarga el EPUB, envíalo al dispositivo o ábrelo después en otra computadora."
+],
+"O que o Lombada faz": [
+"What Lombada does",
+"Qué hace Lombada"
+],
+"Texto igual ao original": [
+"Text that matches the original",
+"Texto igual al original"
+],
+"Cada palavra do EPUB é comparada com o PDF.": [
+"Every word of the EPUB is compared with the PDF.",
+"Cada palabra del EPUB se compara con el PDF."
+],
+"O que sair diferente aparece com a página, para você corrigir.": [
+"Anything that differs is listed with its page, so you can fix it.",
+"Lo que salga distinto aparece con su página, para que lo corrijas."
+],
+"Capítulos e sumário de verdade": [
+"Real chapters and table of contents",
+"Capítulos e índice de verdad"
+],
+"Usa o sumário interno do PDF ou reconhece os títulos, as partes, as notas de rodapé e as quebras de cena.": [
+"It uses the PDF's own outline or recognizes titles, parts, footnotes and scene breaks.",
+"Usa el índice interno del PDF o reconoce los títulos, las partes, las notas al pie y los cambios de escena."
+],
+"Vários formatos": [
+"Many formats",
+"Varios formatos"
+],
+"PDF, EPUB, DOCX, TXT, HTML, Markdown, FB{0}, MOBI e CBZ.": [
+"PDF, EPUB, DOCX, TXT, HTML, Markdown, FB{0}, MOBI and CBZ.",
+"PDF, EPUB, DOCX, TXT, HTML, Markdown, FB{0}, MOBI y CBZ."
+],
+"PDF escaneado passa por OCR.": [
+"Scanned PDFs go through OCR.",
+"El PDF escaneado pasa por OCR."
+],
+"Edição antes de baixar": [
+"Editing before you download",
+"Edición antes de descargar"
+],
+"Troque a capa, corrija o texto na prévia, renomeie e reordene capítulos, busque capa e sinopse.": [
+"Change the cover, fix the text in the preview, rename and reorder chapters, look up a cover and synopsis.",
+"Cambia la portada, corrige el texto en la vista previa, renombra y reordena capítulos, busca portada y sinopsis."
+],
+"Estante no seu Google Drive": [
+"A shelf in your Google Drive",
+"Estante en tu Google Drive"
+],
+"Os livros prontos ficam numa pasta Lombada do seu Drive e aparecem em qualquer aparelho.": [
+"Finished books live in a Lombada folder in your Drive and show up on any device.",
+"Los libros listos quedan en una carpeta Lombada de tu Drive y aparecen en cualquier dispositivo."
+],
+"Kindle, Kobo e outros": [
+"Kindle, Kobo and others",
+"Kindle, Kobo y otros"
+],
+"EPUB {0} conferido antes do download, KEPUB para Kobo e envio direto ao app Kindle no celular.": [
+"EPUB {0} checked before download, KEPUB for Kobo and direct sending to the Kindle app on your phone.",
+"EPUB {0} verificado antes de la descarga, KEPUB para Kobo y envío directo a la app Kindle en el celular."
+],
+"Tela do Lombada com um livro convertido e pronto para o Kindle": [
+"The Lombada screen with a converted book, ready for Kindle",
+"Pantalla de Lombada con un libro convertido y listo para el Kindle"
+],
+"O que acontece com seus arquivos": [
+"What happens to your files",
+"Qué pasa con tus archivos"
+],
+"A conversão é feita no seu navegador.": [
+"The conversion is done in your browser.",
+"La conversión se hace en tu navegador."
+],
+"A conversão é feita no seu navegador": [
+"The conversion is done in your browser",
+"La conversión se hace en tu navegador"
+],
+"O PDF não é enviado a nenhum servidor do Lombada, porque o Lombada não tem servidor.": [
+"The PDF is not sent to any Lombada server, because Lombada has no server.",
+"El PDF no se envía a ningún servidor de Lombada, porque Lombada no tiene servidor."
+],
+"O EPUB pronto vai para o seu Drive.": [
+"The finished EPUB goes to your Drive.",
+"El EPUB listo va a tu Drive."
+],
+"Fica numa pasta Lombada, na sua conta, e só você tem acesso.": [
+"It stays in a Lombada folder, in your account, and only you have access.",
+"Queda en una carpeta Lombada, en tu cuenta, y solo tú tienes acceso."
+],
+"O acesso é mínimo.": [
+"Access is minimal.",
+"El acceso es mínimo."
+],
+"O Lombada só enxerga os arquivos que ele mesmo criou.": [
+"Lombada only sees the files it created itself.",
+"Lombada solo ve los archivos que él mismo creó."
+],
+"Não vê o resto do seu Drive, seus e-mails nem seus contatos.": [
+"It doesn't see the rest of your Drive, your email or your contacts.",
+"No ve el resto de tu Drive, tus correos ni tus contactos."
+],
+"Você sai quando quiser.": [
+"You can sign out whenever you want.",
+"Sales cuando quieras."
+],
+"Ao sair, a conexão é desfeita e os livros continuam no seu Drive.": [
+"When you sign out, the connection is removed and the books stay in your Drive.",
+"Al salir, la conexión se deshace y los libros siguen en tu Drive."
+],
+"Mostrando só os livros deste navegador.": [
+"Showing only this browser's books.",
+"Mostrando solo los libros de este navegador."
+],
+"Reconecte ao Drive, no menu da sua conta, para ver os outros.": [
+"Reconnect to Drive, in your account menu, to see the others.",
+"Reconecta a Drive, en el menú de tu cuenta, para ver los demás."
+],
+"Cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar com a mesma conta.": [
+"Every converted book goes to the Lombada folder in your Google Drive, and the shelf shows those books on any device where you sign in with the same account.",
+"Cada libro convertido va a la carpeta Lombada de tu Google Drive, y el estante muestra esos libros en cualquier dispositivo donde entres con la misma cuenta."
+],
+"O acesso ao Drive dura cerca de uma hora; depois disso, use “Reconectar ao Drive” no menu da sua conta.": [
+"Drive access lasts about an hour; after that, use “Reconnect to Drive” in your account menu.",
+"El acceso a Drive dura cerca de una hora; después, usa “Reconectar a Drive” en el menú de tu cuenta."
+],
+"O arquivo que você solta não sai do seu aparelho.": [
+"The file you drop never leaves your device.",
+"El archivo que sueltas no sale de tu dispositivo."
+],
+"Os EPUBs prontos são guardados numa pasta Lombada do seu próprio Google Drive; o Lombada não tem servidor e não recebe os livros.": [
+"Finished EPUBs are saved in a Lombada folder in your own Google Drive; Lombada has no server and never receives the books.",
+"Los EPUB listos se guardan en una carpeta Lombada de tu propio Google Drive; Lombada no tiene servidor y no recibe los libros."
+],
+"Ainda não está no Drive: a conexão expirou.": [
+"Not in Drive yet: the connection expired.",
+"Todavía no está en Drive: la conexión expiró."
+],
+"A conexão com o Drive expirou.": [
+"The Drive connection expired.",
+"La conexión con Drive expiró."
+],
+"Use “Reconectar” para continuar guardando os livros.": [
+"Use “Reconnect” to keep saving your books.",
+"Usa “Reconectar” para seguir guardando los libros."
 ]
 }

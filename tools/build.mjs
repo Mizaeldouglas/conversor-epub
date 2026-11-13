@@ -32,7 +32,7 @@ html = put(html, "/* @@CSS@@ */", src("style.css").trimEnd());
 html = put(html, "/* @@JS@@ */", js);
 html = put(html, "@@WORDS@@", src("data/pt-words.b64").trim());
 html = put(html, "@@I18N@@", JSON.stringify(JSON.parse(src("data/idiomas.json"))).replace(/</g, "\\u003c"));
-html = html.replaceAll("@@SITE@@", SITE).replaceAll("@@FAVICON@@", encodeURIComponent(favicon)).replaceAll("@@VERSION@@", version);
+html = html.replaceAll("@@GCLIENT@@", googleClientId).replaceAll("@@SITE@@", SITE).replaceAll("@@FAVICON@@", encodeURIComponent(favicon)).replaceAll("@@VERSION@@", version);
 if (/@@[A-Z]+@@/.test(html)) throw new Error("marcador não substituído: " + html.match(/@@[A-Z]+@@/)[0]);
 
 const sw = src("sw.js").replaceAll("@@VERSION@@", version);
