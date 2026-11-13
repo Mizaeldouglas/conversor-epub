@@ -1,5 +1,14 @@
 # Novidades
 
+## 3.9.3 — 13 nov 2026
+
+Correções achadas com um PDF de verdade (romance de 335 páginas, com marcadores e índice clicável):
+
+- Capítulo cujo título está escrito um pouco diferente do marcador do PDF (“CAPÍTULO 3: LIV” no marcador, “CAPÍTULO 3 VIV” na página), ou cujo marcador aponta para o pé da página anterior, agora vira capítulo. Antes, ficava grudado no capítulo anterior como subtítulo.
+- Página só com o título da parte (“PARTE UM”), sem imagem, era descartada por ter pouco texto. Agora o título fica.
+- Título numa página que só tem ele (prólogo, partes, meses) era medido contra ele mesmo e nunca saía centralizado. Agora é medido contra a margem do texto do livro.
+- Subtítulo logo abaixo do título, na mesma página (“DEZEMBRO” / “ONZE MESES ANTES…”), fica como subtítulo do capítulo, e não como capítulo separado; palavra partida no fim da linha de um título volta a ser uma.
+
 ## 3.9.2 — 13 nov 2026
 
 - Título de capítulo centralizado no PDF sai centralizado no EPUB, e a abertura de capítulo que começa mais abaixo na página ganha o mesmo espaço em cima. Título alinhado à esquerda continua à esquerda. Vale também para o DOCX.

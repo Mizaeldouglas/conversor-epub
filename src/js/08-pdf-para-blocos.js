@@ -27,16 +27,26 @@ function applyOutline(blocks, outline){
   if (outline.length < 2) return 0;
   const norm = t => stripPg(stripNotes(t)).toLowerCase().normalize("NFD").replace(/[^\p{L}\p{N}]+/gu, "");
   const hits = new Map();
+  // primeiro bloco com texto de cada página: o marcador às vezes aponta para o pé da página anterior ao título
+  const firstOf = new Map();
+  blocks.forEach((b, i) => { if (b.page != null && typeof b.text === "string" && b.type !== "toc" && !firstOf.has(b.page)) firstOf.set(b.page, i); });
+  const pre = (a, b) => { let k = 0; while (k < a.length && k < b.length && a[k] === b[k]) k++; return k; };
   for (const o of outline) {
     const t = norm(o.title); if (t.length < 2) continue;
+    let fuzzy = -1;
     for (let i = 0; i < blocks.length; i++) {
       const b = blocks[i];
       if (typeof b.text !== "string" || !/^(h1|h2|p)$/.test(b.type) || b.page == null || hits.has(i) || b.text.length > 200) continue;
-      if (o.page < b.page || o.page > (b.last ?? b.page)) continue;
+      const onPage = o.page >= b.page && o.page <= (b.last ?? b.page), nextTop = b.page === o.page + 1 && firstOf.get(b.page) === i;
+      if (!onPage && !nextTop) continue;
       const n = norm(b.text); if (!n) continue;
       const close = Math.min(n.length, t.length) / Math.max(n.length, t.length) >= 0.5;
-      if (n === t || (close && (t.endsWith(n) || t.startsWith(n) || n.endsWith(t) || n.startsWith(t)))) { hits.set(i, o); break; }
+      if (n === t || (close && (t.endsWith(n) || t.startsWith(n) || n.endsWith(t) || n.startsWith(t)))) { hits.set(i, o); fuzzy = -1; break; }
+      // título escrito um pouco diferente do marcador ("CAPÍTULO 3: LIV" × "CAPÍTULO 3 VIV"): começo igual, só em título
+      const k = pre(n, t), m = Math.min(n.length, t.length);
+      if (fuzzy < 0 && /^h[12]$/.test(b.type) && k >= Math.min(8, m) && k >= m * 0.5) fuzzy = i;
     }
+    if (fuzzy >= 0 && ![...hits.values()].includes(o)) hits.set(fuzzy, o);
   }
   if (hits.size < Math.max(2, outline.length * 0.5)) return 0;
   const nested = [...hits.values()].some(o => o.depth === 0 && o.kids);
@@ -285,7 +295,8 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
     let imgs = [], opCount = 0;
     try { if (ol) ({ imgs, opCount } = pageImages(ol)); } catch (e) { console.warn("imagens p." + p, e); }
 
-    if (pageChars < 25) { // página escaneada ou só ilustração
+    // página com pouco texto: escaneada ou só ilustração; sem imagem nenhuma, é uma página de título ("PARTE UM", "FIM") e o texto fica
+    if (pageChars < 25 && !(pageChars > 0 && !imgs.length)) {
       // OCR: tenta ler o texto da página desenhada
       if (opts.ocr && !ocrError && (imgs.length || opCount > 30)) {
         try {
@@ -422,6 +433,11 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       }
     }
   }
+  // margens do texto no livro inteiro (para medir a posição de um título numa página que só tem ele)
+  const textEdges = (() => {
+    const v = lines.filter(l => Math.abs(l.size - body) < body * 0.12), q = (arr, k) => { const a = arr.sort((x, y) => x - y); return a.length ? a[Math.min(a.length - 1, Math.floor(a.length * k))] : 0; };
+    return { left: q(v.map(l => l.x0), 0.1), right: q(v.map(l => l.x1), 0.9), pages: new Set(v.map(gk)) };
+  })();
   // versos: três ou mais linhas curtas e recuadas, bem mais estreitas que o texto
   {
     let run = [], vid = 0;
@@ -518,13 +534,23 @@ async function pdfToBlocks(buf, mode, onProgress, lang, opts = {}){
       // título em várias linhas; o número do capítulo em cima ("1", "IV", "Capítulo 3") fica na primeira linha
       const numOnly = last && /^h[12]$/.test(last.type) && NUM_HEAD.test(stripPg(last.text)) && !last.text.includes(BR);
       // as linhas seguintes do título podem ter fonte menor que o número: valem pelo tamanho da 1ª linha do título
-      const cont = last && (last.type === "h" + level || last.lineLevel === level);
-      if (last && (cont || numOnly) && prev && prev.page === l.page && prev.isHead && prev.y - l.y < Math.max(l.size, prev.size) * 2.2)
-        { last.text += (numOnly ? BR : " ") + mark + l.plain; last.last = l.page; if (numOnly) last.lineLevel = level; }
-      else {
-        // como o título está na página: centralizado na coluna, e se começa bem abaixo do topo (abertura de capítulo)
-        const mid = (l.x0 + l.x1) / 2, colMid = (gg.left + gg.right) / 2, colW = gg.right - gg.left;
-        const center = Math.abs(mid - colMid) < Math.max(body * 1.2, colW * 0.04) && l.x1 - l.x0 < colW * 0.85 && l.x0 > gg.left + body * 1.5;
+      const cont = last && (last.type === "h" + level || last.lineLevel === level || (last.subtitle && level === 1));
+      // como o título está na página: centralizado na coluna, e se começa bem abaixo do topo (abertura de capítulo)
+      // a coluna é a da página quando ela tem texto corrido; numa página só de título, vale a margem do livro
+      const col = textEdges.pages.has(gk(l)) || !(textEdges.right > textEdges.left) ? gg : textEdges;
+      const mid = (l.x0 + l.x1) / 2, colMid = (col.left + col.right) / 2, colW = col.right - col.left;
+      const center = Math.abs(mid - colMid) < Math.max(body * 0.8, colW * 0.03) && l.x0 > col.left + body * 0.4 && l.x1 < col.right - body * 0.4;
+      const headAbove = last && /^h[123]$/.test(last.type) && prev && prev.page === l.page && prev.isHead;
+      if (headAbove && (cont || numOnly) && prev.y - l.y < Math.max(l.size, prev.size) * 2.2) {
+        // palavra partida no fim da linha do título volta a ser uma ("vol- tou" → "voltou")
+        const head = (stripPg(last.text).match(/(\p{L}+)-$/u) || ["", ""])[1], tail = (l.plain.match(/^\p{Ll}+/u) || [""])[0];
+        if (!numOnly && head && tail) last.text = (keepHyphen(head, tail) ? last.text : last.text.replace(/-$/, "")) + mark + l.plain;
+        else last.text += (numOnly ? BR : " ") + mark + l.plain;
+        last.last = l.page; if (numOnly) last.lineLevel = level; if (center) last.center = true;
+      } else if (headAbove && level === 1 && prev.y - l.y < Math.max(l.size, prev.size) * 5 && !CHAP_RE.test(stripNotes(l.plain).trim())) {
+        // outra linha de título logo abaixo, na mesma página e sem texto no meio: é o subtítulo, não um capítulo novo
+        blocks.push({ type: "h2", text: mark + l.plain, page: l.page, last: l.page, center, subtitle: true });
+      } else {
         const firstOnPage = !blocks.some(b => b.page === l.page && b.type !== "img");
         const sink = firstOnPage && l.pageH && (l.pageH - l.y) > l.pageH * 0.22;
         blocks.push({ type: "h" + level, text: mark + l.plain, page: l.page, last: l.page, center, sink });

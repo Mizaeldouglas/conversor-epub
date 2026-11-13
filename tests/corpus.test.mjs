@@ -109,4 +109,11 @@ test("índice do próprio PDF: uma entrada por linha, com o recuo e o link, sem 
   assert.equal((html.match(/<h1 class="centro abertura">/g) || []).length, 4);
 });
 
+test("página só com o título da parte e abertura com subtítulo: nada se perde, tudo centralizado", async () => {
+  const { html, toc } = await convert("farol-partes-chrome.pdf", T.farol);
+  assert.match(html, /<section epub:type="part" class="parte"><h1 class="centro">[^]*?Parte um<\/h1><\/section>/, "a página “Parte um” sumiu");
+  assert.match(html, /<h1 class="centro abertura">[^]*?Março<\/h1>\n<h2 class="centro">Onze meses antes da noite em que o farol voltou a acender<\/h2>/);
+  assert.ok(!toc.some(t => /^Onze meses/.test(t[0])), "o subtítulo virou capítulo");
+});
+
 test("nenhum erro de JavaScript", () => assert.deepEqual(app.errors, []));
