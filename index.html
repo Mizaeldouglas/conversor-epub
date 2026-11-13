@@ -643,7 +643,7 @@ body.noscroll{overflow:hidden}
 </main>
 
 <footer class="foot">
-  <p>Lombada, versão <span id="appVersion">3.4.0</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
+  <p>Lombada, versão <span id="appVersion">3.4.1</span>. Código aberto no <a href="https://github.com/Mizaeldouglas/conversor-epub" target="_blank" rel="noopener">GitHub</a>: veja as <a href="https://github.com/Mizaeldouglas/conversor-epub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">novidades</a> e a <a href="#privacidade" data-open="privacidade">política de privacidade</a>.</p>
 </footer>
 
 <div class="updatebar" id="updateBar" hidden role="status">
@@ -701,7 +701,7 @@ const UI_LANG_KEY = "conversor-epub:idioma";
 let uiLang = "pt";
 try { uiLang = localStorage.getItem(UI_LANG_KEY) || (/^pt/i.test(navigator.language) ? "pt" : /^es/i.test(navigator.language) ? "es" : "en"); } catch {}
 const uiLocale = () => uiLang === "en" ? "en-US" : uiLang === "es" ? "es" : "pt-BR";
-const VERSION = "3.4.0";
+const VERSION = "3.4.1";
 const SITE_URL = "https://mizaeldouglas.github.io/conversor-epub/";
 // no site (não no artefato do Claude): app instalável, OCR com os próprios arquivos de idioma
 const ON_SITE = window.top === window && /^https?:$/.test(location.protocol) && !/claude|anthropic/i.test(location.hostname);
@@ -4523,7 +4523,7 @@ async function renderHistory(){
 /* ---------- Google Drive: entrar com o Google e guardar os livros na pasta "Lombada" do Drive da pessoa ----------
    Opcional e só no site. O app pede só o acesso "drive.file": enxerga apenas os arquivos que ele mesmo criou,
    nunca o resto do Drive. O script do Google só é baixado quando a pessoa clica em "Entrar com Google". */
-const GCLIENT = window.__lombadaGClient || "";
+const GCLIENT = window.__lombadaGClient || "910775716866-3sng5tiqd3jcvh8jn4tjsv1vnmigt8o1.apps.googleusercontent.com";
 const DRIVE_ON = ON_SITE && /\.apps\.googleusercontent\.com$/.test(GCLIENT);
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 const DRIVE_API = "https://www.googleapis.com/drive/v3/", DRIVE_UP = "https://www.googleapis.com/upload/drive/v3/files";

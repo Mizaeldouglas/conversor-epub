@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.4.1 — 12 nov 2026
+
+- O botão “Entrar com Google” passa a aparecer no site.
+
 ## 3.4.0 — 12 nov 2026
 
 - Entrar com Google (opcional): cada livro convertido vai para a pasta Lombada do seu Google Drive, e a estante mostra esses livros em qualquer aparelho em que você entrar. O Lombada pede só o acesso aos arquivos que ele mesmo cria.

@@ -14,9 +14,15 @@ after(async () => { await browser.close(); server.close(); });
 const device = () => openApp(browser, server, { setup: fakeGoogle });
 const login = async p => { await p.click("#loginBtn"); await p.waitForSelector("#acctMenu:not([hidden])"); };
 
-test("sem o id do cliente Google, não aparece login", async () => {
+test("antes de clicar em entrar, nada do Google é carregado", async () => {
   const app = await openApp(browser, server);
-  assert.equal(await app.page.locator("#acct").isHidden(), true);
+  const seen = [];
+  app.page.on("request", r => { if (/accounts\.google\.com|googleapis\.com\/(drive|upload)/.test(r.url())) seen.push(r.url()); });
+  await app.page.reload();
+  await app.page.waitForSelector("#loginBtn");
+  await app.page.waitForTimeout(500);
+  assert.equal(await app.page.locator("#loginBtn").isVisible(), true);
+  assert.deepEqual(seen, []);
   await app.ctx.close();
 });
 
