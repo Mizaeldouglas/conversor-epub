@@ -50,6 +50,8 @@ test("entrar com Google: o livro convertido vai para a pasta Lombada do Drive, c
   assert.equal(live("capa").length, 1);
   assert.match(await p.locator(".row .drive-note").textContent(), /Guardado no seu Google Drive/);
   assert.equal(await p.locator("#history .book .cloud").count(), 1);
+  assert.equal(await p.getAttribute("#driveOpen", "href"), "https://drive.google.com/drive/folders/" + live("pasta")[0].id);
+  assert.equal(await p.getAttribute(".row .drive-note a", "href"), "https://drive.google.com/file/d/" + books[0].id + "/view");
   // gerar de novo substitui o mesmo arquivo, sem duplicar
   await p.locator(".row details.edit > summary").click();
   await p.locator('.row [data-e="apply"]').click();

@@ -63,6 +63,7 @@ async function renderHistory(){
   $("#shelfCount").textContent = items.length ? String(items.length) : "";
   const localOnly = on ? local.filter(r => !inDrive.has(r.id)).length : 0;
   $("#driveAllBtn").hidden = !localOnly;
+  const open = $("#driveOpen"); open.hidden = !(DRIVE_ON && driveRemembered()); open.href = driveFolderUrl();
   $("#driveAllN").textContent = String(localOnly);
   $("#shelfNote").textContent = on ? "Guardados na pasta Lombada do seu Google Drive: aparecem em qualquer aparelho em que você entrar."
     : DRIVE_ON ? "Mostrando só os livros deste navegador. Reconecte ao Drive, no menu da sua conta, para ver os outros."

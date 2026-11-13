@@ -40,7 +40,7 @@ async function driveLogin(){
     drv.token = resp.access_token; drv.exp = Date.now() + (+resp.expires_in || 3600) * 1000;
     try { sessionStorage.setItem(DRIVE_TOKEN, JSON.stringify({ token: drv.token, exp: drv.exp })); } catch {}
     const about = await gapi("about?fields=user(displayName,emailAddress,photoLink)");
-    drv.user = { name: about.user.displayName || "", email: about.user.emailAddress || "", photo: about.user.photoLink || "" };
+    drv.user = { name: about.user.displayName || "", email: about.user.emailAddress || "", photo: about.user.photoLink || "", folder: (driveRemembered() || {}).folder };
     try { localStorage.setItem(DRIVE_ACCT, JSON.stringify(drv.user)); } catch {}
     const first = document.body.classList.contains("gated");
     applyGate(); renderAccount();
@@ -108,7 +108,10 @@ async function driveFolder(name, parent, tag){
   return made.id;
 }
 async function driveFolders(){
-  drv.folder ||= await driveFolder("Lombada", null, "pasta");
+  if (!drv.folder) {
+    drv.folder = await driveFolder("Lombada", null, "pasta");
+    try { const a = driveRemembered(); if (a && a.folder !== drv.folder) localStorage.setItem(DRIVE_ACCT, JSON.stringify({ ...a, folder: drv.folder })); } catch {}
+  }
   drv.covers ||= await driveFolder("capas", drv.folder, "capas");
 }
 // envia (ou atualiza) um arquivo: metadados + conteúdo numa só requisição
@@ -141,7 +144,8 @@ async function driveSaveJob(job){
   try {
     const rec = await idbReq("readonly", st => st.get(job.histId));
     if (!rec) throw new Error("livro não está na estante");
-    await driveSaveRecord(rec);
+    const f = await driveSaveRecord(rec);
+    job.driveFileId = f && f.id;
     job.driveState = "ok";
     driveRefresh();
   } catch (e) {
@@ -204,6 +208,8 @@ async function driveSaveAll(){
   finally { btn.disabled = false; await driveRefresh(); }
 }
 
+// endereço da pasta Lombada no Drive (sem o endereço ainda, abre a busca pela pasta)
+const driveFolderUrl = () => { const id = drv.folder || (driveRemembered() || {}).folder; return id ? "https://drive.google.com/drive/folders/" + id : "https://drive.google.com/drive/search?q=Lombada"; };
 // conta no topo da página
 function renderAccount(){
   const box = $("#acct");
@@ -221,8 +227,7 @@ function renderAccount(){
     $("#acctName").textContent = (user.name || user.email || "").split(" ")[0];
     $("#acctMail").textContent = user.email || "";
     $("#reconnectBtn").hidden = on;
-    $("#acctFolder").hidden = !on;
-    $("#acctFolder").href = drv.folder ? "https://drive.google.com/drive/folders/" + drv.folder : "https://drive.google.com/drive/my-drive";
+    $("#acctFolder").href = driveFolderUrl();
   }
 }
 document.querySelectorAll("[data-login]").forEach(b => { b.onclick = () => { $("#acctMenu").open = false; driveLogin(); }; });

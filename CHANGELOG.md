@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.6.0 — 12 nov 2026
+
+- Botão “Abrir no Google Drive” na estante, que leva à pasta Lombada, e “Ver no Drive” em cada livro guardado.
+
 ## 3.5.2 — 12 nov 2026
 
 - Quando o login com Google falha, a mensagem diz o motivo (bloqueador do navegador, pop-up bloqueado, acesso negado, Drive API desativada).
