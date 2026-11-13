@@ -1,5 +1,9 @@
 # Novidades
 
+## 3.6.1 — 13 nov 2026
+
+- Página de entrada: o print do app deu lugar a uma ilustração de uma prateleira de livros com um leitor de e-book.
+
 ## 3.6.0 — 12 nov 2026
 
 - Botão “Abrir no Google Drive” na estante, que leva à pasta Lombada, e “Ver no Drive” em cada livro guardado.

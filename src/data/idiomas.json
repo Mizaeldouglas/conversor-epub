@@ -1831,10 +1831,6 @@
 "EPUB {0} checked before download, KEPUB for Kobo and direct sending to the Kindle app on your phone.",
 "EPUB {0} verificado antes de la descarga, KEPUB para Kobo y envío directo a la app Kindle en el celular."
 ],
-"Tela do Lombada com um livro convertido e pronto para o Kindle": [
-"The Lombada screen with a converted book, ready for Kindle",
-"Pantalla de Lombada con un libro convertido y listo para el Kindle"
-],
 "O que acontece com seus arquivos": [
 "What happens to your files",
 "Qué pasa con tus archivos"
@@ -1970,5 +1966,13 @@
 "Ver no Drive": [
 "See in Drive",
 "Ver en Drive"
+],
+"Pronto para o Kindle": [
+"Ready for Kindle",
+"Listo para el Kindle"
+],
+"texto igual ao original": [
+"text matches the original",
+"texto igual al original"
 ]
 }
